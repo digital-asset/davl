@@ -1,0 +1,14 @@
+sdk-version: 0.0.0
+name: pinacolada
+source: daml
+scenario: Main:test
+parties:
+  - Alice
+  - Bob
+  - Charlie
+version: 0.0.1
+exposed-modules:
+  - Main
+dependencies:
+  - daml-prim
+  - daml-stdlib
