@@ -7,7 +7,7 @@
 
 ### *v1* / *v2*
 
-In the following, the terms *v1* and *v2* are short-hands to indicate the first MVP and some later version. In general, we should explicitly aim to always be as small-as-possible for out MPV, especially if we know *for sure* we will want the v2 feature. We want to feel all the pain of upgrade!
+In the following, the terms *v1* and *v2* are short-hands to indicate the first MVP and some later version. In general, we should explicitly aim to always be as small-as-possible for out MVP, especially if we know *for sure* we will want the v2 feature. We want to feel all the pain of upgrade!
 
 
 ### Features to be modeled in DAML
