@@ -3,7 +3,7 @@
 
 ### Terminology: *Holiday* / *Vacation*
 
-*Are these works interchangeable (just US/UK variations), or will they mean subtlely different concepts in our model?* For now, we stick with Holiday.
+*Are these words interchangeable (just US/UK variations), or will they mean subtlely different concepts in our model?* For now, we stick with Holiday.
 
 ### *v1* / *v2*
 
