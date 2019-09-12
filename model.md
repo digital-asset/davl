@@ -1,5 +1,5 @@
 
-# What we should model?
+# What should we model?
 
 ### Terminology: *Holiday* / *Vacation*
 
@@ -31,26 +31,26 @@ We Need to model:
 - `HolidayAllocation`
 - `BookedHoliday`
 
-The worker regards holidays (both holiday allocation and booked holidays) as items of value which they own. The worker may exchange `HolidayAllocation` for `BookedHoliday` (subject to boss approval), which then gives the worker the right not to work on a given day. Holidays are rather like cash, but cash which can only be spent on one kind of thing.
+The worker regards holidays (both holiday allocation and booked holidays) as items of value which they own. The worker may exchange `HolidayAllocation` for `BookedHoliday` (subject to boss approval), which then gives the worker the right not to work on a given day. Holidays are rather like cash, but cash which can only be spent on one kind of thing!
 
 #### `HolidayAllocation`
 
 This can be modelled as a contract. It should signed by both boss and worker.
-The boss must sign because she has the obligation. The worker mus sign because he has the right, which cannot be unilaterally removed by the boss.
-We might regard holiday allocation as allocated only for a specific year or other time period - but lets make this a **v2** feature.
+The boss must sign because she has the obligation. The worker must sign because he has the right, which cannot be unilaterally removed by the boss.
+We might regard holiday allocation as allocated only for a specific year or other time period - but let's make this a **v2** feature.
 
 
 #### Holiday Units
 
 What the smallest unit of holiday? For *v1*, let's make it single day. Perhaps in *v2* we can support half or quarter days.
-We could choose to model the `HolidayAllocation` and `BookedHoliday` contracts including a given number of days. But there is no need for this complication. Instead we can have a separate contract for each separate day. Perhaps in the future there will be some reason to keep holidays aggregated together in a single contract - but lets wait and see if our hand is forced this way.
+We could choose to model the `HolidayAllocation` and `BookedHoliday` contracts including a given number of days. But there is no need for this complication. Instead we can have a separate contract for each separate day. Perhaps in the future there will be some reason to keep holidays aggregated together in a single contract - but let's wait and see if our hand is forced this way.
 
 
 #### `BookedHoliday`
 
 This is a holiday booked for a certain day. A `BookedHoliday` is what the worker obtains when he *spends* a `HolidayAllocation`.
 
-A `BookedHoliday` is not automatically transferable to other dates. When a worker has a `BookedHoliday`, he has the assurance that his right to take this day off work cannot be unilaterally revoked by the boss. On the other hand, he has the obligation to take the holiday on the stated day. Perhaps in v2 we allow the feature to ask the boss to reschedule.
+A `BookedHoliday` is not automatically transferable to other dates. When a worker has a `BookedHoliday` he has the assurance that his right to take this day off work cannot be unilaterally revoked by the boss. On the other hand, he has the obligation to take the holiday on the stated day. Perhaps in v2 we allow the feature to ask the boss to reschedule.
 
 A holiday can only transition from allocation to booked if both boss and worker agree. We will use a standard DAML proposal mechanism for request/accept. We choose in v1 to have the worker request and the boss accept, but there is no reason in principal why the proposal couldn't be in the opposite direction.
 
@@ -72,11 +72,11 @@ We already touched on the issue of what stops a boss denying every request & how
 
 ### Were does holiday come from?
 
-Holiday can be regarded as a *gift* from the boss to the worker. In reality, it will correspond to the amount stated on the worker's employment contract. Each year, or month, or whatever, the boss must allocate the required number of days to the worker.
+Holiday can be regarded as a *gift* from the boss to the worker. In reality, it will correspond to the amount stated on the worker's employment contract. Each year, or month, or whatever, the boss will allocate the required number of days to the worker.
 
 Because `HolidayAllocation` must be signed by boss and worker, this gift will have to go through the normal propose/accept mechanism. But there is never a reason or way for the worker not to accept. Perhaps another chance for trigger automation in v2.
 
-Note: we seem to have already multiple instances of the propose/accept pattern. Shoukd these be unified using generic template? Maybe! v2.
+Note: we seem to have already multiple instances of the propose/accept pattern. Should these be unified using generic template? Maybe! v2.
 
 
 ### Querying holiday-allocations and booked holidays
@@ -109,8 +109,8 @@ Perhaps this kind of archival makes it difficult to ask questions about the past
 
 ### Different bosses?
 
-How do different bosses fit into this system? Can a worker have holiday allocated from multiple bosses? Does each boss represent a separate space, with privacy between spaces.. i.e. imagine each boss as being the representative for a different company.
+How do different bosses fit into this system? Can a worker have holiday allocated from multiple bosses? Does each boss represent a separate space, with privacy between spaces.. i.e. imagine each boss as being the representative for a different company?
 
 ### Need for aggregation, contract keys?
 
-Is there a reason to explicitly model the aggregation of holidays? If we do this, then we might want to ensure that there is only one contact per worker/boss pair or whatever, and so need contract keys. *But are we forced into doing this, or can we keep it simpler?* At least, let's be simpler for v1.
+Is there a reason to explicitly model the aggregation of holidays? If we do this, then we might want to ensure that there is only one contract per worker/boss pair, and so need contract keys. *But are we forced into doing this, or can we keep it simpler?* At least, let's be simpler for v1.
