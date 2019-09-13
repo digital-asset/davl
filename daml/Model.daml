@@ -1,0 +1,67 @@
+-- Copyright (c) 2019 The DAML Authors. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
+daml 1.2
+module Model where
+
+template HolidayAllocation
+  with
+    employee : Party
+    boss : Party
+  where
+    signatory employee, boss
+
+template HolidayGift
+  with
+    allocation : HolidayAllocation
+  where
+    signatory allocation.boss
+    observer allocation.employee
+
+    choice HolidayGift_Accept : ContractId HolidayAllocation
+      controller allocation.employee
+        do
+          create allocation
+
+template BookedHoliday
+  with
+    employee : Party
+    boss : Party
+    date : Date
+  where
+    signatory employee, boss
+
+template HolidayDenial
+  with
+    employee : Party
+    boss : Party
+    allocationId : ContractId HolidayAllocation
+    date : Date
+    reason : Text
+  where
+    signatory employee, boss
+
+template HolidayRequest
+  with
+    employee : Party
+    boss : Party
+    allocationId : ContractId HolidayAllocation
+    date : Date
+  where
+    signatory employee
+    observer boss
+
+    choice HolidayRequest_Accept : ContractId BookedHoliday
+      controller boss
+        do
+          HolidayAllocation{employee,boss} <- fetch allocationId
+          archive allocationId
+          create $ BookedHoliday employee boss date
+
+    choice HolidayRequest_Deny : ContractId HolidayDenial
+      with
+        reason : Text
+      controller boss
+        do
+          HolidayAllocation{employee,boss} <- fetch allocationId
+          create $ HolidayDenial employee boss allocationId date reason
