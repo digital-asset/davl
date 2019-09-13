@@ -9,6 +9,8 @@
 
 In the following, the terms *v1* and *v2* are short-hands to indicate the first MVP and some later version. In general, we should explicitly aim to always be as small-as-possible for out MVP, especially if we know *for sure* we will want the v2 feature. We want to feel all the pain of upgrade!
 
+[Model.daml](daml/Model.daml)
+is a first cut at coding the simple v1 model, described here, in DAML.
 
 ### Features to be modeled in DAML
 
@@ -70,7 +72,7 @@ and in the case of a denied request, some reason given by the boss.
 We already touched on the issue of what stops a boss denying every request & how this might be handled on v2. But there is the additional issue of what will incentivize the boss from making any kind of reply... again we might imagine v2 extensions which automatically accept a request after a given time has elapsed (perhaps a chance for triggers/bots here).
 
 
-### Were does holiday come from?
+### Where does holiday come from?
 
 Holiday can be regarded as a *gift* from the boss to the worker. In reality, it will correspond to the amount stated on the worker's employment contract. Each year, or month, or whatever, the boss will allocate the required number of days to the worker.
 

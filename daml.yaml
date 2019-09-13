@@ -9,6 +9,7 @@ parties:
 version: 0.0.1
 exposed-modules:
   - Main
+  - Model
 dependencies:
   - daml-prim
   - daml-stdlib
