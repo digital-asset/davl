@@ -1,0 +1,24 @@
+-- Copyright (c) 2019 The DAML Authors. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
+daml 1.2
+module Pina where
+
+template HolidayAllocation
+  with
+    employee : Party
+    boss : Party
+  where
+    signatory employee, boss
+
+template HolidayGift
+  with
+    allocation : HolidayAllocation
+  where
+    signatory allocation.boss
+    observer allocation.employee
+
+    choice HolidayGift_Accept : ContractId HolidayAllocation
+      controller allocation.employee
+        do
+          create allocation

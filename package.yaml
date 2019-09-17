@@ -1,0 +1,37 @@
+name:                pina-cli
+version:             0.1.0.0
+description:         CLI for the pina-colada Ledger
+license:             Apache-2.0
+author:              The pina-colada authors
+maintainer:          nick.chapman@digitalasset.com
+github:              https://github.com/digital-asset/pina-colada
+
+dependencies:
+- ansi-terminal
+- base >= 4.7 && < 5
+- containers
+- daml-ledger
+- extra
+- haskeline
+- random
+- text
+- transformers
+- uuid
+
+executables:
+  pina-exe:
+    main:                Pina.Main
+    source-dirs:         src
+    ghc-options:
+    - -Wall
+    - -Wno-name-shadowing
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+
+    default-extensions:
+    - LambdaCase
+    - NamedFieldPuns
+    - OverloadedStrings
+    - RecordWildCards
+    - ScopedTypeVariables

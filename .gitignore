@@ -2,3 +2,5 @@
 .markdown-preview.html
 *~
 sandbox.log
+.stack-work
+*.cabal
