@@ -1,0 +1,28 @@
+daml 1.2
+
+module Test where
+
+import Model
+import DA.Date as Date
+
+can_offer_holiday = scenario do
+  boss <- getParty "boss"
+  employee <- getParty "employee"
+  submit boss $ create $ HolidayGift { allocation = HolidayAllocation { boss, employee } }
+
+can_accept_holiday_offer = scenario do
+  boss <- getParty "boss"
+  employee <- getParty "employee"
+  offer <- submit boss $ create $ HolidayGift { allocation = HolidayAllocation { boss, employee } }
+  submit employee do
+    exercise offer HolidayGift_Accept
+
+no_double_spend = scenario do
+  boss <- getParty "boss"
+  employee <- getParty "employee"
+  offer <- submit boss $ create $ HolidayGift { allocation = HolidayAllocation { boss, employee } }
+  alloc <- submit employee $ exercise offer HolidayGift_Accept
+  request1 <- submit employee $ create $ HolidayRequest { employee, boss, allocationId = alloc, date = Date.date 2019 Date.Apr 11 }
+  request2 <- submit employee $ create $ HolidayRequest { employee, boss, allocationId = alloc, date = Date.date 2019 Date.Apr 12 }
+  submit boss $ exercise request1 HolidayRequest_Accept
+  submitMustFail boss $ exercise request2 HolidayRequest_Accept
