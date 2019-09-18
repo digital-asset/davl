@@ -23,7 +23,9 @@ jobs:
       - checkout: self
       - bash: |
           set -euo pipefail
-          echo "Success!"
+          SDK_VERSION=$(cat daml.yaml | grep sdk-version | awk '{print $2}')
+          curl https://get.daml.com | sh -s $SDK_VERSION
+          ~/.daml/bin/daml test
       - bash: |
           set -euo pipefail
           MESSAGE=$(git log --pretty=format:%s -n1)
