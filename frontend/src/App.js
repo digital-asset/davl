@@ -107,7 +107,7 @@ function StaticDatePicker(date, changeDate) {
 function Login(setToken) {
   return (
     <div className="login">
-      <img src="img/login.png" alt="Digital Asset Pinacolada!"></img>
+      <img src="img/login.png" alt="Digital Asset Vacation Ledger"></img>
       <br />
       <input id="token" type="text"></input>
       <input type="Button" onClick={setToken} value="Login" readOnly></input>

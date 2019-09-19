@@ -2,18 +2,18 @@
 -- SPDX-License-Identifier: Apache-2.0
 
 -- The local state maintained non-persistently by the chat-console
-module Pina.Local (
+module Davl.Local (
     State, initState, history,
     UserCommand(..), externalizeCommand,
     applyTransQuiet, applyTrans, Announce,
     ) where
 
-import Pina.Contracts (PinaContract)
-import Pina.Domain (Party,Holiday(..),Gift(..))
+import Davl.Contracts (DavlContract)
+import Davl.Domain (Party,Holiday(..),Gift(..))
 --import Data.List ((\\))
 --import Data.Text.Lazy (Text)
 --import Data.Text.Lazy as Text (unpack)
-import qualified Pina.Contracts as C
+import qualified Davl.Contracts as C
 
 -- user commands, to be interpreted w.r.t the local state
 
@@ -40,19 +40,19 @@ initState = State
      ans = []
     }
 
--- externalize a user-centric command into a Pina Contract (creation)
+-- externalize a user-centric command into a Davl Contract (creation)
 
-externalizeCommand :: Party -> Party -> State -> UserCommand -> Either String PinaContract
+externalizeCommand :: Party -> Party -> State -> UserCommand -> Either String DavlContract
 externalizeCommand whoami employee State{} = \case
     Give ->
         return $ C.Gift $ Gift { allocation = Holiday { boss = whoami, employee } }
 
--- accumulate an external Pina Contract (transaction) into the local state
+-- accumulate an external Davl Contract (transaction) into the local state
 
-applyTransQuiet :: Party -> State -> PinaContract -> State
+applyTransQuiet :: Party -> State -> DavlContract -> State
 applyTransQuiet whoami s cc = s' where (s',_,_) = applyTrans whoami s cc
 
-applyTrans :: Party -> State -> PinaContract -> (State,[Announce],[PinaContract])
+applyTrans :: Party -> State -> DavlContract -> (State,[Announce],[DavlContract])
 applyTrans whoami s@State{ans} = \case
     C.Gift Gift{allocation=Holiday{boss,employee}} ->
         (s { ans = an : ans }, {-if bo == whoami then [] else-} [an], [])

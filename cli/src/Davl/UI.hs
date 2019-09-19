@@ -1,18 +1,19 @@
 -- Copyright (c) 2019 The DAML Authors. All rights reserved.
 -- SPDX-License-Identifier: Apache-2.0
 
-module Pina.UI (interactiveMain) where
+module Davl.UI (interactiveMain) where
 
 import Control.Concurrent.MVar
 import Control.Monad.Trans.Class (lift)
-import Pina.PinaLedger (Handle,connect)
-import Pina.Domain (Party(..))
-import Pina.Interact (InteractState(..),makeInteractState,runSubmit)
-import Pina.Local as Local (State,UserCommand(Give),history)
-import Pina.Logging (colourLog,plainLog,colourWrap)
 import Data.Text.Lazy as Text (pack)
 import System.Console.ANSI (Color(..))
 import qualified System.Console.Haskeline as HL
+
+import Davl.DavlLedger (Handle,connect)
+import Davl.Domain (Party(..))
+import Davl.Interact (InteractState(..),makeInteractState,runSubmit)
+import Davl.Local as Local (State,UserCommand(Give),history)
+import Davl.Logging (colourLog,plainLog,colourWrap)
 
 replyLog :: String -> IO ()
 replyLog = colourLog Cyan plainLog

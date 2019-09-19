@@ -1,17 +1,17 @@
 -- Copyright (c) 2019 The DAML Authors. All rights reserved.
 -- SPDX-License-Identifier: Apache-2.0
 
--- Interact with a PinaLedger, submitting commands and tracking extern transitions.
+-- Interact with a DavlLedger, submitting commands and tracking extern transitions.
 -- This is basically unchanged from the Nim example
-module Pina.Interact (InteractState(..), makeInteractState, runSubmit) where
+module Davl.Interact (InteractState(..), makeInteractState, runSubmit) where
 
 import Control.Concurrent (forkIO)
 import Control.Concurrent.MVar
-import Pina.PinaLedger (Handle,sendCommand,getTrans)
-import Pina.Contracts (PinaContract)
-import Pina.Domain (Party(..))
-import Pina.Local (State,initState,UserCommand,externalizeCommand,applyTrans,applyTransQuiet)
-import Pina.Logging (Logger,colourLog)
+import Davl.DavlLedger (Handle,sendCommand,getTrans)
+import Davl.Contracts (DavlContract)
+import Davl.Domain (Party(..))
+import Davl.Local (State,initState,UserCommand,externalizeCommand,applyTrans,applyTransQuiet)
+import Davl.Logging (Logger,colourLog)
 import DA.Ledger.PastAndFuture (PastAndFuture(..))
 import DA.Ledger.Stream (Stream,Closed(EOS,Abnormal,reason),takeStream)
 import System.Console.ANSI (Color(..))
@@ -20,7 +20,7 @@ data InteractState = InteractState {
     whoami :: Party,
     talking :: Maybe Party,
     sv :: MVar State,
-    stream :: Stream PinaContract
+    stream :: Stream DavlContract
     }
 
 makeInteractState :: Handle -> Logger -> Party -> IO InteractState
@@ -30,7 +30,7 @@ makeInteractState h xlog whoami = do
     stream <- manageUpdates h whoami partyLog sv
     return InteractState{whoami,talking=Nothing,sv,stream}
 
-sendShowingRejection :: Party -> Handle -> Logger -> PinaContract -> IO ()
+sendShowingRejection :: Party -> Handle -> Logger -> DavlContract -> IO ()
 sendShowingRejection whoami h log cc =
     sendCommand whoami h cc >>= \case
     Nothing -> return ()
@@ -48,10 +48,10 @@ runSubmit h log is uc = do
                 Left reason -> log reason
                 Right cc -> sendShowingRejection whoami h log cc
 
--- Manage updates in response to PinaContract from the ledger
+-- Manage updates in response to DavlContract from the ledger
 
 
-manageUpdates :: Handle -> Party -> Logger -> MVar State -> IO (Stream PinaContract)
+manageUpdates :: Handle -> Party -> Logger -> MVar State -> IO (Stream DavlContract)
 manageUpdates h whoami log sv = do
     PastAndFuture{past,future} <- getTrans whoami h
     log $ "replaying " <> show (length past) <> " transactions"
@@ -61,7 +61,7 @@ manageUpdates h whoami log sv = do
     return future
 
 
-updateX :: Handle -> Party -> Logger -> MVar State -> Stream PinaContract -> IO ()
+updateX :: Handle -> Party -> Logger -> MVar State -> Stream DavlContract -> IO ()
 updateX h whoami log sv stream = loop
   where
     loop = do
@@ -74,7 +74,7 @@ updateX h whoami log sv stream = loop
                 applyX h whoami log sv cc
                 loop
 
-applyX :: Handle -> Party -> Logger -> MVar State -> PinaContract -> IO ()
+applyX :: Handle -> Party -> Logger -> MVar State -> DavlContract -> IO ()
 applyX h whoami log sv cc = do
     s <- takeMVar sv
     let (s',ans,replies) = applyTrans whoami s cc

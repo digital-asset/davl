@@ -13,18 +13,18 @@ These notes should be mainly regarded as append-only. But we can fixup and impro
 
 Martin suggest that perhaps these file could be hosted as google pages.
 
-One of the hopes for these notes is they might form the basis of future blog posts about the experiences of team-pina-colada in developing a kick-ass DAML ledger app.
+One of the hopes for these notes is they might form the basis of future blog posts about the experiences of team-davl in developing a kick-ass DAML ledger app.
 
 
 ### Tue 17th September (Nick)
 
-- Nick and Gary pairing to get a quick first cut for `pina-cli`. As gary puts it: _What we've done today is basically taking Nick's [chat app](https://github.com/digital-asset/daml/tree/master/language-support/hs/bindings/examples/chat) and changing the core datatypes from under it, then try to play whack-a-mole with the compiler error messages._
+- Nick and Gary pairing to get a quick first cut for `davl-cli`. As gary puts it: _What we've done today is basically taking Nick's [chat app](https://github.com/digital-asset/daml/tree/master/language-support/hs/bindings/examples/chat) and changing the core datatypes from under it, then try to play whack-a-mole with the compiler error messages._
 - Constructing/Interpreting `DAML-LF` values (in Haskell) for communication over the ledger API could be easier. When there are mistakes, error messages from the runtime system could be more illuminating.
 
 
 ### Wed 18th September (Nick)
 
-- created subdir for `pina-cli` code and added README
+- created subdir for `davl-cli` code and added README
 - created this diary
 
 
