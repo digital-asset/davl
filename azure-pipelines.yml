@@ -18,7 +18,7 @@ jobs:
   - job: build_and_test
     timeoutInMinutes: 15
     pool:
-      vmImage: "Ubuntu-16.04"
+      name: linux-pool
     steps:
       - checkout: self
       - bash: |
