@@ -2,7 +2,7 @@ daml 1.2
 
 module Test where
 
-import Model
+import Davl
 import DA.Date as Date
 
 can_offer_holiday = scenario do
