@@ -4,26 +4,26 @@
 daml 1.2
 module Model where
 
-template HolidayAllocation
+template Holiday
   with
     employee : Party
     boss : Party
   where
     signatory employee, boss
 
-template HolidayGift
+template Gift
   with
-    allocation : HolidayAllocation
+    allocation : Holiday
   where
     signatory allocation.boss
     observer allocation.employee
 
-    choice HolidayGift_Accept : ContractId HolidayAllocation
+    choice Gift_Claim : ContractId Holiday
       controller allocation.employee
         do
           create allocation
 
-template BookedHoliday
+template Vacation
   with
     employee : Party
     boss : Party
@@ -31,37 +31,37 @@ template BookedHoliday
   where
     signatory employee, boss
 
-template HolidayDenial
+template Denial
   with
     employee : Party
     boss : Party
-    allocationId : ContractId HolidayAllocation
+    allocationId : ContractId Holiday
     date : Date
     reason : Text
   where
-    signatory employee, boss
+    signatory employee
 
-template HolidayRequest
+template Request
   with
     employee : Party
     boss : Party
-    allocationId : ContractId HolidayAllocation
+    allocationId : ContractId Holiday
     date : Date
   where
     signatory employee
     observer boss
 
-    choice HolidayRequest_Accept : ContractId BookedHoliday
+    choice Request_Approve : ContractId Vacation
       controller boss
         do
-          HolidayAllocation{employee,boss} <- fetch allocationId
+          Holiday{employee,boss} <- fetch allocationId
           archive allocationId
-          create $ BookedHoliday employee boss date
+          create $ Vacation employee boss date
 
-    choice HolidayRequest_Deny : ContractId HolidayDenial
+    choice Request_Deny : ContractId Denial
       with
         reason : Text
       controller boss
         do
-          HolidayAllocation{employee,boss} <- fetch allocationId
-          create $ HolidayDenial employee boss allocationId date reason
+          Holiday{employee,boss} <- fetch allocationId
+          create $ Denial employee boss allocationId date reason
