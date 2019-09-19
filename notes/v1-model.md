@@ -1,6 +1,6 @@
 
 
-# V1 Model for `pina-colada` application.
+# V1 Model for `DAVL` holiday tracking application, driven by `DAML`
 
 Following a general acceptance of the ideas contained in the initial thoughts
 [here](/notes/model-early-thoughts.md),

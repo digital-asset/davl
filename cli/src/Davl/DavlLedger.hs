@@ -2,14 +2,14 @@
 -- SPDX-License-Identifier: Apache-2.0
 
 
--- Abstraction for a Ledger which is hosting the Pina domain model.
+-- Abstraction for a Ledger which is hosting the Davl domain model.
 -- This is basically unchanged from the Nim example
-module Pina.PinaLedger (Handle, connect, sendCommand, getTrans) where
+module Davl.DavlLedger (Handle, connect, sendCommand, getTrans) where
 
 import Control.Monad(forM)
 import DA.Ledger as Ledger
-import Pina.Contracts (PinaContract,extractTransaction,makeLedgerCommand)
-import Pina.Logging (Logger)
+import Davl.Contracts (DavlContract,extractTransaction,makeLedgerCommand)
+import Davl.Logging (Logger)
 import Data.List as List
 import Data.Maybe (maybeToList)
 import System.Random (randomIO)
@@ -40,24 +40,24 @@ connect log = do
             getPackage lid pid >>= \case
                 Nothing -> return (pid, False)
                 Just package -> do
-                    return (pid, containsPina package)
+                    return (pid, containsDavl package)
 
     case List.filter snd discovery of
-        [] -> fail "cant find package containing Pina"
-        xs@(_:_:_) -> fail $ "found multiple packages containing Pina: " <> show (map fst xs)
+        [] -> fail "cant find package containing Davl"
+        xs@(_:_:_) -> fail $ "found multiple packages containing Davl: " <> show (map fst xs)
         [(pid,_)] -> return Handle{log,lid,pid}
 
-containsPina :: Package -> Bool
-containsPina package = "Pina" `isInfixOf` show package -- TODO: be more principled
+containsDavl :: Package -> Bool
+containsDavl package = "Davl" `isInfixOf` show package -- TODO: be more principled
 
-sendCommand :: Party -> Handle -> PinaContract -> IO (Maybe Rejection)
+sendCommand :: Party -> Handle -> DavlContract -> IO (Maybe Rejection)
 sendCommand asParty h@Handle{pid} cc = do
     let com = makeLedgerCommand pid cc
     submitCommand h asParty com >>= \case
         Left rejection -> return $ Just rejection
         Right () -> return Nothing
 
-getTrans :: Party -> Handle -> IO (PastAndFuture PinaContract)
+getTrans :: Party -> Handle -> IO (PastAndFuture DavlContract)
 getTrans party Handle{log,lid} = do
     pf <- run 6000 $ getTransactionsPF lid party
     mapListPF (fmap concat . mapM (fmap maybeToList . extractTransaction log)) pf

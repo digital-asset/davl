@@ -1,17 +1,17 @@
 -- Copyright (c) 2019 The DAML Authors. All rights reserved.
 -- SPDX-License-Identifier: Apache-2.0
 
--- Chat domain types. These should be derived automatically from the Daml model.
+-- Davl domain types. These should be derived automatically from the Daml model.
 
 {-# LANGUAGE DuplicateRecordFields #-}
 
-module Pina.Domain (
+module Davl.Domain (
     Party(..),
     Holiday(..),
     Gift(..),
     ) where
 
-import DA.Ledger.Types(Party(..),Record(..),RecordField(..),Value(..))
+import DA.Ledger.Types (Party(..),Record(..),RecordField(..),Value(..))
 import DA.Ledger.IsLedgerValue (IsLedgerValue(..))
 
 data Holiday = Holiday { employee :: Party, boss :: Party }

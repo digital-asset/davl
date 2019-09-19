@@ -1,10 +1,10 @@
-name:                pina-cli
+name:                davl-cli
 version:             0.1.0.0
-description:         CLI for the pina-colada Ledger
+description:         CLI for the DAVL holiday tracking application, driven by DAML.
 license:             Apache-2.0
-author:              The pina-colada authors
+author:              The DAVL authors
 maintainer:          nick.chapman@digitalasset.com
-github:              https://github.com/digital-asset/pina-colada
+github:              https://github.com/digital-asset/davl
 
 dependencies:
 - ansi-terminal
@@ -19,8 +19,8 @@ dependencies:
 - uuid
 
 executables:
-  pina-exe:
-    main:                Pina.Main
+  davl-exe:
+    main:                Davl.Main
     source-dirs:         src
     ghc-options:
     - -Wall

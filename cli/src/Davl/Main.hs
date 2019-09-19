@@ -1,13 +1,13 @@
 -- Copyright (c) 2019 The DAML Authors. All rights reserved.
 -- SPDX-License-Identifier: Apache-2.0
 
+module Davl.Main (main) where
 
-module Pina.Main (main) where
-
-import Pina.Domain (Party(..))
-import Pina.UI (interactiveMain)
 import System.Environment (getArgs)
 import qualified Data.Text.Lazy as Text
+
+import Davl.Domain (Party(..))
+import Davl.UI (interactiveMain)
 
 main :: IO ()
 main = do
