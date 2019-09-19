@@ -1,0 +1,10 @@
+[94mreplaying 0 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Alice'> [97m[92m'Alice'> [97m[94mreplaying 1 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Bob'> [97m[96mGift <-- 'Alice'
+[97m
+[92m'Bob'> [97m[94mreplaying 1 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Bob'> [97m[92m'Bob'> [97m[94mreplaying 2 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Alice'> [97m[96mGift --> 'Bob'
+Gift <-- 'Bob'
+[97m
+[92m'Alice'> [97m
