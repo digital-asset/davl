@@ -23,14 +23,14 @@ makeLedgerCommand :: PackageId -> DavlContract -> Command
 makeLedgerCommand pid = \case
     Gift x -> do
         let mod = ModuleName "Davl"
-        let ent = EntityName "HolidayGift"
+        let ent = EntityName "Gift"
         let tid = TemplateId (Identifier pid mod ent)
         let args = toRecord x
         CreateCommand {tid,args}
 
 extractEvents :: [Event] -> Maybe DavlContract
 extractEvents = \case
-    [CreatedEvent{tid=TemplateId Identifier{ent=EntityName"HolidayGift"}, createArgs}] -> do
+    [CreatedEvent{tid=TemplateId Identifier{ent=EntityName"Gift"}, createArgs}] -> do
         x <- fromRecord createArgs
         return $ Gift x
     _ ->

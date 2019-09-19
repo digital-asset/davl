@@ -5,6 +5,8 @@ set -euo pipefail
 
 cd "$(dirname ${BASH_SOURCE[0]})"
 
+stack build
+
 pkill -f sandbox.jar || true
 
 cd testcases
