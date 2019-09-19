@@ -32,3 +32,5 @@ One of the hopes for these notes is they might form the basis of future blog pos
 
 - fixing model version 1. DAML and spec.
 - choosing simpler un-compunded names: i.e `Holiday`, `Vacation`
+
+- renamed this project to `davl` - _DA Vacation Ledger_
