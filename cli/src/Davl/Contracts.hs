@@ -12,22 +12,15 @@ import DA.Ledger (
     Command(..), Event(..), Transaction(..)
     )
 
-import Davl.Domain (Holiday,Gift)
+import Davl.Domain (Gift)
 import Davl.Logging (Logger)
 import DA.Ledger.IsLedgerValue (toRecord,fromRecord)
 
 data DavlContract
-    = Holiday Holiday
-    | Gift Gift
+    = Gift Gift
 
 makeLedgerCommand :: PackageId -> DavlContract -> Command
 makeLedgerCommand pid = \case
-    Holiday x -> do
-        let mod = ModuleName "Davl"
-        let ent = EntityName "HolidayAllocation"
-        let tid = TemplateId (Identifier pid mod ent)
-        let args = toRecord x
-        CreateCommand {tid,args}
     Gift x -> do
         let mod = ModuleName "Davl"
         let ent = EntityName "HolidayGift"
@@ -37,9 +30,6 @@ makeLedgerCommand pid = \case
 
 extractEvents :: [Event] -> Maybe DavlContract
 extractEvents = \case
-    [CreatedEvent{tid=TemplateId Identifier{ent=EntityName"HolidayAllocation"}, createArgs}] -> do
-        x <- fromRecord createArgs
-        return $ Holiday x
     [CreatedEvent{tid=TemplateId Identifier{ent=EntityName"HolidayGift"}, createArgs}] -> do
         x <- fromRecord createArgs
         return $ Gift x

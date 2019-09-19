@@ -33,13 +33,8 @@ You haven't deployed the DAML model.
 Current WIP output:
 
     $ stack run davl-cli
-    replaying 0 transactions
     'Alice'> !Bob
-    'Alice'> ('Bob') .
-    -> (GiftSent'Bob')
-    'Alice'> ('Bob') .
-    -> (GiftSent'Bob')
-    'Alice'> ('Bob')
+    Gift --> 'Bob'
 
 ### test
 

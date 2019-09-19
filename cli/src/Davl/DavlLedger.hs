@@ -70,7 +70,7 @@ submitCommand Handle{lid} party com = do
         wid = Nothing
         leTime = Timestamp 0 0
         mrTime = Timestamp 5 0
-        myAid = ApplicationId "chat-console"
+        myAid = ApplicationId "davl-console"
 
 randomCid :: IO CommandId
 randomCid = do fmap (CommandId . Text.pack . UUID.toString) randomIO

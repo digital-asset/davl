@@ -5,79 +5,59 @@
 module Davl.Local (
     State, initState, history,
     UserCommand(..), externalizeCommand,
-    applyTransQuiet, applyTrans, Announce,
+    applyTransQuiet, applyTrans, Event,
     ) where
 
 import Davl.Contracts (DavlContract)
 import Davl.Domain (Party,Holiday(..),Gift(..))
---import Data.List ((\\))
---import Data.Text.Lazy (Text)
---import Data.Text.Lazy as Text (unpack)
 import qualified Davl.Contracts as C
 
 -- user commands, to be interpreted w.r.t the local state
 
 data UserCommand
-    = Give
+    = GiveTo Party
     deriving Show
 
 -- local state, accumulates external transitions
 
-data State = State
-    {
-    ans :: [Announce]
-    }
+data State = State { events :: [Event] }
     deriving (Show)
 
-history :: State -> [Announce]
-history = reverse . ans
+history :: State -> [Event]
+history = reverse . events
 
 data MKind = MSay | MShout deriving (Show)
 
 initState :: State
-initState = State
-    {
-     ans = []
-    }
+initState = State {events = []}
 
 -- externalize a user-centric command into a Davl Contract (creation)
 
-externalizeCommand :: Party -> Party -> State -> UserCommand -> Either String DavlContract
-externalizeCommand whoami employee State{} = \case
-    Give ->
+externalizeCommand :: Party -> State -> UserCommand -> Either String DavlContract
+externalizeCommand whoami State{} = \case
+    GiveTo employee ->
         return $ C.Gift $ Gift { allocation = Holiday { boss = whoami, employee } }
 
 -- accumulate an external Davl Contract (transaction) into the local state
 
 applyTransQuiet :: Party -> State -> DavlContract -> State
-applyTransQuiet whoami s cc = s' where (s',_,_) = applyTrans whoami s cc
+applyTransQuiet whoami s cc = s' where (s',_) = applyTrans whoami s cc
 
-applyTrans :: Party -> State -> DavlContract -> (State,[Announce],[DavlContract])
-applyTrans whoami s@State{ans} = \case
+applyTrans :: Party -> State -> DavlContract -> (State,[Event])
+applyTrans whoami s@State{events} = \case
     C.Gift Gift{allocation=Holiday{boss,employee}} ->
-        (s { ans = an : ans }, {-if bo == whoami then [] else-} [an], [])
-        where an =
-                  if boss == whoami
-                  then AGiftSent{to=employee}
-                  else AGiftIn{from=boss}
+        (s { events = event : events }, [event])
+        where
+            event =
+                if boss == whoami
+                then AGiftSent{to=employee}
+                else AGiftIn{from=boss}
 
-    C.Holiday Holiday{boss,employee} ->
-        (s { ans = an : ans }, {-if bo == whoami then [] else-} [an], [])
-        where an =
-                  if boss == whoami
-                  then AHolidaySent{to=employee}
-                  else AHolidayIn{from=boss}
-
-data Announce
+data Event
     = AGiftIn { from :: Party }
     | AGiftSent { to :: Party }
-    | AHolidayIn { from :: Party }
-    | AHolidaySent { to :: Party }
 
-
-instance Show Announce where
+instance Show Event where
     show = \case
-        AGiftIn{from} -> "(GiftIn" ++ show from ++ ") "
-        AGiftSent{to} -> "-> (GiftSent" ++ show to ++") "
-        AHolidayIn{from} -> "(HolIn" ++ show from ++ ") "
-        AHolidaySent{to} -> "-> (HolSent" ++ show to ++") "
+        AGiftIn{from} -> "Gift <-- " ++ show from
+        AGiftSent{to} -> "Gift --> " ++ show to

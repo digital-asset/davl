@@ -2,7 +2,6 @@
 -- SPDX-License-Identifier: Apache-2.0
 
 -- Interact with a DavlLedger, submitting commands and tracking extern transitions.
--- This is basically unchanged from the Nim example
 module Davl.Interact (InteractState(..), makeInteractState, runSubmit) where
 
 import Control.Concurrent (forkIO)
@@ -18,7 +17,6 @@ import System.Console.ANSI (Color(..))
 
 data InteractState = InteractState {
     whoami :: Party,
-    talking :: Maybe Party,
     sv :: MVar State,
     stream :: Stream DavlContract
     }
@@ -28,7 +26,7 @@ makeInteractState h xlog whoami = do
     sv <- newMVar initState
     let partyLog = colourLog Blue xlog
     stream <- manageUpdates h whoami partyLog sv
-    return InteractState{whoami,talking=Nothing,sv,stream}
+    return InteractState{whoami,sv,stream}
 
 sendShowingRejection :: Party -> Handle -> Logger -> DavlContract -> IO ()
 sendShowingRejection whoami h log cc =
@@ -39,30 +37,24 @@ sendShowingRejection whoami h log cc =
 runSubmit :: Handle -> Logger -> InteractState -> UserCommand -> IO ()
 runSubmit h log is uc = do
     --log $ "uc: " <> show uc
-    let InteractState{whoami,talking,sv} = is
+    let InteractState{whoami,sv} = is
     s <- readMVar sv
-    case talking of
-        Nothing -> log "pick an recipient"
-        Just employ ->
-            case externalizeCommand whoami employ s uc of
-                Left reason -> log reason
-                Right cc -> sendShowingRejection whoami h log cc
+    case externalizeCommand whoami s uc of
+        Left reason -> log reason
+        Right cc -> sendShowingRejection whoami h log cc
 
 -- Manage updates in response to DavlContract from the ledger
-
 
 manageUpdates :: Handle -> Party -> Logger -> MVar State -> IO (Stream DavlContract)
 manageUpdates h whoami log sv = do
     PastAndFuture{past,future} <- getTrans whoami h
     log $ "replaying " <> show (length past) <> " transactions"
     modifyMVar_ sv (\s -> return $ foldl (applyTransQuiet whoami) s past)
-    --withMVar sv $ \s -> sendShowingRejection whoami h log (introduceEveryone whoami s)
-    _ <- forkIO (updateX h whoami log sv future)
+    _ <- forkIO (updateX whoami log sv future)
     return future
 
-
-updateX :: Handle -> Party -> Logger -> MVar State -> Stream DavlContract -> IO ()
-updateX h whoami log sv stream = loop
+updateX :: Party -> Logger -> MVar State -> Stream DavlContract -> IO ()
+updateX whoami log sv stream = loop
   where
     loop = do
         takeStream stream >>= \case
@@ -71,13 +63,12 @@ updateX h whoami log sv stream = loop
             Left Abnormal{reason} -> do
                 log $ "transaction stream is closed: " <> reason
             Right cc -> do
-                applyX h whoami log sv cc
+                applyX whoami log sv cc
                 loop
 
-applyX :: Handle -> Party -> Logger -> MVar State -> DavlContract -> IO ()
-applyX h whoami log sv cc = do
+applyX :: Party -> Logger -> MVar State -> DavlContract -> IO ()
+applyX whoami log sv cc = do
     s <- takeMVar sv
-    let (s',ans,replies) = applyTrans whoami s cc
-    mapM_ (sendShowingRejection whoami h log) replies
+    let (s',ans) = applyTrans whoami s cc
     mapM_ (log . show) ans
     putMVar sv s'
