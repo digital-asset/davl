@@ -26,3 +26,9 @@ One of the hopes for these notes is they might form the basis of future blog pos
 
 - created subdir for `pina-cli` code and added README
 - created this diary
+
+
+### Thu 19th September (Nick)
+
+- fixing model version 1. DAML and spec.
+- choosing simpler un-compunded names: i.e `Holiday`, `Vacation`

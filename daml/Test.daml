@@ -8,21 +8,21 @@ import DA.Date as Date
 can_offer_holiday = scenario do
   boss <- getParty "boss"
   employee <- getParty "employee"
-  submit boss $ create $ HolidayGift { allocation = HolidayAllocation { boss, employee } }
+  submit boss $ create $ Gift { allocation = Holiday { boss, employee } }
 
 can_accept_holiday_offer = scenario do
   boss <- getParty "boss"
   employee <- getParty "employee"
-  offer <- submit boss $ create $ HolidayGift { allocation = HolidayAllocation { boss, employee } }
+  offer <- submit boss $ create $ Gift { allocation = Holiday { boss, employee } }
   submit employee do
-    exercise offer HolidayGift_Accept
+    exercise offer Gift_Claim
 
 no_double_spend = scenario do
   boss <- getParty "boss"
   employee <- getParty "employee"
-  offer <- submit boss $ create $ HolidayGift { allocation = HolidayAllocation { boss, employee } }
-  alloc <- submit employee $ exercise offer HolidayGift_Accept
-  request1 <- submit employee $ create $ HolidayRequest { employee, boss, allocationId = alloc, date = Date.date 2019 Date.Apr 11 }
-  request2 <- submit employee $ create $ HolidayRequest { employee, boss, allocationId = alloc, date = Date.date 2019 Date.Apr 12 }
-  submit boss $ exercise request1 HolidayRequest_Accept
-  submitMustFail boss $ exercise request2 HolidayRequest_Accept
+  offer <- submit boss $ create $ Gift { allocation = Holiday { boss, employee } }
+  alloc <- submit employee $ exercise offer Gift_Claim
+  request1 <- submit employee $ create $ Request { employee, boss, allocationId = alloc, date = Date.date 2019 Date.Apr 11 }
+  request2 <- submit employee $ create $ Request { employee, boss, allocationId = alloc, date = Date.date 2019 Date.Apr 12 }
+  submit boss $ exercise request1 Request_Approve
+  submitMustFail boss $ exercise request2 Request_Approve
