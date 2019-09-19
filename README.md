@@ -8,3 +8,7 @@ Holiday tracking application, driven by DAML.
 - Notes on command-line-interface `davl-cli` [here](/cli/README.md).
 - Developer log [here](/notes/diary.md).
 
+Regression testing
+
+- `daml test`
+- `cli/test.sh`

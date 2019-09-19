@@ -19,7 +19,7 @@ dependencies:
 - uuid
 
 executables:
-  davl-exe:
+  davl-cli:
     main:                Davl.Main
     source-dirs:         src
     ghc-options:
