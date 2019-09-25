@@ -8,7 +8,7 @@ module Davl.DavlLedger (Handle, connect, sendCommand, getTrans) where
 
 import Control.Monad(forM)
 import DA.Ledger as Ledger
-import Davl.Contracts (DavlContract,extractTransaction,makeLedgerCommand)
+import Davl.Contracts (DavlContract,DavlTemplate,extractTransaction,makeLedgerCommand)
 import Davl.Logging (Logger)
 import Data.List as List
 import Data.Maybe (maybeToList)
@@ -50,7 +50,7 @@ connect log = do
 containsDavl :: Package -> Bool
 containsDavl package = "Davl" `isInfixOf` show package -- TODO: be more principled
 
-sendCommand :: Party -> Handle -> DavlContract -> IO (Maybe Rejection)
+sendCommand :: Party -> Handle -> DavlTemplate -> IO (Maybe Rejection)
 sendCommand asParty h@Handle{pid} cc = do
     let com = makeLedgerCommand pid cc
     submitCommand h asParty com >>= \case

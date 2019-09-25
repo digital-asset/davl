@@ -3,23 +3,26 @@
 
 -- Davl Contracts, both sent-to, and coming-from the external ledger.
 module Davl.Contracts (
-    DavlContract(..),
+    DavlContractId,
+    DavlTemplate(..), DavlContract(..),
     makeLedgerCommand,extractTransaction,
     ) where
 
+import qualified Data.Text.Lazy as Text(unpack)
+
 import DA.Ledger (
     PackageId,Command,ModuleName(..),EntityName(..),TemplateId(..),Identifier(..),
-    Command(..), Event(..), Transaction(..)
+    Command(..), Event(..), Transaction(..),
+    ContractId(..),
     )
-
 import Davl.Domain (Gift)
 import Davl.Logging (Logger)
 import DA.Ledger.IsLedgerValue (toRecord,fromRecord)
 
-data DavlContract
+data DavlTemplate
     = Gift Gift
 
-makeLedgerCommand :: PackageId -> DavlContract -> Command
+makeLedgerCommand :: PackageId -> DavlTemplate -> Command
 makeLedgerCommand pid = \case
     Gift x -> do
         let mod = ModuleName "Davl"
@@ -28,11 +31,19 @@ makeLedgerCommand pid = \case
         let args = toRecord x
         CreateCommand {tid,args}
 
+data DavlContract = DavlContract { id :: DavlContractId, info :: DavlTemplate }
+
+newtype DavlContractId = DavlContractId { cid :: String }
+
+instance Show DavlContractId where
+    show DavlContractId{cid} = "[" <> cid <> "]"
+
+
 extractEvents :: [Event] -> Maybe DavlContract
 extractEvents = \case
-    [CreatedEvent{tid=TemplateId Identifier{ent=EntityName"Gift"}, createArgs}] -> do
+    [CreatedEvent{cid,tid=TemplateId Identifier{ent=EntityName"Gift"}, createArgs}] -> do
         x <- fromRecord createArgs
-        return $ Gift x
+        return $ DavlContract { id = DavlContractId $ Text.unpack $ unContractId $ cid , info = Gift x }
     _ ->
         Nothing
 

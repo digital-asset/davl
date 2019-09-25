@@ -8,7 +8,7 @@ module Davl.Local (
     applyTransQuiet, applyTrans, Event,
     ) where
 
-import Davl.Contracts (DavlContract)
+import Davl.Contracts (DavlContractId, DavlContract(..),DavlTemplate)
 import Davl.Domain (Party,Holiday(..),Gift(..))
 import qualified Davl.Contracts as C
 
@@ -31,7 +31,7 @@ initState = State {events = []}
 
 -- externalize a user-centric command into a Davl Contract (creation)
 
-externalizeCommand :: Party -> State -> UserCommand -> Either String DavlContract
+externalizeCommand :: Party -> State -> UserCommand -> Either String DavlTemplate
 externalizeCommand whoami State{} = \case
     GiveTo employee ->
         return $ C.Gift $ Gift { allocation = Holiday { boss = whoami, employee } }
@@ -43,19 +43,19 @@ applyTransQuiet whoami s cc = s' where (s',_) = applyTrans whoami s cc
 
 applyTrans :: Party -> State -> DavlContract -> (State,[Event])
 applyTrans whoami s@State{events} = \case
-    C.Gift Gift{allocation=Holiday{boss,employee}} ->
+    DavlContract { id, info = C.Gift Gift{allocation=Holiday{boss,employee}} } ->
         (s { events = event : events }, [event])
         where
             event =
                 if boss == whoami
-                then AGiftSent{to=employee}
-                else AGiftIn{from=boss}
+                then AGiftSent{id,to=employee}
+                else AGiftIn{id,from=boss}
 
 data Event
-    = AGiftIn { from :: Party }
-    | AGiftSent { to :: Party }
+    = AGiftIn { id :: DavlContractId, from :: Party }
+    | AGiftSent { id :: DavlContractId, to :: Party }
 
 instance Show Event where
     show = \case
-        AGiftIn{from} -> "Gift <-- " ++ show from
-        AGiftSent{to} -> "Gift --> " ++ show to
+        AGiftIn{id,from} -> unwords ["Gift", show id, "<--", show from]
+        AGiftSent{id,to} -> unwords ["Gift", show id, "-->", show to]
