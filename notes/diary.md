@@ -11,7 +11,7 @@ This file records thoughts and ideas which occur during development, including:
 
 These notes should be mainly regarded as append-only. But we can fixup and improve earlier entries if we wish, including deleting stuff which on reflection seems on low value.
 
-Martin suggest that perhaps these file could be hosted as google pages.
+Martin suggest that perhaps these file could be hosted as Github pages.
 
 One of the hopes for these notes is they might form the basis of future blog posts about the experiences of team-davl in developing a kick-ass DAML ledger app.
 
