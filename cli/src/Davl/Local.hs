@@ -26,8 +26,6 @@ data State = State { events :: [Event] }
 history :: State -> [Event]
 history = reverse . events
 
-data MKind = MSay | MShout deriving (Show)
-
 initState :: State
 initState = State {events = []}
 
