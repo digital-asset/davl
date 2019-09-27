@@ -5,7 +5,7 @@ cd "$(dirname ${BASH_SOURCE[0]})"
 
 CLI=$(stack exec which davl-cli)
 
-echo '!Bob' | $CLI
+echo 'give Bob' | $CLI Alice
 echo | $CLI Bob
-echo '!Alice' | $CLI Bob
-echo | $CLI
+echo 'claim Alice' | $CLI Bob
+echo | $CLI Alice
