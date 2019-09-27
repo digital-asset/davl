@@ -30,12 +30,20 @@ You haven't deployed the DAML model.
 
 ### using the CLI
 
-Current WIP output:
+    $ stack run davl-cli Alice
+    'Alice'> help
+    'Alice'> give Bob
+    'Alice'> give Bob
+    'Alice'> give Charlie
 
-    $ stack run davl-cli
-    'Alice'> !Bob
-    Gift --> 'Bob'
+    $ stack run davl-cli Bob
+    'Bob> summary
+    'Bob> claim Alice
+    'Bob> summary
+
+    $ stack run davl-cli Alice
+    'Alice> summary
 
 ### test
 
-- TODO
+    ./test.sh
