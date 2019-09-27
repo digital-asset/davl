@@ -8,7 +8,9 @@ module Davl.Local (
     applyTransQuiet, applyTrans, Event,
     ) where
 
-import Davl.Contracts (DavlContractId, DavlContract(..),DavlTemplate)
+import Data.Maybe
+
+import Davl.Contracts (DavlContractId, DavlContract(..), DavlCommand(..))
 import Davl.Domain (Party,Holiday(..),Gift(..))
 import qualified Davl.Contracts as C
 
@@ -16,6 +18,7 @@ import qualified Davl.Contracts as C
 
 data UserCommand
     = GiveTo Party
+    | ClaimFrom Party
     deriving Show
 
 -- local state, accumulates external transitions
@@ -31,10 +34,25 @@ initState = State {events = []}
 
 -- externalize a user-centric command into a Davl Contract (creation)
 
-externalizeCommand :: Party -> State -> UserCommand -> Either String DavlTemplate
-externalizeCommand whoami State{} = \case
+externalizeCommand :: Party -> State -> UserCommand -> Either String DavlCommand
+externalizeCommand whoami state = \case
     GiveTo employee ->
-        return $ C.Gift $ Gift { allocation = Holiday { boss = whoami, employee } }
+        return $ C.GiveGift $ Gift { allocation = Holiday { boss = whoami, employee } }
+    ClaimFrom boss -> do
+        case findGiftToMeFrom state boss of
+            Nothing -> Left $ "no gift found from: " <> show boss
+            Just id -> return $ C.ClaimGift id
+
+findGiftToMeFrom :: State ->  Party -> Maybe DavlContractId
+findGiftToMeFrom (State events) bossK = listToMaybe $ do
+    events >>= \case
+        AGiftIn id boss ->
+            if boss/=bossK then [] else return id
+
+        _ -> []
+        --AGiftSent _ _ -> []
+        --AHolidayIn _ _ -> []
+        --AHolidaySent _ _ -> []
 
 -- accumulate an external Davl Contract (transaction) into the local state
 
@@ -50,12 +68,25 @@ applyTrans whoami s@State{events} = \case
                 if boss == whoami
                 then AGiftSent{id,to=employee}
                 else AGiftIn{id,from=boss}
+    DavlContract { id, info = C.Holiday Holiday {boss,employee} } -> do
+        let
+            event =
+                if boss == whoami
+                then AHolidaySent{id,to=employee}
+                else AHolidayIn{id,from=boss}
+        (s { events = event : events }, [event])
+
 
 data Event
     = AGiftIn { id :: DavlContractId, from :: Party }
     | AGiftSent { id :: DavlContractId, to :: Party }
+    | AHolidayIn { id :: DavlContractId, from :: Party }
+    | AHolidaySent { id :: DavlContractId, to :: Party }
 
 instance Show Event where
     show = \case
         AGiftIn{id,from} -> unwords ["Gift", show id, "<--", show from]
         AGiftSent{id,to} -> unwords ["Gift", show id, "-->", show to]
+
+        AHolidayIn{id,from} -> unwords ["Holiday", show id, "<--", show from]
+        AHolidaySent{id,to} -> unwords ["Holiday", show id, "-->", show to]

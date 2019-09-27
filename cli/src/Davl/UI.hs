@@ -61,7 +61,8 @@ parseLine :: String -> Command
 parseLine line = case words line of
     [] -> Query History
     ["help"] -> Query Help
-    ['!':guy] -> Submit (Local.GiveTo (party guy))
+    ["give",guy] -> Submit (Local.GiveTo (party guy))
+    ["claim",guy] -> Submit (Local.ClaimFrom (party guy))
     words ->
         Unexpected words
 
@@ -71,9 +72,10 @@ parseLine line = case words line of
 
 helpText :: String
 helpText = unlines
-    [ "!<Name>      Send a Gift to <Name>"
-    , "help         Display this help text"
-    , "<return>     Show the history of sent and received Gifts"
+    [ "give <Name>    Send a Gift to <Name>"
+    , "claim <Name>   Claim a Gift from <Name>"
+    , "help           Display this help text"
+    , "<return>       Show the history of sent and received Gifts"
     ]
 
 -- run the parsed command

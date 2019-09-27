@@ -7,7 +7,7 @@ module Davl.Interact (InteractState(..), makeInteractState, runSubmit) where
 import Control.Concurrent (forkIO)
 import Control.Concurrent.MVar
 import Davl.DavlLedger (Handle,sendCommand,getTrans)
-import Davl.Contracts (DavlContract,DavlTemplate)
+import Davl.Contracts (DavlContract,DavlCommand)
 import Davl.Domain (Party(..))
 import Davl.Local (State,initState,UserCommand,externalizeCommand,applyTrans,applyTransQuiet)
 import Davl.Logging (Logger,colourLog)
@@ -28,7 +28,7 @@ makeInteractState h xlog whoami = do
     stream <- manageUpdates h whoami partyLog sv
     return InteractState{whoami,sv,stream}
 
-sendShowingRejection :: Party -> Handle -> Logger -> DavlTemplate -> IO ()
+sendShowingRejection :: Party -> Handle -> Logger -> DavlCommand -> IO ()
 sendShowingRejection whoami h log cc =
     sendCommand whoami h cc >>= \case
     Nothing -> return ()
