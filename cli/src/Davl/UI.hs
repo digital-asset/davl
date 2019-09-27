@@ -61,12 +61,13 @@ data Command
 
 parseLine :: String -> Command
 parseLine line = case words line of
-    [] -> Query ShowSummary
     ["give",guy] -> Submit (Interact.GiveTo (party guy))
     ["claim",guy] -> Submit (Interact.ClaimFrom (party guy))
     ["help"] -> Query Help
     ["history"] -> Query ShowHistory
-    ["h"] -> Query ShowHistory --alias
+    ["summary"] -> Query ShowSummary
+    ["h"] -> Query ShowHistory
+    [] -> Query ShowSummary
     words ->
         Unexpected words
 
@@ -81,7 +82,9 @@ helpText = unlines
     , "claim <Name>   Claim a Gift from <Name>"
     , "help           Display this help text"
     , "history        Show the history of contract creations/archivals"
-    , "<return>       Show summary of holiday status, as boss/employee"
+    , "summary        Show summary of holiday status, as boss/employee"
+    , "h              alias for history"
+    , "<return>       alias for summary"
     ]
 
 -- run the parsed command
