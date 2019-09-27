@@ -10,10 +10,11 @@ import System.Console.ANSI (Color(..))
 import qualified System.Console.Haskeline as HL
 
 import Davl.DavlLedger (Handle,connect)
-import Davl.Domain (Party(..))
-import Davl.Interact (InteractState(..),makeInteractState,runSubmit)
-import Davl.Local as Local (State,UserCommand(..),history)
+import Davl.Domain
 import Davl.Logging (colourLog,plainLog,colourWrap)
+import qualified Davl.Interact as Interact
+import qualified Davl.ContractStore as CS
+import qualified Davl.Aggregation as AG
 
 replyLog :: String -> IO ()
 replyLog = colourLog Cyan plainLog
@@ -23,17 +24,17 @@ interactiveMain party = HL.runInputT HL.defaultSettings $ do
     xlog <- HL.getExternalPrint
     let errLog = colourLog Red xlog
     h <- lift (connect errLog)
-    ps <- lift $ makeInteractState h xlog party
+    ps <- lift $ Interact.makeState h xlog party
     lift $ replyLog "type \"help\" to see available commands"
     readLoop h ps
 
 -- readLoop
 
-prompt :: InteractState -> String
-prompt InteractState{whoami} =
+prompt :: Interact.State -> String
+prompt Interact.State{whoami} =
     colourWrap Green (show whoami <> "> ")
 
-readLoop :: Handle -> InteractState -> HL.InputT IO ()
+readLoop :: Handle -> Interact.State -> HL.InputT IO ()
 readLoop h is = do
     lineOpt <- HL.getInputLine (prompt is)
     case lineOpt of
@@ -46,12 +47,13 @@ readLoop h is = do
 
 data Query
     = Help
-    | History
+    | ShowHistory
+    | ShowSummary
     deriving (Show)
 
 data Command
     = Unexpected [String]
-    | Submit UserCommand
+    | Submit Interact.Command
     | Query Query
     deriving (Show)
 
@@ -59,9 +61,13 @@ data Command
 
 parseLine :: String -> Command
 parseLine line = case words line of
-    [] -> Query History
+    ["give",guy] -> Submit (Interact.GiveTo (party guy))
+    ["claim",guy] -> Submit (Interact.ClaimFrom (party guy))
     ["help"] -> Query Help
-    ['!':guy] -> Submit (Local.GiveTo (party guy))
+    ["history"] -> Query ShowHistory
+    ["summary"] -> Query ShowSummary
+    ["h"] -> Query ShowHistory
+    [] -> Query ShowSummary
     words ->
         Unexpected words
 
@@ -71,28 +77,36 @@ parseLine line = case words line of
 
 helpText :: String
 helpText = unlines
-    [ "!<Name>      Send a Gift to <Name>"
-    , "help         Display this help text"
-    , "<return>     Show the history of sent and received Gifts"
+    [
+      "give <Name>    Send a Gift to <Name>"
+    , "claim <Name>   Claim a Gift from <Name>"
+    , "help           Display this help text"
+    , "history        Show the history of contract creations/archivals"
+    , "summary        Show summary of holiday status, as boss/employee"
+    , "h              alias for history"
+    , "<return>       alias for summary"
     ]
 
 -- run the parsed command
 
-runCommand :: Handle -> InteractState -> Command -> IO InteractState
+runCommand :: Handle -> Interact.State -> Command -> IO Interact.State
 runCommand h is = \case
     Unexpected words -> do
         replyLog $ "Parse error: " <> unwords words
         return is
     Submit uc -> do
-        runSubmit h replyLog is uc
+        Interact.runSubmit h replyLog is uc
         return is
     Query lq -> do
-        let InteractState{sv} = is
+        let Interact.State{sv,whoami} = is
         s <- readMVar sv
-        runLocalQuery s lq
+        runLocalQuery whoami s lq
         return is
 
-runLocalQuery :: State -> Query -> IO ()
-runLocalQuery s = \case
+runLocalQuery :: Party -> CS.State -> Query -> IO ()
+runLocalQuery whoami s = \case
     Help -> replyLog helpText
-    History -> replyLog (unlines $ map show (Local.history s))
+    ShowHistory -> replyLog (unlines $ map show (CS.history s))
+    ShowSummary -> do
+        replyLog (show (AG.summaryAsBoss whoami s))
+        replyLog (show (AG.summaryAsEmployee whoami s))
