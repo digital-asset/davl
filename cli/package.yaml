@@ -17,6 +17,7 @@ dependencies:
 - text
 - transformers
 - uuid
+- utility-ht
 
 executables:
   davl-cli:
@@ -30,6 +31,7 @@ executables:
     - -with-rtsopts=-N
 
     default-extensions:
+    - DuplicateRecordFields
     - LambdaCase
     - NamedFieldPuns
     - OverloadedStrings

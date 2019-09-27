@@ -14,6 +14,7 @@ import Davl.Domain
 import Davl.Logging (colourLog,plainLog,colourWrap)
 import qualified Davl.Interact as Interact
 import qualified Davl.ContractStore as CS
+import qualified Davl.Aggregation as AG
 
 replyLog :: String -> IO ()
 replyLog = colourLog Cyan plainLog
@@ -46,7 +47,8 @@ readLoop h is = do
 
 data Query
     = Help
-    | History
+    | ShowHistory
+    | ShowSummary
     deriving (Show)
 
 data Command
@@ -59,10 +61,12 @@ data Command
 
 parseLine :: String -> Command
 parseLine line = case words line of
-    [] -> Query History
-    ["help"] -> Query Help
+    [] -> Query ShowSummary
     ["give",guy] -> Submit (Interact.GiveTo (party guy))
     ["claim",guy] -> Submit (Interact.ClaimFrom (party guy))
+    ["help"] -> Query Help
+    ["history"] -> Query ShowHistory
+    ["h"] -> Query ShowHistory --alias
     words ->
         Unexpected words
 
@@ -72,10 +76,12 @@ parseLine line = case words line of
 
 helpText :: String
 helpText = unlines
-    [ "give <Name>    Send a Gift to <Name>"
+    [
+      "give <Name>    Send a Gift to <Name>"
     , "claim <Name>   Claim a Gift from <Name>"
     , "help           Display this help text"
-    , "<return>       Show the history of sent and received Gifts"
+    , "history        Show the history of contract creations/archivals"
+    , "<return>       Show summary of holiday status, as boss/employee"
     ]
 
 -- run the parsed command
@@ -89,12 +95,15 @@ runCommand h is = \case
         Interact.runSubmit h replyLog is uc
         return is
     Query lq -> do
-        let Interact.State{sv} = is
+        let Interact.State{sv,whoami} = is
         s <- readMVar sv
-        runLocalQuery s lq
+        runLocalQuery whoami s lq
         return is
 
-runLocalQuery :: CS.State -> Query -> IO ()
-runLocalQuery s = \case
+runLocalQuery :: Party -> CS.State -> Query -> IO ()
+runLocalQuery whoami s = \case
     Help -> replyLog helpText
-    History -> replyLog (unlines $ map show (CS.history s))
+    ShowHistory -> replyLog (unlines $ map show (CS.history s))
+    ShowSummary -> do
+        replyLog (show (AG.summaryAsBoss whoami s))
+        replyLog (show (AG.summaryAsEmployee whoami s))
