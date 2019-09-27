@@ -34,3 +34,11 @@ One of the hopes for these notes is they might form the basis of future blog pos
 - choosing simpler un-compunded names: i.e `Holiday`, `Vacation`
 
 - renamed this project to `davl` - _DA Vacation Ledger_
+
+### Fri 26th September (Nick)
+
+- continuing to hack on the CLI
+- trying to figure out the best way to organize the code to be malliable for incremental changes
+- CLI now support workflow: give/claim + summary query: as boss (grouped by employee) / as employee (grouped by boss)
+
+- one thing that is clearer is that the core in-App representation just needs to be [Event] (Create/Archive) received from the ledger. And these can be further processed on demand... in particular to determine the active contract set
