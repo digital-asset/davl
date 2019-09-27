@@ -2,31 +2,36 @@
 -- SPDX-License-Identifier: Apache-2.0
 
 -- Interact with a DavlLedger, submitting commands and tracking extern transitions.
-module Davl.Interact (InteractState(..), makeInteractState, runSubmit) where
+module Davl.Interact (
+    State(..), makeState,
+    Command(..), runSubmit
+    ) where
 
 import Control.Concurrent (forkIO)
-import Control.Concurrent.MVar
-import Davl.DavlLedger (Handle,sendCommand,getTrans)
-import Davl.Contracts (DavlContract,DavlCommand)
-import Davl.Domain (Party(..))
-import Davl.Local (State,initState,UserCommand,externalizeCommand,applyTrans,applyTransQuiet)
-import Davl.Logging (Logger,colourLog)
-import DA.Ledger.PastAndFuture (PastAndFuture(..))
-import DA.Ledger.Stream (Stream,Closed(EOS,Abnormal,reason),takeStream)
+import Control.Concurrent.MVar(MVar,newMVar,readMVar,modifyMVar_,takeMVar,putMVar)
+import Data.Maybe(listToMaybe)
 import System.Console.ANSI (Color(..))
 
-data InteractState = InteractState {
+import DA.Ledger.PastAndFuture (PastAndFuture(..))
+import DA.Ledger.Stream (Stream,Closed(EOS,Abnormal,reason),takeStream)
+
+import Davl.DavlLedger (Handle,sendCommand,getTrans)
+import Davl.Domain
+import Davl.Logging (Logger,colourLog)
+import qualified Davl.ContractStore as CS
+
+data State = State {
     whoami :: Party,
-    sv :: MVar State,
-    stream :: Stream DavlContract
+    sv :: MVar CS.State,
+    stream :: Stream DavlEvent
     }
 
-makeInteractState :: Handle -> Logger -> Party -> IO InteractState
-makeInteractState h xlog whoami = do
-    sv <- newMVar initState
+makeState :: Handle -> Logger -> Party -> IO State
+makeState h xlog whoami = do
+    sv <- newMVar CS.initState
     let partyLog = colourLog Blue xlog
     stream <- manageUpdates h whoami partyLog sv
-    return InteractState{whoami,sv,stream}
+    return State{whoami,sv,stream}
 
 sendShowingRejection :: Party -> Handle -> Logger -> DavlCommand -> IO ()
 sendShowingRejection whoami h log cc =
@@ -34,26 +39,54 @@ sendShowingRejection whoami h log cc =
     Nothing -> return ()
     Just rej -> log $ "command rejected by ledger: " <> rej
 
-runSubmit :: Handle -> Logger -> InteractState -> UserCommand -> IO ()
+runSubmit :: Handle -> Logger -> State -> Command -> IO ()
 runSubmit h log is uc = do
     --log $ "uc: " <> show uc
-    let InteractState{whoami,sv} = is
+    let State{whoami,sv} = is
     s <- readMVar sv
     case externalizeCommand whoami s uc of
         Left reason -> log reason
         Right cc -> sendShowingRejection whoami h log cc
 
--- Manage updates in response to contracts from the ledger
+-- user commands, to be interpreted w.r.t the local state
 
-manageUpdates :: Handle -> Party -> Logger -> MVar State -> IO (Stream DavlContract)
+data Command
+    = GiveTo Party
+    | ClaimFrom Party
+    deriving Show
+
+externalizeCommand :: Party -> CS.State -> Command -> Either String DavlCommand
+externalizeCommand whoami state = \case
+    GiveTo employee ->
+        return $ GiveGift $ Gift { allocation = Holiday { boss = whoami, employee } }
+    ClaimFrom boss -> do
+        case findGiftToMeFrom state whoami boss of
+            Nothing -> Left $ "no gift found from: " <> show boss
+            Just id -> return $ ClaimGift id
+
+
+findGiftToMeFrom :: CS.State ->  Party -> Party -> Maybe DavlContractId
+findGiftToMeFrom state whoami bossK = listToMaybe $ do
+    (id,Gift{allocation=Holiday{employee,boss}}) <- activeGifts state
+    if boss==bossK && employee==whoami then return id else []
+
+activeGifts :: CS.State ->  [(DavlContractId,Gift)]
+activeGifts state = do
+    (id,TGift gift) <- CS.activeContracts state
+    return (id,gift)
+
+
+-- Manage updates in response to contracts from the ledgerS.
+
+manageUpdates :: Handle -> Party -> Logger -> MVar CS.State -> IO (Stream DavlEvent)
 manageUpdates h whoami log sv = do
     PastAndFuture{past,future} <- getTrans whoami h
     log $ "replaying " <> show (length past) <> " transactions"
-    modifyMVar_ sv (\s -> return $ foldl (applyTransQuiet whoami) s past)
+    modifyMVar_ sv (\s -> return $ foldl (CS.applyTrans whoami) s past)
     _ <- forkIO (updateX whoami log sv future)
     return future
 
-updateX :: Party -> Logger -> MVar State -> Stream DavlContract -> IO ()
+updateX :: Party -> Logger -> MVar CS.State -> Stream DavlEvent -> IO ()
 updateX whoami log sv stream = loop
   where
     loop = do
@@ -66,9 +99,9 @@ updateX whoami log sv stream = loop
                 applyX whoami log sv cc
                 loop
 
-applyX :: Party -> Logger -> MVar State -> DavlContract -> IO ()
-applyX whoami log sv cc = do
+applyX :: Party -> Logger -> MVar CS.State -> DavlEvent -> IO ()
+applyX whoami log sv event = do
     s <- takeMVar sv
-    let (s',ans) = applyTrans whoami s cc
-    mapM_ (log . show) ans
+    let s' = CS.applyTrans whoami s event
+    log $ show event
     putMVar sv s'

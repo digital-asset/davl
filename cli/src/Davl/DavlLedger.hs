@@ -1,20 +1,23 @@
 -- Copyright (c) 2019 The DAML Authors. All rights reserved.
 -- SPDX-License-Identifier: Apache-2.0
 
-
--- Abstraction for a Ledger which is hosting the Davl domain model.
--- This is basically unchanged from the Nim example
-module Davl.DavlLedger (Handle, connect, sendCommand, getTrans) where
+module Davl.DavlLedger (
+    Handle,
+    connect,
+    sendCommand,
+    getTrans
+    ) where
 
 import Control.Monad(forM)
-import DA.Ledger as Ledger
-import Davl.Contracts (DavlContract,DavlCommand,extractTransaction,makeLedgerCommand)
-import Davl.Logging (Logger)
 import Data.List as List
-import Data.Maybe (maybeToList)
 import System.Random (randomIO)
 import qualified Data.Text.Lazy as Text (pack)
 import qualified Data.UUID as UUID
+import DA.Ledger as Ledger
+
+import Davl.Domain
+import Davl.LedgerTranslation(makeLedgerCommand,extractTransaction)
+import Davl.Logging (Logger)
 
 data Handle = Handle {
     log :: Logger,
@@ -57,10 +60,10 @@ sendCommand asParty h@Handle{pid} cc = do
         Left rejection -> return $ Just rejection
         Right () -> return Nothing
 
-getTrans :: Party -> Handle -> IO (PastAndFuture DavlContract)
+getTrans :: Party -> Handle -> IO (PastAndFuture DavlEvent)
 getTrans party Handle{log,lid} = do
     pf <- run 6000 $ getTransactionsPF lid party
-    mapListPF (fmap concat . mapM (fmap maybeToList . extractTransaction log)) pf
+    mapListPF (fmap concat . mapM (extractTransaction log)) pf
 
 submitCommand :: Handle -> Party -> Command -> IO (Either String ())
 submitCommand Handle{lid} party com = do
