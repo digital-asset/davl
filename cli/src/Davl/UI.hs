@@ -63,6 +63,7 @@ parseLine :: String -> Command
 parseLine line = case words line of
     ["give",guy] -> Submit (Interact.GiveTo (party guy))
     ["claim",guy] -> Submit (Interact.ClaimFrom (party guy))
+    ["request",n] -> Submit (Interact.RequestDate (Date {daysSinceEpoch = read n}))
     ["help"] -> Query Help
     ["history"] -> Query ShowHistory
     ["summary"] -> Query ShowSummary
@@ -80,6 +81,7 @@ helpText = unlines
     [
       "give <Name>    Send a Gift to <Name>"
     , "claim <Name>   Claim a Gift from <Name>"
+    , "request <N>    Request a holiday <N> days from epoch(!), using any allocation day"
     , "help           Display this help text"
     , "history        Show the history of contract creations/archivals"
     , "summary        Show summary of holiday status, as boss/employee"

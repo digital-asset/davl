@@ -40,6 +40,35 @@ instance IsLedgerValue Gift where
             return Gift{allocation=Holiday{boss,employee}}
         _ -> Nothing
 
+instance IsLedgerValue Request where
+    toValue Request{employee,boss,allocationId,date} =
+        L.VList [toValue employee
+                , toValue boss
+                , toValue allocationId
+                , toValue date
+                ]
+    fromValue = \case
+        L.VList [v1,v2,v3,v4] -> do
+            employee <- fromValue v1
+            boss <- fromValue v2
+            allocationId <- fromValue v3
+            date <- fromValue v4
+            return Request{employee,boss,allocationId,date}
+        _ -> Nothing
+
+
+instance IsLedgerValue DavlContractId where
+    toValue DavlContractId{cid} = L.VContract cid
+    fromValue = \case
+        L.VContract cid -> return DavlContractId{cid}
+        _ -> Nothing
+
+instance IsLedgerValue Date where
+    toValue Date{daysSinceEpoch} = L.VDate (L.DaysSinceEpoch daysSinceEpoch)
+    fromValue = \case
+        L.VDate (L.DaysSinceEpoch daysSinceEpoch) -> return Date{daysSinceEpoch}
+        _ -> Nothing
+
 makeLedgerCommand :: L.PackageId -> DavlCommand -> L.Command
 makeLedgerCommand pid = \case
 
@@ -58,6 +87,13 @@ makeLedgerCommand pid = \case
         let arg = L.VRecord (L.Record Nothing [])
         L.ExerciseCommand {tid,cid,choice,arg}
 
+    RequestHoliday x -> do
+        let mod = L.ModuleName "Davl"
+        let ent = L.EntityName "Request"
+        let tid = L.TemplateId (L.Identifier pid mod ent)
+        let args = toRecord x
+        L.CreateCommand {tid,args}
+
 extractEvents :: [L.Event] -> Maybe [DavlEvent]
 extractEvents = \case
 
@@ -73,6 +109,10 @@ extractEvents = \case
             , Create { id = DavlContractId cid2 , info = THoliday x }
             ]
 
+    [L.CreatedEvent{cid=cid2,tid=L.TemplateId L.Identifier{ent=L.EntityName"Request"}, createArgs}] -> do
+        x <- fromRecord createArgs
+        return $
+            [Create { id = DavlContractId cid2 , info = TRequest x }]
     _ ->
         Nothing
 

@@ -53,6 +53,7 @@ runSubmit h log is uc = do
 data Command
     = GiveTo Party
     | ClaimFrom Party
+    | RequestDate Date
     deriving Show
 
 externalizeCommand :: Party -> CS.State -> Command -> Either String DavlCommand
@@ -63,9 +64,28 @@ externalizeCommand whoami state = \case
         case findGiftToMeFrom state whoami boss of
             Nothing -> Left $ "no gift found from: " <> show boss
             Just id -> return $ ClaimGift id
+    RequestDate date -> do
+        case findAnyAllocation state whoami of
+            Nothing -> Left $ "no holiday allocation available"
+            Just (allocationId,Holiday{boss}) ->
+                return $ RequestHoliday $ Request
+                { employee = whoami
+                , boss
+                , allocationId
+                , date
+                }
 
+findAnyAllocation :: CS.State -> Party -> Maybe (DavlContractId,Holiday)
+findAnyAllocation state whoami = listToMaybe $ do
+    (id,hol@Holiday{employee}) <- activeHolidays state
+    if employee==whoami then return (id,hol) else []
 
-findGiftToMeFrom :: CS.State ->  Party -> Party -> Maybe DavlContractId
+activeHolidays :: CS.State ->  [(DavlContractId,Holiday)]
+activeHolidays state = do
+    (id,THoliday holiday) <- CS.activeContracts state
+    return (id,holiday)
+
+findGiftToMeFrom :: CS.State -> Party -> Party -> Maybe DavlContractId
 findGiftToMeFrom state whoami bossK = listToMaybe $ do
     (id,Gift{allocation=Holiday{employee,boss}}) <- activeGifts state
     if boss==bossK && employee==whoami then return id else []
