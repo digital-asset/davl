@@ -25,7 +25,7 @@ jobs:
           set -euo pipefail
           SDK_VERSION=$(cat daml.yaml | grep sdk-version | awk '{print $2}')
           curl https://get.daml.com | sh -s $SDK_VERSION
-          ~/.daml/bin/daml test
+          (cd project/V1; ~/.daml/bin/daml test)
       - bash: |
           set -euo pipefail
           MESSAGE=$(git log --pretty=format:%s -n1)
