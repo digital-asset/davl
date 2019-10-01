@@ -2,7 +2,7 @@
 -- SPDX-License-Identifier: Apache-2.0
 
 module Davl.ListDenials (
-    ListAsEmployee, listAsEmployee, -- only for employees; boss's don't see denials
+    ListAsEmployee, listAsEmployee, -- only for employees; bosses don't see their denials
     ) where
 
 import Data.List as List

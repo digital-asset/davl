@@ -3,7 +3,11 @@
 
 module Davl.Query (
     State, -- reexport from ContractStore
-    module Davl.Query,
+    giftsAsEmployee, giftsAsBoss,
+    holidaysAsEmployee, holidaysAsBoss,
+    requestsAsEmployee, requestsAsBoss,
+    denialsAsEmployee,
+    vacationsAsEmployee, vacationsAsBoss,
     ) where
 
 import Davl.Domain
@@ -48,7 +52,19 @@ denialsAsEmployee whoami state = do
     x@Denial{employee} <- denials state
     if (employee == whoami) then return x else []
 
---denialsAsBoss :: Party -> State -> [Denial]
+--denialsAsBoss :: Party -> State -> [Denial] -- (currently the model does not allow bosses to see their denial)
+
+
+vacationsAsEmployee :: Party -> State -> [Vacation]
+vacationsAsEmployee whoami state = do
+    x@Vacation{employee} <- vacations state
+    if (employee == whoami) then return x else []
+
+vacationsAsBoss :: Party -> State -> [Vacation]
+vacationsAsBoss whoami state = do
+    x@Vacation{boss} <- vacations state
+    if (boss == whoami) then return x else []
+
 
 
 gifts :: State -> [Gift]
@@ -70,3 +86,8 @@ denials :: State -> [Denial]
 denials state = do
     (_,TDenial denial) <- activeContracts state
     return denial
+
+vacations :: State -> [Vacation]
+vacations state = do
+    (_,TVacation vacation) <- activeContracts state
+    return vacation

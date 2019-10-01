@@ -18,6 +18,7 @@ import qualified Davl.ContractStore as CS
 import qualified Davl.Aggregation as AG
 import qualified Davl.ListRequests as LR
 import qualified Davl.ListDenials as LD
+import qualified Davl.ListVacations as LV
 
 replyLog :: String -> IO ()
 replyLog = colourLog Cyan plainLog
@@ -54,6 +55,7 @@ data Query
     | ShowSummary
     | ShowPending
     | ShowDenials
+    | ShowVacations
     deriving (Show)
 
 data Command
@@ -87,6 +89,9 @@ parseLine line = case words line of
     ["denials"] -> Query ShowDenials
     ["d"] -> Query ShowDenials
 
+    ["vacations"] -> Query ShowVacations
+    ["v"] -> Query ShowVacations
+
     words ->
         Unexpected words
 
@@ -105,6 +110,7 @@ helpText = unlines
     , "summary/s       Show summary of holiday status, as boss/employee"
     , "pending/p       Show pending requests for holiday, as boss/employee"
     , "denials/d       Show denials for holiday requests, as employee"
+    , "vacations/v     Show booked vacation, as boss/employee"
 
     , "<return>        Alias for summary"
     , "help            Display this help text"
@@ -138,3 +144,6 @@ runLocalQuery whoami s = \case
         replyLog (show (LR.listAsEmployee whoami s))
     ShowDenials -> do
         replyLog (show (LD.listAsEmployee whoami s))
+    ShowVacations -> do
+        replyLog (show (LV.listAsBoss whoami s))
+        replyLog (show (LV.listAsEmployee whoami s))
