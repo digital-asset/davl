@@ -11,7 +11,7 @@
 + Vacation: Domain, LedgerTranslation
 + UI: approve (take index from request list)
 + UI: list denials
-- UI: list vacations
++ UI: list vacations
 - Agg: +count denials
 - Agg: +count vacations
 - connect to remote host/port

@@ -23,3 +23,15 @@ echo 'deny 1 work-harder' | $CLI Alice
 echo 'summary' | $CLI Alice
 
 echo 'summary' | $CLI Bob
+echo 'denials' | $CLI Bob
+echo 'request 200' | $CLI Bob
+echo 'summary' | $CLI Bob
+
+echo 'summary' | $CLI Alice
+echo 'pending' | $CLI Alice
+echo 'approve 1' | $CLI Alice
+echo 'summary' | $CLI Alice
+echo 'vacations' | $CLI Bob
+
+echo 'summary' | $CLI Bob
+echo 'vacations' | $CLI Bob
