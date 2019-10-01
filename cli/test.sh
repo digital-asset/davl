@@ -27,5 +27,5 @@ echo cli, case1
 echo compare
 cmp case1.log{.expected,}
 
-echo kill sandbox
-pkill -f sandbox.jar
+#echo kill sandbox
+#pkill -f sandbox.jar

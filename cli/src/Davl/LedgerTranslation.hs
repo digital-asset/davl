@@ -8,6 +8,7 @@ module Davl.LedgerTranslation(
     extractTransaction,
     ) where
 
+import Data.Text.Lazy (Text)
 import qualified Data.Text.Lazy as Text
 
 import DA.Ledger.IsLedgerValue (IsLedgerValue(..))
@@ -91,36 +92,32 @@ instance IsLedgerValue Date where
 
 makeLedgerCommand :: L.PackageId -> DavlCommand -> L.Command
 makeLedgerCommand pid = \case
-
-    GiveGift x -> do
-        let mod = L.ModuleName "Davl"
-        let ent = L.EntityName "Gift"
-        let tid = L.TemplateId (L.Identifier pid mod ent)
-        let args = toRecord x
-        L.CreateCommand {tid,args}
-
+    GiveGift x -> createCommand pid "Gift" x
     ClaimGift DavlContractId{cid} -> do
-        let mod = L.ModuleName "Davl"
-        let ent = L.EntityName "Gift"
-        let tid = L.TemplateId (L.Identifier pid mod ent)
-        let choice = L.Choice "Gift_Claim"
-        let arg = L.VRecord (L.Record Nothing [])
-        L.ExerciseCommand {tid,cid,choice,arg}
+        excerciseCommand pid cid "Gift" "Gift_Claim" $ L.Record Nothing []
+    RequestHoliday x -> createCommand pid "Request" x
+    DenyRequest DavlContractId{cid} reason ->
+        excerciseCommand pid cid "Request" "Request_Deny" $
+        L.Record Nothing [L.RecordField { fieldValue = L.VText (Text.pack reason) , label = ""}]
 
-    RequestHoliday x -> do
+
+createCommand :: IsLedgerValue a => L.PackageId -> Text -> a -> L.Command
+createCommand pid ename a = do
         let mod = L.ModuleName "Davl"
-        let ent = L.EntityName "Request"
+        let ent = L.EntityName ename
         let tid = L.TemplateId (L.Identifier pid mod ent)
-        let args = toRecord x
+        let args = toRecord a
         L.CreateCommand {tid,args}
 
-    DenyRequest DavlContractId{cid} reason -> do
+excerciseCommand :: L.PackageId -> L.ContractId -> Text -> Text -> L.Record -> L.Command
+excerciseCommand pid cid ename cname r = do
         let mod = L.ModuleName "Davl"
-        let ent = L.EntityName "Request"
+        let ent = L.EntityName ename
         let tid = L.TemplateId (L.Identifier pid mod ent)
-        let choice = L.Choice "Request_Deny"
-        let arg = L.VRecord (L.Record Nothing [L.RecordField { fieldValue = L.VText (Text.pack reason) , label = ""}])
+        let choice = L.Choice cname
+        let arg = L.VRecord r
         L.ExerciseCommand {tid,cid,choice,arg}
+
 
 extractEvents :: [L.Event] -> Maybe [DavlEvent]
 extractEvents = \case
