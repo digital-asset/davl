@@ -12,10 +12,12 @@ import qualified System.Console.Haskeline as HL
 import Davl.DavlLedger (Handle,connect)
 import Davl.Domain
 import Davl.Logging (colourLog,plainLog,colourWrap)
+
 import qualified Davl.Interact as Interact
 import qualified Davl.ContractStore as CS
 import qualified Davl.Aggregation as AG
-import qualified Davl.TableRequests as TR
+import qualified Davl.ListRequests as LR
+import qualified Davl.ListDenials as LD
 
 replyLog :: String -> IO ()
 replyLog = colourLog Cyan plainLog
@@ -51,6 +53,7 @@ data Query
     | ShowHistory
     | ShowSummary
     | ShowPending
+    | ShowDenials
     deriving (Show)
 
 data Command
@@ -66,13 +69,9 @@ parseLine line = case words line of
     ["help"] -> Query Help
 
     ["give",guy] -> Submit (Interact.GiveTo (party guy))
-    ["g",guy] -> Submit (Interact.GiveTo (party guy))
-
     ["claim",guy] -> Submit (Interact.ClaimFrom (party guy))
-    ["c",guy] -> Submit (Interact.ClaimFrom (party guy))
-
     ["request",n] -> Submit (Interact.RequestDate (Date {daysSinceEpoch = read n}))
-    ["r",n] -> Submit (Interact.RequestDate (Date {daysSinceEpoch = read n}))
+    ["deny",n,why] -> Submit (Interact.DenyRequestNumber (read n) why)
 
     ["history"] -> Query ShowHistory
     ["h"] -> Query ShowHistory
@@ -84,8 +83,8 @@ parseLine line = case words line of
     ["pending"] -> Query ShowPending
     ["p"] -> Query ShowPending
 
-    ["deny",n,why] -> Submit (Interact.DenyRequestNumber (read n) why)
-    ["d",n,why] -> Submit (Interact.DenyRequestNumber (read n) why)
+    ["denials"] -> Query ShowDenials
+    ["d"] -> Query ShowDenials
 
     words ->
         Unexpected words
@@ -96,14 +95,15 @@ parseLine line = case words line of
 
 helpText :: String
 helpText = unlines
-    [ "give/g <Name>   Send a Gift to <Name>"
-    , "claim/c <Name>  Claim a Gift from <Name>"
-    , "request/r <N>   Request a holiday <N> days from epoch(!), using any allocation day"
-    , "deny/d <N>      Deny request #N (as listed by pending)"
+    [ "give <Name>     Send a Gift to <Name>"
+    , "claim <Name>    Claim a Gift from <Name>"
+    , "request <N>     Request a holiday <N> days from epoch(!), using any allocation day"
+    , "deny <N>        Deny request #N (as listed by pending)"
 
     , "history/h       Show the history of contract creations/archivals"
     , "summary/s       Show summary of holiday status, as boss/employee"
     , "pending/p       Show pending requests for holiday, as boss/employee"
+    , "denials/d       Show denials for holiday requests, as employee"
 
     , "<return>        Alias for summary"
     , "help            Display this help text"
@@ -133,5 +133,7 @@ runLocalQuery whoami s = \case
         replyLog (show (AG.summaryAsBoss whoami s))
         replyLog (show (AG.summaryAsEmployee whoami s))
     ShowPending -> do
-        replyLog (show (TR.tableAsBoss whoami s))
-        replyLog (show (TR.tableAsEmployee whoami s))
+        replyLog (show (LR.listAsBoss whoami s))
+        replyLog (show (LR.listAsEmployee whoami s))
+    ShowDenials -> do
+        replyLog (show (LD.listAsEmployee whoami s))

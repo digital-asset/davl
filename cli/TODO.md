@@ -10,7 +10,7 @@
 ### Goal, for Thurday demo
 - Vacation: Domain, LedgerTranslation
 - UI: approve (take index from request list)
-- UI: list denials
++ UI: list denials
 - UI: list vacations
 - Agg: +count denials
 - Agg: +count vacations
