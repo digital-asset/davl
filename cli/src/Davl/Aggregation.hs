@@ -17,7 +17,7 @@ import Davl.ContractStore(State,activeContracts)
 data Counts = Counts
     { unclaimed_gifts :: Int
     , unspent_holidays :: Int
-    , open_requests :: Int
+    , pending_requests :: Int
     } deriving Show
 
 data SummaryAsBoss = SummaryAsBoss { counts :: Map Party Counts }
@@ -47,7 +47,7 @@ summaryAsBoss whoami state = do
     let counts = flip Map.map (zipMap3 mgs mhs mrs) $ \(gs,hs,rs) ->
             Counts { unclaimed_gifts = length gs
                    , unspent_holidays = length hs
-                   , open_requests = length rs
+                   , pending_requests = length rs
                    }
     SummaryAsBoss {counts}
 
@@ -62,7 +62,7 @@ summaryAsEmployee whoami state = do
     let counts = flip Map.map (zipMap3 mgs mhs mrs) $ \(gs,hs,rs) ->
             Counts { unclaimed_gifts = length gs
                    , unspent_holidays = length hs
-                   , open_requests = length rs
+                   , pending_requests = length rs
                    }
     SummaryAsEmployee {counts}
 
@@ -86,6 +86,8 @@ zipMap3 m1 m2 m3 =
           g12 _ (v1,v2) = Just (v1,v2,[])
           g3 _ v3 = Just ([],[],v3)
           f _ (v1,v2) v3  = Just (v1,v2,v3)
+
+-- TODO: move -> common/shared state queries
 
 giftsAsBoss :: Party -> State -> [Gift]
 giftsAsBoss whoami state = do
@@ -117,7 +119,6 @@ requestsAsEmployee :: Party -> State -> [Request]
 requestsAsEmployee whoami state = do
     x@Request{employee} <- requests state
     if (employee == whoami) then return x else []
-
 
 
 gifts :: State -> [Gift]

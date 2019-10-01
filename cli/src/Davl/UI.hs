@@ -15,6 +15,7 @@ import Davl.Logging (colourLog,plainLog,colourWrap)
 import qualified Davl.Interact as Interact
 import qualified Davl.ContractStore as CS
 import qualified Davl.Aggregation as AG
+import qualified Davl.TableRequests as TR
 
 replyLog :: String -> IO ()
 replyLog = colourLog Cyan plainLog
@@ -49,6 +50,7 @@ data Query
     = Help
     | ShowHistory
     | ShowSummary
+    | ShowPending
     deriving (Show)
 
 data Command
@@ -61,14 +63,27 @@ data Command
 
 parseLine :: String -> Command
 parseLine line = case words line of
-    ["give",guy] -> Submit (Interact.GiveTo (party guy))
-    ["claim",guy] -> Submit (Interact.ClaimFrom (party guy))
-    ["request",n] -> Submit (Interact.RequestDate (Date {daysSinceEpoch = read n}))
     ["help"] -> Query Help
+
+    ["give",guy] -> Submit (Interact.GiveTo (party guy))
+    ["g",guy] -> Submit (Interact.GiveTo (party guy))
+
+    ["claim",guy] -> Submit (Interact.ClaimFrom (party guy))
+    ["c",guy] -> Submit (Interact.ClaimFrom (party guy))
+
+    ["request",n] -> Submit (Interact.RequestDate (Date {daysSinceEpoch = read n}))
+    ["r",n] -> Submit (Interact.RequestDate (Date {daysSinceEpoch = read n}))
+
     ["history"] -> Query ShowHistory
-    ["summary"] -> Query ShowSummary
     ["h"] -> Query ShowHistory
+
+    ["summary"] -> Query ShowSummary
+    ["s"] -> Query ShowSummary
     [] -> Query ShowSummary
+
+    ["pending"] -> Query ShowPending
+    ["p"] -> Query ShowPending
+
     words ->
         Unexpected words
 
@@ -78,15 +93,16 @@ parseLine line = case words line of
 
 helpText :: String
 helpText = unlines
-    [
-      "give <Name>    Send a Gift to <Name>"
-    , "claim <Name>   Claim a Gift from <Name>"
-    , "request <N>    Request a holiday <N> days from epoch(!), using any allocation day"
-    , "help           Display this help text"
-    , "history        Show the history of contract creations/archivals"
-    , "summary        Show summary of holiday status, as boss/employee"
-    , "h              alias for history"
-    , "<return>       alias for summary"
+    [ "give/g <Name>   Send a Gift to <Name>"
+    , "claim/c <Name>  Claim a Gift from <Name>"
+    , "request/r <N>   Request a holiday <N> days from epoch(!), using any allocation day"
+
+    , "history/h       Show the history of contract creations/archivals"
+    , "summary/s       Show summary of holiday status, as boss/employee"
+    , "pending/p       Show pending requests for holiday, as boss/employee"
+
+    , "<return>        Alias for summary"
+    , "help            Display this help text"
     ]
 
 -- run the parsed command
@@ -112,3 +128,6 @@ runLocalQuery whoami s = \case
     ShowSummary -> do
         replyLog (show (AG.summaryAsBoss whoami s))
         replyLog (show (AG.summaryAsEmployee whoami s))
+    ShowPending -> do
+        replyLog (show (TR.tableAsBoss whoami s))
+        replyLog (show (TR.tableAsEmployee whoami s))

@@ -16,6 +16,7 @@
 - UI: as boss/employee, see list of vacations
 
 ### Misc:
+- fix UI to make request only on allocations with no pending request
 - date support in CLI, something better than days-since-epoch!
 - factoring common code
 - make aggregation code less of a pain
