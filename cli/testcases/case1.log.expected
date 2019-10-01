@@ -1,98 +1,119 @@
 [94mreplaying 0 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[92m'Alice'> [97m[94mreplaying 1 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Alice'> [97m[92m'Alice'> [97m[94mreplaying 2 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Alice'> [97m[92m'Alice'> [97m[94mreplaying 3 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Alice'> [97m[92m'Alice'> [97m[94mreplaying 4 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Alice'> [97m[96mAs Boss:
+  'Bob' : Counts {gifts = 2, holidays = 0, requests = 0}
+  'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0}
+[97m
+[96mAs Employee:
+[97m
+[92m'Alice'> [97m[94mreplaying 2 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Bob'> [97m[96mCREATE: [#0:0] = Gift {allocation = Holiday {employee = 'Bob', boss = 'Alice'}}
+CREATE: [#1:0] = Gift {allocation = Holiday {employee = 'Bob', boss = 'Alice'}}
 [97m
-[92m'Bob'> [97m[94mreplaying 1 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Bob'> [97m[94mreplaying 2 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Bob'> [97m[96mAs Boss:
 [97m
 [96mAs Employee:
-  'Alice' : Counts {gifts = 1, holidays = 0, requests = 0}
+  'Alice' : Counts {gifts = 2, holidays = 0, requests = 0}
 [97m
-[92m'Bob'> [97m[94mreplaying 1 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Bob'> [97m[92m'Bob'> [97m[94mreplaying 3 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Bob'> [97m[94mreplaying 2 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Bob'> [97m[92m'Bob'> [97m[94mreplaying 6 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[96mCREATE: [#0:0] = Gift {allocation = Holiday {employee = 'Bob', boss = 'Alice'}}
+CREATE: [#1:0] = Gift {allocation = Holiday {employee = 'Bob', boss = 'Alice'}}
+CREATE: [#2:0] = Gift {allocation = Holiday {employee = 'Charlie', boss = 'Alice'}}
+CREATE: [#3:0] = Gift {allocation = Holiday {employee = 'Charlie', boss = 'Alice'}}
 ARCHIVE: [#0:0]
-CREATE: [#1:1] = Holiday {employee = 'Bob', boss = 'Alice'}
-[97m
-[92m'Alice'> [97m[94mreplaying 3 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[96mAs Boss:
-  'Bob' : Counts {gifts = 0, holidays = 1, requests = 0}
-[97m
-[96mAs Employee:
-[97m
-[92m'Alice'> [97m[94mreplaying 3 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Bob'> [97m[92m'Bob'> [97m[94mreplaying 4 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Bob'> [97m[96mAs Boss:
-[97m
-[96mAs Employee:
-  'Alice' : Counts {gifts = 0, holidays = 1, requests = 1}
-[97m
-[92m'Bob'> [97m[94mreplaying 4 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[96mAs Boss:
-  'Bob' : Counts {gifts = 0, holidays = 1, requests = 1}
-[97m
-[96mAs Employee:
-[97m
-[92m'Alice'> [97m[94mreplaying 4 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[96mAs Boss:
-  #1 Request {employee = 'Bob', boss = 'Alice', allocationId = [#1:1], date = Date {daysSinceEpoch = 100}}
-[97m
-[96mAs Employee:
-[97m
-[92m'Alice'> [97m[94mreplaying 4 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[92m'Alice'> [97m[94mreplaying 5 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[96mAs Boss:
-  'Bob' : Counts {gifts = 0, holidays = 1, requests = 0}
-[97m
-[96mAs Employee:
+CREATE: [#4:1] = Holiday {employee = 'Bob', boss = 'Alice'}
 [97m
 [92m'Alice'> [97m[94mreplaying 6 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Alice'> [97m[96mAs Boss:
+  'Bob' : Counts {gifts = 1, holidays = 1, requests = 0}
+  'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0}
+[97m
+[96mAs Employee:
+[97m
+[92m'Alice'> [97m[94mreplaying 4 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Bob'> [97m[92m'Bob'> [97m[94mreplaying 5 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Bob'> [97m[96mAs Boss:
 [97m
 [96mAs Employee:
-  'Alice' : Counts {gifts = 0, holidays = 1, requests = 0}
+  'Alice' : Counts {gifts = 1, holidays = 1, requests = 1}
 [97m
-[92m'Bob'> [97m[94mreplaying 6 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Bob'> [97m[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Alice'> [97m[96mAs Boss:
+  'Bob' : Counts {gifts = 1, holidays = 1, requests = 1}
+  'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0}
+[97m
+[96mAs Employee:
+[97m
+[92m'Alice'> [97m[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Alice'> [97m[96mAs Boss:
+  #1 Request {employee = 'Bob', boss = 'Alice', allocationId = [#4:1], date = Date {daysSinceEpoch = 100}}
+[97m
+[96mAs Employee:
+[97m
+[92m'Alice'> [97m[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Alice'> [97m[92m'Alice'> [97m[94mreplaying 8 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Alice'> [97m[96mAs Boss:
+  'Bob' : Counts {gifts = 1, holidays = 1, requests = 0}
+  'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0}
+[97m
+[96mAs Employee:
+[97m
+[92m'Alice'> [97m[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Bob'> [97m[96mAs Boss:
+[97m
+[96mAs Employee:
+  'Alice' : Counts {gifts = 1, holidays = 1, requests = 0}
+[97m
+[92m'Bob'> [97m[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Bob'> [97m[96mAs Employee:
-  #1 Denial {employee = 'Bob', boss = 'Alice', allocationId = [#1:1], date = Date {daysSinceEpoch = 100}, reason = "work-harder"}
+  #1 Denial {employee = 'Bob', boss = 'Alice', allocationId = [#4:1], date = Date {daysSinceEpoch = 100}, reason = "not-that-day-please"}
 [97m
-[92m'Bob'> [97m[94mreplaying 6 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Bob'> [97m[92m'Bob'> [97m[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Bob'> [97m[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Bob'> [97m[92m'Bob'> [97m[94mreplaying 8 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Bob'> [97m[96mAs Boss:
 [97m
 [96mAs Employee:
-  'Alice' : Counts {gifts = 0, holidays = 1, requests = 1}
+  'Alice' : Counts {gifts = 1, holidays = 1, requests = 1}
 [97m
-[92m'Bob'> [97m[94mreplaying 6 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Bob'> [97m[94mreplaying 9 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[96mAs Boss:
-  'Bob' : Counts {gifts = 0, holidays = 1, requests = 1}
+  'Bob' : Counts {gifts = 1, holidays = 1, requests = 1}
+  'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0}
 [97m
 [96mAs Employee:
 [97m
-[92m'Alice'> [97m[94mreplaying 6 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Alice'> [97m[94mreplaying 9 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[96mAs Boss:
-  #1 Request {employee = 'Bob', boss = 'Alice', allocationId = [#1:1], date = Date {daysSinceEpoch = 200}}
+  #1 Request {employee = 'Bob', boss = 'Alice', allocationId = [#4:1], date = Date {daysSinceEpoch = 200}}
 [97m
 [96mAs Employee:
 [97m
-[92m'Alice'> [97m[94mreplaying 6 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[92m'Alice'> [97m[94mreplaying 9 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Alice'> [97m[94mreplaying 9 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Alice'> [97m[92m'Alice'> [97m[94mreplaying 12 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[96mAs Boss:
+  'Bob' : Counts {gifts = 1, holidays = 0, requests = 0}
+  'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0}
 [97m
 [96mAs Employee:
 [97m
-[92m'Alice'> [97m[94mreplaying 10 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Alice'> [97m[94mreplaying 11 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Bob'> [97m[96mAs Boss:
 [97m
 [96mAs Employee:
   #1 Vacation {employee = 'Bob', boss = 'Alice', date = Date {daysSinceEpoch = 200}}
 [97m
-[92m'Bob'> [97m[94mreplaying 10 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Bob'> [97m[94mreplaying 11 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Bob'> [97m[96mAs Boss:
 [97m
 [96mAs Employee:
+  'Alice' : Counts {gifts = 1, holidays = 0, requests = 0}
 [97m
-[92m'Bob'> [97m[94mreplaying 10 transactions[97m[96mtype "help" to see available commands[97m
+[92m'Bob'> [97m[94mreplaying 11 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Bob'> [97m[96mAs Boss:
 [97m
 [96mAs Employee:
