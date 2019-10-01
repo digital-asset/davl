@@ -4,8 +4,8 @@
 [92m'Alice'> [97m[92m'Alice'> [97m[94mreplaying 3 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[92m'Alice'> [97m[94mreplaying 4 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[96mAs Boss (grouped by Employee):
-  'Bob' : Counts {gifts = 2, holidays = 0, requests = 0}
-  'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0}
+  'Bob' : Counts {gifts = 2, holidays = 0, requests = 0, denials = 0, vacations = 0}
+  'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0, denials = 0, vacations = 0}
 [97m
 [96mAs Employee (grouped by Boss)
 [97m
@@ -17,7 +17,7 @@ CREATE: [#1:0] = Gift {allocation = Holiday {employee = 'Bob', boss = 'Alice'}}
 [92m'Bob'> [97m[96mAs Boss (grouped by Employee):
 [97m
 [96mAs Employee (grouped by Boss)
-  'Alice' : Counts {gifts = 2, holidays = 0, requests = 0}
+  'Alice' : Counts {gifts = 2, holidays = 0, requests = 0, denials = 0, vacations = 0}
 [97m
 [92m'Bob'> [97m[94mreplaying 2 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Bob'> [97m[92m'Bob'> [97m[94mreplaying 6 transactions[97m[96mtype "help" to see available commands[97m
@@ -30,8 +30,8 @@ CREATE: [#4:1] = Holiday {employee = 'Bob', boss = 'Alice'}
 [97m
 [92m'Alice'> [97m[94mreplaying 6 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[96mAs Boss (grouped by Employee):
-  'Bob' : Counts {gifts = 1, holidays = 1, requests = 0}
-  'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0}
+  'Bob' : Counts {gifts = 1, holidays = 1, requests = 0, denials = 0, vacations = 0}
+  'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0, denials = 0, vacations = 0}
 [97m
 [96mAs Employee (grouped by Boss)
 [97m
@@ -40,12 +40,12 @@ CREATE: [#4:1] = Holiday {employee = 'Bob', boss = 'Alice'}
 [92m'Bob'> [97m[96mAs Boss (grouped by Employee):
 [97m
 [96mAs Employee (grouped by Boss)
-  'Alice' : Counts {gifts = 1, holidays = 1, requests = 1}
+  'Alice' : Counts {gifts = 1, holidays = 1, requests = 1, denials = 0, vacations = 0}
 [97m
 [92m'Bob'> [97m[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[96mAs Boss (grouped by Employee):
-  'Bob' : Counts {gifts = 1, holidays = 1, requests = 1}
-  'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0}
+  'Bob' : Counts {gifts = 1, holidays = 1, requests = 1, denials = 0, vacations = 0}
+  'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0, denials = 0, vacations = 0}
 [97m
 [96mAs Employee (grouped by Boss)
 [97m
@@ -58,8 +58,8 @@ CREATE: [#4:1] = Holiday {employee = 'Bob', boss = 'Alice'}
 [92m'Alice'> [97m[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[92m'Alice'> [97m[94mreplaying 8 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[96mAs Boss (grouped by Employee):
-  'Bob' : Counts {gifts = 1, holidays = 1, requests = 0}
-  'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0}
+  'Bob' : Counts {gifts = 1, holidays = 1, requests = 0, denials = 0, vacations = 0}
+  'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0, denials = 0, vacations = 0}
 [97m
 [96mAs Employee (grouped by Boss)
 [97m
@@ -67,7 +67,7 @@ CREATE: [#4:1] = Holiday {employee = 'Bob', boss = 'Alice'}
 [92m'Bob'> [97m[96mAs Boss (grouped by Employee):
 [97m
 [96mAs Employee (grouped by Boss)
-  'Alice' : Counts {gifts = 1, holidays = 1, requests = 0}
+  'Alice' : Counts {gifts = 1, holidays = 1, requests = 0, denials = 1, vacations = 0}
 [97m
 [92m'Bob'> [97m[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Bob'> [97m[96mAs Employee:
@@ -78,12 +78,12 @@ CREATE: [#4:1] = Holiday {employee = 'Bob', boss = 'Alice'}
 [92m'Bob'> [97m[96mAs Boss (grouped by Employee):
 [97m
 [96mAs Employee (grouped by Boss)
-  'Alice' : Counts {gifts = 1, holidays = 1, requests = 1}
+  'Alice' : Counts {gifts = 1, holidays = 1, requests = 1, denials = 1, vacations = 0}
 [97m
 [92m'Bob'> [97m[94mreplaying 9 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[96mAs Boss (grouped by Employee):
-  'Bob' : Counts {gifts = 1, holidays = 1, requests = 1}
-  'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0}
+  'Bob' : Counts {gifts = 1, holidays = 1, requests = 1, denials = 0, vacations = 0}
+  'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0, denials = 0, vacations = 0}
 [97m
 [96mAs Employee (grouped by Boss)
 [97m
@@ -96,8 +96,8 @@ CREATE: [#4:1] = Holiday {employee = 'Bob', boss = 'Alice'}
 [92m'Alice'> [97m[94mreplaying 9 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[92m'Alice'> [97m[94mreplaying 12 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[96mAs Boss (grouped by Employee):
-  'Bob' : Counts {gifts = 1, holidays = 0, requests = 0}
-  'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0}
+  'Bob' : Counts {gifts = 1, holidays = 0, requests = 0, denials = 0, vacations = 1}
+  'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0, denials = 0, vacations = 0}
 [97m
 [96mAs Employee (grouped by Boss)
 [97m
@@ -111,7 +111,7 @@ CREATE: [#4:1] = Holiday {employee = 'Bob', boss = 'Alice'}
 [92m'Bob'> [97m[96mAs Boss (grouped by Employee):
 [97m
 [96mAs Employee (grouped by Boss)
-  'Alice' : Counts {gifts = 1, holidays = 0, requests = 0}
+  'Alice' : Counts {gifts = 1, holidays = 0, requests = 0, denials = 1, vacations = 1}
 [97m
 [92m'Bob'> [97m[94mreplaying 11 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Bob'> [97m[96mAs Boss:

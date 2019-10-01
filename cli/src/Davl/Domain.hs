@@ -28,7 +28,7 @@ data Holiday = Holiday
     } deriving (Show)
 
 data Gift = Gift
-    { allocation :: Holiday
+    { allocation :: Holiday -- TODO: inline the employee/boss field, for more regularity
     } deriving (Show)
 
 data Request = Request

@@ -17,6 +17,8 @@ data Counts = Counts
     { gifts :: Int -- unclaimed gifts
     , holidays :: Int -- unspent holiday (TODO: don't count allocations with pending requests)
     , requests :: Int -- requests pending an answer: deny/approve
+    , denials :: Int
+    , vacations :: Int
     } deriving Show
 
 counts0 :: Counts
@@ -24,6 +26,8 @@ counts0 = Counts
     { gifts = 0
     , holidays = 0
     , requests = 0
+    , denials = 0
+    , vacations = 0
     }
 
 -- TODO: rename counts -> grouped
@@ -60,7 +64,7 @@ type INC = (Counts -> Counts)
 
 iAmBoss,iAmEmployee :: Party -> FILTER
 tickBoss,tickEmployee :: DavlTemplate -> TICK
-incGifts,incHolidays,incRequests :: INC
+incGifts,incHolidays,incRequests,incDenials,incVacations :: INC
 
 genericSummary
     :: (Party -> FILTER)
@@ -91,15 +95,15 @@ tickEmployee = \case
     TGift Gift{allocation=Holiday{employee}} -> finding employee incGifts
     THoliday Holiday{employee} -> finding employee incHolidays
     TRequest Request{employee} -> finding employee incRequests
-    TDenial Denial{employee=_} -> Prelude.id -- TODO
-    TVacation Vacation{employee=_} -> Prelude.id -- TODO
+    TDenial Denial{employee} -> finding employee incDenials
+    TVacation Vacation{employee} -> finding employee incVacations
 
 tickBoss = \case
     TGift Gift{allocation=Holiday{boss}} -> finding boss incGifts
     THoliday Holiday{boss} -> finding boss incHolidays
     TRequest Request{boss} -> finding boss incRequests
-    TDenial Denial{boss=_} -> Prelude.id -- TODO
-    TVacation Vacation{boss=_} -> Prelude.id -- TODO
+    TDenial Denial{boss} -> finding boss incDenials
+    TVacation Vacation{boss} -> finding boss incVacations
 
 finding :: Party -> INC -> TICK
 finding key f m = do
@@ -110,3 +114,5 @@ finding key f m = do
 incGifts c@Counts{gifts} = c { gifts = gifts + 1 }
 incHolidays c@Counts{holidays} = c { holidays = holidays + 1 }
 incRequests c@Counts{requests} = c { requests = requests + 1 }
+incDenials c@Counts{denials} = c { denials = denials + 1 }
+incVacations c@Counts{vacations} = c { vacations = vacations + 1 }
