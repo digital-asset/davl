@@ -15,9 +15,9 @@ import Davl.Domain
 import Davl.Query
 
 data Counts = Counts
-    { unclaimed_gifts :: Int
-    , unspent_holidays :: Int
-    , pending_requests :: Int
+    { gifts :: Int -- unclaimed
+    , holidays :: Int -- unspent holiday allocation
+    , requests :: Int -- requests pending a answer: deny/approve
     } deriving Show
 
 data SummaryAsBoss = SummaryAsBoss { counts :: Map Party Counts }
@@ -45,9 +45,9 @@ summaryAsBoss whoami state = do
     let mhs = flip groupByKey holidays $ \Holiday{employee} -> employee
     let mrs = flip groupByKey requests $ \Request{employee} -> employee
     let counts = flip Map.map (zipMap3 mgs mhs mrs) $ \(gs,hs,rs) ->
-            Counts { unclaimed_gifts = length gs
-                   , unspent_holidays = length hs
-                   , pending_requests = length rs
+            Counts { gifts = length gs
+                   , holidays = length hs
+                   , requests = length rs
                    }
     SummaryAsBoss {counts}
 
@@ -60,9 +60,9 @@ summaryAsEmployee whoami state = do
     let mhs = flip groupByKey holidays $ \Holiday{boss} -> boss
     let mrs = flip groupByKey requests $ \Request{boss} -> boss
     let counts = flip Map.map (zipMap3 mgs mhs mrs) $ \(gs,hs,rs) ->
-            Counts { unclaimed_gifts = length gs
-                   , unspent_holidays = length hs
-                   , pending_requests = length rs
+            Counts { gifts = length gs
+                   , holidays = length hs
+                   , requests = length rs
                    }
     SummaryAsEmployee {counts}
 

@@ -6,7 +6,7 @@
 [92m'Bob'> [97m[96mAs Boss:
 [97m
 [96mAs Employee:
-  'Alice' : Counts {unclaimed_gifts = 1, unspent_holidays = 0, pending_requests = 0}
+  'Alice' : Counts {gifts = 1, holidays = 0, requests = 0}
 [97m
 [92m'Bob'> [97m[94mreplaying 1 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Bob'> [97m[92m'Bob'> [97m[94mreplaying 3 transactions[97m[96mtype "help" to see available commands[97m
@@ -16,7 +16,7 @@ CREATE: [#1:1] = Holiday {employee = 'Bob', boss = 'Alice'}
 [97m
 [92m'Alice'> [97m[94mreplaying 3 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[96mAs Boss:
-  'Bob' : Counts {unclaimed_gifts = 0, unspent_holidays = 1, pending_requests = 0}
+  'Bob' : Counts {gifts = 0, holidays = 1, requests = 0}
 [97m
 [96mAs Employee:
 [97m
@@ -25,11 +25,11 @@ CREATE: [#1:1] = Holiday {employee = 'Bob', boss = 'Alice'}
 [92m'Bob'> [97m[96mAs Boss:
 [97m
 [96mAs Employee:
-  'Alice' : Counts {unclaimed_gifts = 0, unspent_holidays = 1, pending_requests = 1}
+  'Alice' : Counts {gifts = 0, holidays = 1, requests = 1}
 [97m
 [92m'Bob'> [97m[94mreplaying 4 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[96mAs Boss:
-  'Bob' : Counts {unclaimed_gifts = 0, unspent_holidays = 1, pending_requests = 1}
+  'Bob' : Counts {gifts = 0, holidays = 1, requests = 1}
 [97m
 [96mAs Employee:
 [97m
@@ -42,7 +42,7 @@ CREATE: [#1:1] = Holiday {employee = 'Bob', boss = 'Alice'}
 [92m'Alice'> [97m[94mreplaying 4 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[92m'Alice'> [97m[94mreplaying 5 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[96mAs Boss:
-  'Bob' : Counts {unclaimed_gifts = 0, unspent_holidays = 1, pending_requests = 0}
+  'Bob' : Counts {gifts = 0, holidays = 1, requests = 0}
 [97m
 [96mAs Employee:
 [97m
@@ -50,7 +50,7 @@ CREATE: [#1:1] = Holiday {employee = 'Bob', boss = 'Alice'}
 [92m'Bob'> [97m[96mAs Boss:
 [97m
 [96mAs Employee:
-  'Alice' : Counts {unclaimed_gifts = 0, unspent_holidays = 1, pending_requests = 0}
+  'Alice' : Counts {gifts = 0, holidays = 1, requests = 0}
 [97m
 [92m'Bob'> [97m[94mreplaying 6 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Bob'> [97m[96mAs Employee:
@@ -61,11 +61,11 @@ CREATE: [#1:1] = Holiday {employee = 'Bob', boss = 'Alice'}
 [92m'Bob'> [97m[96mAs Boss:
 [97m
 [96mAs Employee:
-  'Alice' : Counts {unclaimed_gifts = 0, unspent_holidays = 1, pending_requests = 1}
+  'Alice' : Counts {gifts = 0, holidays = 1, requests = 1}
 [97m
 [92m'Bob'> [97m[94mreplaying 6 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[96mAs Boss:
-  'Bob' : Counts {unclaimed_gifts = 0, unspent_holidays = 1, pending_requests = 1}
+  'Bob' : Counts {gifts = 0, holidays = 1, requests = 1}
 [97m
 [96mAs Employee:
 [97m
