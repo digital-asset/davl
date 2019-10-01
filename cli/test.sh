@@ -13,11 +13,11 @@ cd testcases
 rm -f *.log
 
 echo start sandbox
-(cd ../..; daml sandbox &) > /dev/null
+(daml sandbox &) > /dev/null
 sleep 5 # TODO: do better!
 
 echo deploy
-(cd ../..; daml deploy) > /dev/null
+(cd ../../project/V1; daml deploy) > /dev/null
 
 echo cli, case1
 ./case1.sh > case1.log
