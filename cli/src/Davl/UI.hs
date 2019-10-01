@@ -72,6 +72,7 @@ parseLine line = case words line of
     ["claim",guy] -> Submit (Interact.ClaimFrom (party guy))
     ["request",n] -> Submit (Interact.RequestDate (Date {daysSinceEpoch = read n}))
     ["deny",n,why] -> Submit (Interact.DenyRequestNumber (read n) why)
+    ["approve",n] -> Submit (Interact.ApproveRequestNumber (read n))
 
     ["history"] -> Query ShowHistory
     ["h"] -> Query ShowHistory

@@ -55,6 +55,7 @@ data Command
     | ClaimFrom Party
     | RequestDate Date
     | DenyRequestNumber Int String
+    | ApproveRequestNumber Int
     deriving Show
 
 externalizeCommand :: Party -> CS.State -> Command -> Either String DavlCommand
@@ -75,20 +76,28 @@ externalizeCommand whoami state = \case
                 , allocationId
                 , date
                 }
-    DenyRequestNumber num why -> do
-        case findRequestAsBoss state whoami of
-            [] -> Left $ "there are no pending requests for you to deal with"
-            requests ->
-                if num < 1 || num > length requests
-                then Left $ unwords
-                     [ "you have pending requests numbered 1 to",
-                       show (length requests),
-                       "but you typed:",
-                       show num
-                     ]
-                else do
-                    let allocationId = requests !! (num-1) -- indexing from 1
-                    return $ DenyRequest allocationId why
+    DenyRequestNumber num reason -> do
+        id <- tryFindRequestNumberAsBoss state whoami num
+        return $ DenyRequest id reason
+
+    ApproveRequestNumber num -> do
+        id <- tryFindRequestNumberAsBoss state whoami num
+        return $ ApproveRequest id
+
+
+tryFindRequestNumberAsBoss :: CS.State -> Party -> Int -> Either String DavlContractId
+tryFindRequestNumberAsBoss state whoami num =
+    case findRequestAsBoss state whoami of
+        [] -> Left $ "there are no pending requests for you to deal with"
+        ids ->
+            if num < 1 || num > length ids
+            then Left $ unwords
+                 [ "you have pending requests numbered 1 to",
+                   show (length ids),
+                   "but you typed:",
+                   show num
+                 ]
+            else Right $ ids !! (num-1) -- indexing from 1
 
 findRequestAsBoss :: CS.State -> Party -> [DavlContractId]
 findRequestAsBoss state whoami = do

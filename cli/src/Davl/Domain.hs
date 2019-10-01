@@ -7,8 +7,10 @@ module Davl.Domain (
     Holiday(..),
     Gift(..),
     Request(..),
-    Date(..),
     Denial(..),
+    Vacation(..),
+
+    Date(..),
 
     DavlContractId(..),
     DavlTemplate(..),
@@ -18,12 +20,16 @@ module Davl.Domain (
     ) where
 
 import qualified Data.Text.Lazy as Text(unpack)
-
 import DA.Ledger.Types (Party(..),ContractId(..))
 
-data Holiday = Holiday { employee :: Party, boss :: Party } deriving (Show)
+data Holiday = Holiday
+    { employee :: Party
+    , boss :: Party
+    } deriving (Show)
 
-data Gift = Gift { allocation :: Holiday } deriving (Show)
+data Gift = Gift
+    { allocation :: Holiday
+    } deriving (Show)
 
 data Request = Request
     { employee :: Party
@@ -31,8 +37,6 @@ data Request = Request
     , allocationId :: DavlContractId
     , date :: Date
     } deriving (Show)
-
-data Date = Date { daysSinceEpoch :: Int } deriving (Show) -- TODO: use a standard type
 
 data Denial = Denial
     { employee :: Party
@@ -42,11 +46,23 @@ data Denial = Denial
     , reason :: String
     } deriving (Show)
 
+data Vacation = Vacation
+    { employee :: Party
+    , boss :: Party
+    , date :: Date
+    } deriving (Show)
+
+data Date = Date
+    { daysSinceEpoch :: Int
+    } deriving (Show) -- TODO: use a standard type
+
+
 data DavlTemplate
     = TGift Gift
     | THoliday Holiday
     | TRequest Request
     | TDenial Denial
+    | TVacation Vacation
 
 newtype DavlContractId = DavlContractId { cid :: ContractId } deriving (Eq)
 
@@ -59,6 +75,7 @@ data DavlCommand
     | ClaimGift DavlContractId
     | RequestHoliday Request
     | DenyRequest DavlContractId String
+    | ApproveRequest DavlContractId
 
 instance Show DavlTemplate where
     show = \case
@@ -66,6 +83,7 @@ instance Show DavlTemplate where
         THoliday x -> show x
         TRequest x -> show x
         TDenial x -> show x
+        TVacation x -> show x
 
 instance Show DavlEvent where
     show = \case

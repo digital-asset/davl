@@ -77,6 +77,20 @@ instance IsLedgerValue Denial where
             return Denial{employee,boss,allocationId,date,reason = Text.unpack reason}
         _ -> Nothing
 
+instance IsLedgerValue Vacation where
+    toValue Vacation{employee,boss,date} =
+        L.VList [toValue employee
+                , toValue boss
+                , toValue date
+                ]
+    fromValue = \case
+        L.VList [v1,v2,v3] -> do
+            employee <- fromValue v1
+            boss <- fromValue v2
+            date <- fromValue v3
+            return Vacation{employee,boss,date}
+        _ -> Nothing
+
 
 instance IsLedgerValue DavlContractId where
     toValue DavlContractId{cid} = L.VContract cid
@@ -99,6 +113,8 @@ makeLedgerCommand pid = \case
     DenyRequest DavlContractId{cid} reason ->
         excerciseCommand pid cid "Request" "Request_Deny" $
         L.Record Nothing [L.RecordField { fieldValue = L.VText (Text.pack reason) , label = ""}]
+    ApproveRequest DavlContractId{cid} -> do
+        excerciseCommand pid cid "Request" "Request_Approve" $ L.Record Nothing []
 
 
 createCommand :: IsLedgerValue a => L.PackageId -> Text -> a -> L.Command
@@ -119,16 +135,15 @@ excerciseCommand pid cid ename cname r = do
         L.ExerciseCommand {tid,cid,choice,arg}
 
 
-extractEvents :: [L.Event] -> Maybe [DavlEvent]
+extractEvents :: [L.Event] -> Maybe [DavlEvent] -- TODO: consider working on individual events
 extractEvents = \case
 
-    [L.ArchivedEvent{cid=cid1}] ->
-        return [ Archive $ DavlContractId cid1 ]
-
+    -- Transaction for gift
     [L.CreatedEvent{cid,tid=L.TemplateId L.Identifier{ent=L.EntityName"Gift"}, createArgs}] -> do
         x <- fromRecord createArgs
         return $ [Create { id = DavlContractId cid , info = TGift x }]
 
+    -- Transaction for gift-claim
     [L.ArchivedEvent{cid=cid1},
      L.CreatedEvent{cid=cid2,tid=L.TemplateId L.Identifier{ent=L.EntityName"Holiday"}, createArgs}] -> do
         x <- fromRecord createArgs
@@ -137,11 +152,16 @@ extractEvents = \case
             , Create { id = DavlContractId cid2 , info = THoliday x }
             ]
 
+    -- Transaction for request
     [L.CreatedEvent{cid=cid2,tid=L.TemplateId L.Identifier{ent=L.EntityName"Request"}, createArgs}] -> do
         x <- fromRecord createArgs
-        return $
-            [Create { id = DavlContractId cid2 , info = TRequest x }]
+        return $ [Create { id = DavlContractId cid2 , info = TRequest x }]
 
+    -- Transaction for request-denial (as seen by boss)
+    [L.ArchivedEvent{cid=cid1}] ->
+        return [ Archive $ DavlContractId cid1 ]
+
+    -- Transaction for request-denial (as seen by employee)
     [L.ArchivedEvent{cid=cid1},
      L.CreatedEvent{cid=cid2,tid=L.TemplateId L.Identifier{ent=L.EntityName"Denial"}, createArgs}] -> do
         x <- fromRecord createArgs
@@ -150,6 +170,16 @@ extractEvents = \case
             , Create { id = DavlContractId cid2 , info = TDenial x }
             ]
 
+    -- Transaction for request-approval
+    [L.ArchivedEvent{cid=cid1},
+     L.ArchivedEvent{cid=cid2},
+     L.CreatedEvent{cid=cid3,tid=L.TemplateId L.Identifier{ent=L.EntityName"Vacation"}, createArgs}] -> do
+        x <- fromRecord createArgs
+        return $
+            [ Archive $ DavlContractId cid1
+            , Archive $ DavlContractId cid2
+            , Create { id = DavlContractId cid3 , info = TVacation x }
+            ]
     _ ->
         Nothing
 
