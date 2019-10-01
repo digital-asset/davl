@@ -1,35 +1,27 @@
 
-### Request(finish):
+### DONE
 + UI: as boss, see list of requests, with stable counting index
 + UI: as employee, see list of requests
-
-### Deny:
 + Denial: type, ledger-trans
-+ UI: deny (take index, default 0) + text
-
-### Test, refactor
++ UI: deny (take index from request list) + text
 + add new workflow steps to CLI regression: request/deny
-> refactor1: makeLedgerCommand
-- refcator2: extractEvents
++ refactor1: makeLedgerCommand
 
-### Approve:
-- Vacation: type, ledger-trans
+### Goal, for Thurday demo
+- Vacation: Domain, LedgerTranslation
 - UI: approve (take index from request list)
-- UI: as boss/employee, see list of vacations
-
-### query
+- UI: list denials
+- UI: list vacations
 - Agg: +count denials
 - Agg: +count vacations
-- list denials
-- list vacations (booked vacations)
+- connect to remote host/port
 
 ### Misc:
+- UI: fix handling when reading int/date fails
 - fix UI to make request only on allocations with no pending request
 - date support in CLI, something better than days-since-epoch!
-- factoring common code
+- refactor: extractEvents
 - make aggregation code less of a pain
 - UI: boss/employee mode: `data Role = AsBoss Party | AsEmployee Party`
-- UI: handling when read int/date failed
 - Model: denials should be observed by the boss/denier
 - Local request numbering is not quite stable in face of async updates
-
