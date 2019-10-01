@@ -15,9 +15,9 @@ import Davl.Domain
 import Davl.Query
 
 data Counts = Counts
-    { gifts :: Int -- unclaimed
+    { gifts :: Int -- unclaimed gifts
     , holidays :: Int -- unspent holiday allocation
-    , requests :: Int -- requests pending a answer: deny/approve
+    , requests :: Int -- requests pending an answer: deny/approve
     } deriving Show
 
 data SummaryAsBoss = SummaryAsBoss { counts :: Map Party Counts }
@@ -25,18 +25,20 @@ data SummaryAsEmployee = SummaryAsEmployee { counts :: Map Party Counts }
 
 instance Show SummaryAsBoss where
     show SummaryAsBoss{counts} =
-        unlines ("As Boss:" : tab 2 (List.map f (LK.sort fst (Map.toList counts))))
+        unlines ("As Boss (grouped by Employee):" :
+                 tab 2 (List.map f (LK.sort fst (Map.toList counts))))
         where f (party,count) = unwords [show party,":",show count]
 
 instance Show SummaryAsEmployee where
     show SummaryAsEmployee{counts} =
-        unlines ("As Employee:" : tab 2 (List.map f (LK.sort fst (Map.toList counts))))
+        unlines ("As Employee (grouped by Boss)" :
+                 tab 2 (List.map f (LK.sort fst (Map.toList counts))))
         where f (party,count) = unwords [show party,":",show count]
 
 tab :: Int -> [String] -> [String]
 tab n xs = List.map ((spaces <>)) xs where spaces = replicate n ' '
 
-summaryAsBoss :: Party -> State -> SummaryAsBoss -- grouped by Employee
+summaryAsBoss :: Party -> State -> SummaryAsBoss
 summaryAsBoss whoami state = do
     let gifts = giftsAsBoss whoami state
     let holidays = holidaysAsBoss whoami state
@@ -51,7 +53,7 @@ summaryAsBoss whoami state = do
                    }
     SummaryAsBoss {counts}
 
-summaryAsEmployee :: Party -> State -> SummaryAsEmployee -- grouped by Boss
+summaryAsEmployee :: Party -> State -> SummaryAsEmployee
 summaryAsEmployee whoami state = do
     let gifts = giftsAsEmployee whoami state
     let holidays = holidaysAsEmployee whoami state

@@ -3,20 +3,20 @@
 [92m'Alice'> [97m[92m'Alice'> [97m[94mreplaying 2 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[92m'Alice'> [97m[94mreplaying 3 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[92m'Alice'> [97m[94mreplaying 4 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[96mAs Boss:
+[92m'Alice'> [97m[96mAs Boss (grouped by Employee):
   'Bob' : Counts {gifts = 2, holidays = 0, requests = 0}
   'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0}
 [97m
-[96mAs Employee:
+[96mAs Employee (grouped by Boss)
 [97m
 [92m'Alice'> [97m[94mreplaying 2 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Bob'> [97m[96mCREATE: [#0:0] = Gift {allocation = Holiday {employee = 'Bob', boss = 'Alice'}}
 CREATE: [#1:0] = Gift {allocation = Holiday {employee = 'Bob', boss = 'Alice'}}
 [97m
 [92m'Bob'> [97m[94mreplaying 2 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Bob'> [97m[96mAs Boss:
+[92m'Bob'> [97m[96mAs Boss (grouped by Employee):
 [97m
-[96mAs Employee:
+[96mAs Employee (grouped by Boss)
   'Alice' : Counts {gifts = 2, holidays = 0, requests = 0}
 [97m
 [92m'Bob'> [97m[94mreplaying 2 transactions[97m[96mtype "help" to see available commands[97m
@@ -29,25 +29,25 @@ ARCHIVE: [#0:0]
 CREATE: [#4:1] = Holiday {employee = 'Bob', boss = 'Alice'}
 [97m
 [92m'Alice'> [97m[94mreplaying 6 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[96mAs Boss:
+[92m'Alice'> [97m[96mAs Boss (grouped by Employee):
   'Bob' : Counts {gifts = 1, holidays = 1, requests = 0}
   'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0}
 [97m
-[96mAs Employee:
+[96mAs Employee (grouped by Boss)
 [97m
 [92m'Alice'> [97m[94mreplaying 4 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Bob'> [97m[92m'Bob'> [97m[94mreplaying 5 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Bob'> [97m[96mAs Boss:
+[92m'Bob'> [97m[96mAs Boss (grouped by Employee):
 [97m
-[96mAs Employee:
+[96mAs Employee (grouped by Boss)
   'Alice' : Counts {gifts = 1, holidays = 1, requests = 1}
 [97m
 [92m'Bob'> [97m[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[96mAs Boss:
+[92m'Alice'> [97m[96mAs Boss (grouped by Employee):
   'Bob' : Counts {gifts = 1, holidays = 1, requests = 1}
   'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0}
 [97m
-[96mAs Employee:
+[96mAs Employee (grouped by Boss)
 [97m
 [92m'Alice'> [97m[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[96mAs Boss:
@@ -57,16 +57,16 @@ CREATE: [#4:1] = Holiday {employee = 'Bob', boss = 'Alice'}
 [97m
 [92m'Alice'> [97m[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[92m'Alice'> [97m[94mreplaying 8 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[96mAs Boss:
+[92m'Alice'> [97m[96mAs Boss (grouped by Employee):
   'Bob' : Counts {gifts = 1, holidays = 1, requests = 0}
   'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0}
 [97m
-[96mAs Employee:
+[96mAs Employee (grouped by Boss)
 [97m
 [92m'Alice'> [97m[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Bob'> [97m[96mAs Boss:
+[92m'Bob'> [97m[96mAs Boss (grouped by Employee):
 [97m
-[96mAs Employee:
+[96mAs Employee (grouped by Boss)
   'Alice' : Counts {gifts = 1, holidays = 1, requests = 0}
 [97m
 [92m'Bob'> [97m[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m
@@ -75,17 +75,17 @@ CREATE: [#4:1] = Holiday {employee = 'Bob', boss = 'Alice'}
 [97m
 [92m'Bob'> [97m[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Bob'> [97m[92m'Bob'> [97m[94mreplaying 8 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Bob'> [97m[96mAs Boss:
+[92m'Bob'> [97m[96mAs Boss (grouped by Employee):
 [97m
-[96mAs Employee:
+[96mAs Employee (grouped by Boss)
   'Alice' : Counts {gifts = 1, holidays = 1, requests = 1}
 [97m
 [92m'Bob'> [97m[94mreplaying 9 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[96mAs Boss:
+[92m'Alice'> [97m[96mAs Boss (grouped by Employee):
   'Bob' : Counts {gifts = 1, holidays = 1, requests = 1}
   'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0}
 [97m
-[96mAs Employee:
+[96mAs Employee (grouped by Boss)
 [97m
 [92m'Alice'> [97m[94mreplaying 9 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[96mAs Boss:
@@ -95,11 +95,11 @@ CREATE: [#4:1] = Holiday {employee = 'Bob', boss = 'Alice'}
 [97m
 [92m'Alice'> [97m[94mreplaying 9 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Alice'> [97m[92m'Alice'> [97m[94mreplaying 12 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[96mAs Boss:
+[92m'Alice'> [97m[96mAs Boss (grouped by Employee):
   'Bob' : Counts {gifts = 1, holidays = 0, requests = 0}
   'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0}
 [97m
-[96mAs Employee:
+[96mAs Employee (grouped by Boss)
 [97m
 [92m'Alice'> [97m[94mreplaying 11 transactions[97m[96mtype "help" to see available commands[97m
 [92m'Bob'> [97m[96mAs Boss:
@@ -108,9 +108,9 @@ CREATE: [#4:1] = Holiday {employee = 'Bob', boss = 'Alice'}
   #1 Vacation {employee = 'Bob', boss = 'Alice', date = Date {daysSinceEpoch = 200}}
 [97m
 [92m'Bob'> [97m[94mreplaying 11 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Bob'> [97m[96mAs Boss:
+[92m'Bob'> [97m[96mAs Boss (grouped by Employee):
 [97m
-[96mAs Employee:
+[96mAs Employee (grouped by Boss)
   'Alice' : Counts {gifts = 1, holidays = 0, requests = 0}
 [97m
 [92m'Bob'> [97m[94mreplaying 11 transactions[97m[96mtype "help" to see available commands[97m
