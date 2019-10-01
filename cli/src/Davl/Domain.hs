@@ -2,13 +2,19 @@
 -- SPDX-License-Identifier: Apache-2.0
 
 module Davl.Domain (
+
     Party(..),
     Holiday(..),
     Gift(..),
     Request(..),
     Date(..),
-    DavlContractId(..), DavlTemplate(..), DavlEvent(..),
+    Denial(..),
+
+    DavlContractId(..),
+    DavlTemplate(..),
+    DavlEvent(..),
     DavlCommand(..)
+
     ) where
 
 import qualified Data.Text.Lazy as Text(unpack)
@@ -28,10 +34,19 @@ data Request = Request
 
 data Date = Date { daysSinceEpoch :: Int } deriving (Show) -- TODO: use a standard type
 
+data Denial = Denial
+    { employee :: Party
+    , boss :: Party
+    , allocationId :: DavlContractId
+    , date :: Date
+    , reason :: String
+    } deriving (Show)
+
 data DavlTemplate
     = TGift Gift
     | THoliday Holiday
     | TRequest Request
+    | TDenial Denial
 
 newtype DavlContractId = DavlContractId { cid :: ContractId } deriving (Eq)
 
@@ -43,12 +58,14 @@ data DavlCommand
     = GiveGift Gift
     | ClaimGift DavlContractId
     | RequestHoliday Request
+    | DenyRequest DavlContractId String
 
 instance Show DavlTemplate where
     show = \case
         TGift x -> show x
         THoliday x -> show x
         TRequest x -> show x
+        TDenial x -> show x
 
 instance Show DavlEvent where
     show = \case

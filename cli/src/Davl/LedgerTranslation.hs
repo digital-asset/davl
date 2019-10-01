@@ -8,6 +8,8 @@ module Davl.LedgerTranslation(
     extractTransaction,
     ) where
 
+import qualified Data.Text.Lazy as Text
+
 import DA.Ledger.IsLedgerValue (IsLedgerValue(..))
 import qualified DA.Ledger.Types as L
 
@@ -56,6 +58,24 @@ instance IsLedgerValue Request where
             return Request{employee,boss,allocationId,date}
         _ -> Nothing
 
+instance IsLedgerValue Denial where
+    toValue Denial{employee,boss,allocationId,date,reason} =
+        L.VList [toValue employee
+                , toValue boss
+                , toValue allocationId
+                , toValue date
+                , toValue (Text.pack reason)
+                ]
+    fromValue = \case
+        L.VList [v1,v2,v3,v4,v5] -> do
+            employee <- fromValue v1
+            boss <- fromValue v2
+            allocationId <- fromValue v3
+            date <- fromValue v4
+            reason <- fromValue v5
+            return Denial{employee,boss,allocationId,date,reason = Text.unpack reason}
+        _ -> Nothing
+
 
 instance IsLedgerValue DavlContractId where
     toValue DavlContractId{cid} = L.VContract cid
@@ -94,8 +114,19 @@ makeLedgerCommand pid = \case
         let args = toRecord x
         L.CreateCommand {tid,args}
 
+    DenyRequest DavlContractId{cid} reason -> do
+        let mod = L.ModuleName "Davl"
+        let ent = L.EntityName "Request"
+        let tid = L.TemplateId (L.Identifier pid mod ent)
+        let choice = L.Choice "Request_Deny"
+        let arg = L.VRecord (L.Record Nothing [L.RecordField { fieldValue = L.VText (Text.pack reason) , label = ""}])
+        L.ExerciseCommand {tid,cid,choice,arg}
+
 extractEvents :: [L.Event] -> Maybe [DavlEvent]
 extractEvents = \case
+
+    [L.ArchivedEvent{cid=cid1}] ->
+        return [ Archive $ DavlContractId cid1 ]
 
     [L.CreatedEvent{cid,tid=L.TemplateId L.Identifier{ent=L.EntityName"Gift"}, createArgs}] -> do
         x <- fromRecord createArgs
@@ -113,6 +144,15 @@ extractEvents = \case
         x <- fromRecord createArgs
         return $
             [Create { id = DavlContractId cid2 , info = TRequest x }]
+
+    [L.ArchivedEvent{cid=cid1},
+     L.CreatedEvent{cid=cid2,tid=L.TemplateId L.Identifier{ent=L.EntityName"Denial"}, createArgs}] -> do
+        x <- fromRecord createArgs
+        return $
+            [ Archive $ DavlContractId cid1
+            , Create { id = DavlContractId cid2 , info = TDenial x }
+            ]
+
     _ ->
         Nothing
 

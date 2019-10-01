@@ -9,16 +9,16 @@ module Davl.ContractStore (
 
 import Davl.Domain
 
-data State = State { events :: [DavlEvent] } -- reverse order
+data State = State { events :: [DavlEvent] } -- stored in most-recent-first order
 
 initState :: State
 initState = State []
 
-history :: State -> [DavlEvent] -- forwards order
+history :: State -> [DavlEvent] -- returned in oldest-first order
 history = reverse . events
 
-applyTrans :: Party -> State -> DavlEvent -> State
-applyTrans _ State{events} dc =
+applyTrans :: State -> DavlEvent -> State
+applyTrans State{events} dc =
     State {events = dc : events }
 
 archivedContractIds :: State -> [DavlContractId]

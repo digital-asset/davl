@@ -84,6 +84,9 @@ parseLine line = case words line of
     ["pending"] -> Query ShowPending
     ["p"] -> Query ShowPending
 
+    ["deny",n,why] -> Submit (Interact.DenyRequestNumber (read n) why)
+    ["d",n,why] -> Submit (Interact.DenyRequestNumber (read n) why)
+
     words ->
         Unexpected words
 
@@ -96,6 +99,7 @@ helpText = unlines
     [ "give/g <Name>   Send a Gift to <Name>"
     , "claim/c <Name>  Claim a Gift from <Name>"
     , "request/r <N>   Request a holiday <N> days from epoch(!), using any allocation day"
+    , "deny/d <N>      Deny request #N (as listed by pending)"
 
     , "history/h       Show the history of contract creations/archivals"
     , "summary/s       Show summary of holiday status, as boss/employee"
