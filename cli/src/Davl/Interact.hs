@@ -46,43 +46,43 @@ runSubmit h log is uc = do
     s <- readMVar sv
     case externalizeCommand whoami s uc of
         Left reason -> log reason
-        Right cc -> sendShowingRejection whoami h log cc
+        Right dcs -> mapM_ (sendShowingRejection whoami h log) dcs
 
 -- user commands, to be interpreted w.r.t the local state
 
 data Command
-    = GiveTo Party
+    = GiveTo Int Party
     | ClaimFrom Party
     | RequestDate Date
     | DenyRequestNumber Int String
     | ApproveRequestNumber Int
     deriving Show
 
-externalizeCommand :: Party -> CS.State -> Command -> Either String DavlCommand
+externalizeCommand :: Party -> CS.State -> Command -> Either String [DavlCommand]
 externalizeCommand whoami state = \case
-    GiveTo employee ->
-        return $ GiveGift $ Gift { allocation = Holiday { boss = whoami, employee } }
+    GiveTo n employee ->
+        return $ replicate n $ GiveGift $ Gift { allocation = Holiday { boss = whoami, employee } }
     ClaimFrom boss -> do
         case findGiftToMeFrom state whoami boss of
             Nothing -> Left $ "no gift found from: " <> show boss
-            Just id -> return $ ClaimGift id
+            Just id -> return [ClaimGift id]
     RequestDate date -> do
         case findAnyAllocation state whoami of
             Nothing -> Left $ "no holiday allocation available"
             Just (allocationId,Holiday{boss}) ->
-                return $ RequestHoliday $ Request
+                return [RequestHoliday $ Request
                 { employee = whoami
                 , boss
                 , allocationId
                 , date
-                }
+                }]
     DenyRequestNumber num reason -> do
         id <- tryFindRequestNumberAsBoss state whoami num
-        return $ DenyRequest id reason
+        return [DenyRequest id reason]
 
     ApproveRequestNumber num -> do
         id <- tryFindRequestNumberAsBoss state whoami num
-        return $ ApproveRequest id
+        return [ApproveRequest id]
 
 
 tryFindRequestNumberAsBoss :: CS.State -> Party -> Int -> Either String DavlContractId

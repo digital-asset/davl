@@ -71,7 +71,8 @@ parseLine :: String -> Command
 parseLine line = case words line of
     ["help"] -> Query Help
 
-    ["give",guy] -> Submit (Interact.GiveTo (party guy))
+    ["give",guy] -> Submit (Interact.GiveTo 1 (party guy))
+    ["give",n,guy] -> Submit (Interact.GiveTo (read n) (party guy))
     ["claim",guy] -> Submit (Interact.ClaimFrom (party guy))
     ["request",n] -> Submit (Interact.RequestDate (Date {daysSinceEpoch = read n}))
     ["deny",n,why] -> Submit (Interact.DenyRequestNumber (read n) why)
