@@ -105,9 +105,11 @@ parseLine line = case words line of
 
 helpText :: String
 helpText = unlines
-    [ "give <Name>     Send a Gift to <Name>"
-    , "claim <Name>    Claim a Gift from <Name>"
-    , "request <N>     Request a holiday <N> days from epoch(!), using any allocation day"
+    [ "give <N> <Name> Send <N> Gifts to <Name>"
+    , "give <Name>     Send a Gift to <Name>"
+    , "claim all       Claim all Gifts from everyone"
+    , "claim <Name>    Claim one Gift from <Name>"
+    , "request <D>     Request a holiday date, using any non-pending allocation day"
     , "deny <N>        Deny request #N (as listed by pending)"
 
     , "history/h       Show the history of contract creations/archivals"
