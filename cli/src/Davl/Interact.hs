@@ -17,6 +17,7 @@ import DA.Ledger.Stream (Stream,Closed(EOS,Abnormal,reason),takeStream)
 
 import Davl.DavlLedger (Handle,sendCommand,getTrans)
 import Davl.Domain
+import Davl.Query(requestsAsEmployee)
 import Davl.Logging (Logger,colourLog)
 import qualified Davl.ContractStore as CS
 
@@ -55,6 +56,7 @@ data Command
     | ClaimFrom Party -- claim 1 from given party
     | ClaimAll -- claim everything from all parties
     | RequestDate Date
+    | RequestDateWithNoPendingAllocation Date
     | DenyRequestNumber Int String
     | ApproveRequestNumber Int
     deriving Show
@@ -72,6 +74,16 @@ externalizeCommand whoami state = \case
     RequestDate date -> do
         case findAnyAllocation state whoami of
             Nothing -> Left $ "no holiday allocation available"
+            Just (allocationId,Holiday{boss}) ->
+                return [RequestHoliday $ Request
+                { employee = whoami
+                , boss
+                , allocationId
+                , date
+                }]
+    RequestDateWithNoPendingAllocation date -> do
+        case findNonPendingAllocation state whoami of
+            Nothing -> Left $ "no holiday allocation (without a pending request) available"
             Just (allocationId,Holiday{boss}) ->
                 return [RequestHoliday $ Request
                 { employee = whoami
@@ -111,6 +123,20 @@ findAnyAllocation :: CS.State -> Party -> Maybe (DavlContractId,Holiday)
 findAnyAllocation state whoami = listToMaybe $ do
     (id,hol@Holiday{employee}) <- activeHolidays state
     if employee==whoami then return (id,hol) else []
+
+
+findNonPendingAllocation :: CS.State -> Party -> Maybe (DavlContractId,Holiday)
+findNonPendingAllocation state whoami = listToMaybe $ do
+    let pending = allocationsWithPendingRequest state whoami
+    (id,hol@Holiday{employee}) <- activeHolidays state
+    if id `elem` pending then [] else return ()
+    if employee==whoami then return (id,hol) else []
+
+allocationsWithPendingRequest :: CS.State -> Party -> [DavlContractId]
+allocationsWithPendingRequest state whoami = do
+    Request{allocationId} <- requestsAsEmployee whoami state
+    return allocationId
+
 
 activeHolidays :: CS.State ->  [(DavlContractId,Holiday)]
 activeHolidays state = do

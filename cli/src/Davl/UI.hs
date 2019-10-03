@@ -75,7 +75,8 @@ parseLine line = case words line of
     ["give",n,guy] -> Submit (Interact.GiveTo (read n) (party guy))
     ["claim","all"] -> Submit Interact.ClaimAll -- no party can be called "all"
     ["claim",guy] -> Submit (Interact.ClaimFrom (party guy))
-    ["request",n] -> Submit (Interact.RequestDate (Date {daysSinceEpoch = read n}))
+    ["requestDumb",n] -> Submit (Interact.RequestDate (Date {daysSinceEpoch = read n}))
+    ["request",n] -> Submit (Interact.RequestDateWithNoPendingAllocation (Date {daysSinceEpoch = read n}))
     ["deny",n,why] -> Submit (Interact.DenyRequestNumber (read n) why)
     ["approve",n] -> Submit (Interact.ApproveRequestNumber (read n))
 
