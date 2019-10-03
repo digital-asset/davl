@@ -5,45 +5,53 @@ cd "$(dirname ${BASH_SOURCE[0]})"
 
 CLI=$(stack exec which davl-cli)
 
+as () {
+    party=$1
+    cmd=$2
+    echo As $party: $cmd
+    (sleep 2; echo "$cmd"; sleep 2) | $CLI $party
+    echo; echo --
+}
+
 # Alice gifts 2 days of holiday allocation to each of Bob and Charlie
-sleep 1; echo 'give Bob' | $CLI Alice
-sleep 1; echo 'give Bob' | $CLI Alice
-sleep 1; echo 'give Charlie' | $CLI Alice
-sleep 1; echo 'give Charlie' | $CLI Alice
-sleep 1; echo 'summary' | $CLI Alice
+as Alice 'give Bob'
+as Alice 'give Bob'
+as Alice 'give Charlie'
+as Alice 'give Charlie'
+as Alice 'summary'
 
 # Bob claims one day of his allocation
-sleep 1; echo 'history' | $CLI Bob
-sleep 1; echo 'summary' | $CLI Bob
-sleep 1; echo 'claim Alice' | $CLI Bob
+as Bob 'history'
+as Bob 'summary'
+as Bob 'claim Alice'
 
 # What does Alice see?
-sleep 1; echo 'history' | $CLI Alice
-sleep 1; echo 'summary' | $CLI Alice
+as Alice 'history'
+as Alice 'summary'
 
 # Bob make a holiday request using his single allocation
-sleep 1; echo 'request 100' | $CLI Bob
-sleep 1; echo 'summary' | $CLI Bob
+as Bob 'request 100'
+as Bob 'summary'
 
 # Alice sees the request, and denies it
-sleep 1; echo 'summary' | $CLI Alice
-sleep 1; echo 'pending' | $CLI Alice
-sleep 1; echo 'deny 1 not-that-day-please' | $CLI Alice
-sleep 1; echo 'summary' | $CLI Alice
+as Alice 'summary'
+as Alice 'pending'
+as Alice 'deny 1 not-that-day-please'
+as Alice 'summary'
 
 # Bob sees the denial, any make a request for a different day
-sleep 1; echo 'summary' | $CLI Bob
-sleep 1; echo 'denials' | $CLI Bob
-sleep 1; echo 'request 200' | $CLI Bob
-sleep 1; echo 'summary' | $CLI Bob
+as Bob 'summary'
+as Bob 'denials'
+as Bob 'request 200'
+as Bob 'summary'
 
 # Alice sees the new request and accepts it
-sleep 1; echo 'summary' | $CLI Alice
-sleep 1; echo 'pending' | $CLI Alice
-sleep 1; echo 'approve 1' | $CLI Alice
-sleep 1; echo 'summary' | $CLI Alice
-sleep 1; echo 'vacations' | $CLI Bob
+as Alice 'summary'
+as Alice 'pending'
+as Alice 'approve 1'
+as Alice 'summary'
+as Alice 'vacations'
 
 # Bob sees his scheduled vacation day
-sleep 1; echo 'summary' | $CLI Bob
-sleep 1; echo 'vacations' | $CLI Bob
+as Bob 'summary'
+as Bob 'vacations'
