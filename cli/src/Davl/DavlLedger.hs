@@ -13,13 +13,16 @@ import Data.List as List
 import System.Random (randomIO)
 import qualified Data.Text.Lazy as Text (pack)
 import qualified Data.UUID as UUID
-import DA.Ledger as Ledger
+
+import DA.Ledger
 
 import Davl.Domain
 import Davl.LedgerTranslation(makeLedgerCommand,extractTransaction)
 import Davl.Logging (Logger)
+import qualified Davl.HostAndPort as HP
 
 data Handle = Handle {
+    hp :: HP.HostAndPort,
     log :: Logger,
     lid :: LedgerId,
     pid :: PackageId
@@ -27,17 +30,16 @@ data Handle = Handle {
 
 type Rejection = String
 
-port :: Port
-port = 6865 -- port on which we expect to find a ledger. should be a command line option
+run :: HP.HostAndPort -> TimeoutSeconds -> LedgerService a -> IO a
+run hp timeout ls = do
+    let config = HP.toLedgerConfig hp
+    runLedgerService ls timeout config
 
-run :: TimeoutSeconds -> LedgerService a -> IO a
-run timeout ls  = runLedgerService ls timeout (configOfPort port)
+connect :: HP.HostAndPort -> Logger -> IO Handle
+connect hp log = do
+    lid <- run hp 5 getLedgerIdentity
 
-connect :: Logger -> IO Handle
-connect log = do
-    lid <- run 5 getLedgerIdentity
-
-    discovery <- run 5 $ do
+    discovery <- run hp 5 $ do
         pids <- listPackages lid
         forM pids $ \pid -> do
             getPackage lid pid >>= \case
@@ -48,7 +50,7 @@ connect log = do
     case List.filter snd discovery of
         [] -> fail "cant find package containing Davl"
         xs@(_:_:_) -> fail $ "found multiple packages containing Davl: " <> show (map fst xs)
-        [(pid,_)] -> return Handle{log,lid,pid}
+        [(pid,_)] -> return Handle{hp,log,lid,pid}
 
 containsDavl :: Package -> Bool
 containsDavl package = "Davl" `isInfixOf` show package -- TODO: be more principled
@@ -61,14 +63,15 @@ sendCommand asParty h@Handle{pid} cc = do
         Right () -> return Nothing
 
 getTrans :: Party -> Handle -> IO (PastAndFuture DavlEvent)
-getTrans party Handle{log,lid} = do
-    pf <- run 6000 $ getTransactionsPF lid party
+getTrans party Handle{hp,log,lid} = do
+    pf <- run hp 6000 $ getTransactionsPF lid party
     mapListPF (fmap concat . mapM (extractTransaction log)) pf
 
 submitCommand :: Handle -> Party -> Command -> IO (Either String ())
-submitCommand Handle{lid} party com = do
+submitCommand Handle{hp,lid} party com = do
     cid <- randomCid
-    run 5 $ Ledger.submit (Commands {lid,wid,aid=myAid,cid,party,leTime,mrTime,coms=[com]})
+    run hp 5 $
+        submit (Commands {lid,wid,aid=myAid,cid,party,leTime,mrTime,coms=[com]})
     where
         wid = Nothing
         leTime = Timestamp 0 0

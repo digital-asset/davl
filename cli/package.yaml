@@ -8,6 +8,7 @@ github:              https://github.com/digital-asset/davl
 
 dependencies:
 - ansi-terminal
+- bytestring
 - base >= 4.7 && < 5
 - containers
 - daml-ledger

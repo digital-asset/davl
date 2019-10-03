@@ -9,6 +9,7 @@ import Data.Text.Lazy as Text (pack)
 import System.Console.ANSI (Color(..))
 import qualified System.Console.Haskeline as HL
 
+import Davl.HostAndPort(HostAndPort)
 import Davl.DavlLedger (Handle,connect)
 import Davl.Domain
 import Davl.Logging (colourLog,plainLog,colourWrap)
@@ -23,11 +24,11 @@ import qualified Davl.ListVacations as LV
 replyLog :: String -> IO ()
 replyLog = colourLog Cyan plainLog
 
-interactiveMain :: Party -> IO ()
-interactiveMain party = HL.runInputT HL.defaultSettings $ do
+interactiveMain :: HostAndPort -> Party -> IO ()
+interactiveMain hp party = HL.runInputT HL.defaultSettings $ do
     xlog <- HL.getExternalPrint
     let errLog = colourLog Red xlog
-    h <- lift (connect errLog)
+    h <- lift (connect hp errLog)
     ps <- lift $ Interact.makeState h xlog party
     lift $ replyLog "type \"help\" to see available commands"
     readLoop h ps
