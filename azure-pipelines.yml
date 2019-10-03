@@ -26,7 +26,9 @@ jobs:
           DIR=$(pwd)
 
           # Install stack
-          curl -sSL https://get.haskellstack.org/ | sh
+          if ! which stack >/dev/null 2>&1; then
+              curl -sSL https://get.haskellstack.org/ | sh
+          fi
 
           # Install DAML SDK
           SDK_VERSION=$(cat project/V1/daml.yaml | grep sdk-version | awk '{print $2}')
