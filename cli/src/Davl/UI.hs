@@ -12,9 +12,13 @@ import qualified System.Console.Haskeline as HL
 import Davl.DavlLedger (Handle,connect)
 import Davl.Domain
 import Davl.Logging (colourLog,plainLog,colourWrap)
+
 import qualified Davl.Interact as Interact
 import qualified Davl.ContractStore as CS
 import qualified Davl.Aggregation as AG
+import qualified Davl.ListRequests as LR
+import qualified Davl.ListDenials as LD
+import qualified Davl.ListVacations as LV
 
 replyLog :: String -> IO ()
 replyLog = colourLog Cyan plainLog
@@ -49,6 +53,9 @@ data Query
     = Help
     | ShowHistory
     | ShowSummary
+    | ShowPending
+    | ShowDenials
+    | ShowVacations
     deriving (Show)
 
 data Command
@@ -61,13 +68,30 @@ data Command
 
 parseLine :: String -> Command
 parseLine line = case words line of
+    ["help"] -> Query Help
+
     ["give",guy] -> Submit (Interact.GiveTo (party guy))
     ["claim",guy] -> Submit (Interact.ClaimFrom (party guy))
-    ["help"] -> Query Help
+    ["request",n] -> Submit (Interact.RequestDate (Date {daysSinceEpoch = read n}))
+    ["deny",n,why] -> Submit (Interact.DenyRequestNumber (read n) why)
+    ["approve",n] -> Submit (Interact.ApproveRequestNumber (read n))
+
     ["history"] -> Query ShowHistory
-    ["summary"] -> Query ShowSummary
     ["h"] -> Query ShowHistory
+
+    ["summary"] -> Query ShowSummary
+    ["s"] -> Query ShowSummary
     [] -> Query ShowSummary
+
+    ["pending"] -> Query ShowPending
+    ["p"] -> Query ShowPending
+
+    ["denials"] -> Query ShowDenials
+    ["d"] -> Query ShowDenials
+
+    ["vacations"] -> Query ShowVacations
+    ["v"] -> Query ShowVacations
+
     words ->
         Unexpected words
 
@@ -77,14 +101,19 @@ parseLine line = case words line of
 
 helpText :: String
 helpText = unlines
-    [
-      "give <Name>    Send a Gift to <Name>"
-    , "claim <Name>   Claim a Gift from <Name>"
-    , "help           Display this help text"
-    , "history        Show the history of contract creations/archivals"
-    , "summary        Show summary of holiday status, as boss/employee"
-    , "h              alias for history"
-    , "<return>       alias for summary"
+    [ "give <Name>     Send a Gift to <Name>"
+    , "claim <Name>    Claim a Gift from <Name>"
+    , "request <N>     Request a holiday <N> days from epoch(!), using any allocation day"
+    , "deny <N>        Deny request #N (as listed by pending)"
+
+    , "history/h       Show the history of contract creations/archivals"
+    , "summary/s       Show summary of holiday status, as boss/employee"
+    , "pending/p       Show pending requests for holiday, as boss/employee"
+    , "denials/d       Show denials for holiday requests, as employee"
+    , "vacations/v     Show booked vacation, as boss/employee"
+
+    , "<return>        Alias for summary"
+    , "help            Display this help text"
     ]
 
 -- run the parsed command
@@ -110,3 +139,11 @@ runLocalQuery whoami s = \case
     ShowSummary -> do
         replyLog (show (AG.summaryAsBoss whoami s))
         replyLog (show (AG.summaryAsEmployee whoami s))
+    ShowPending -> do
+        replyLog (show (LR.listAsBoss whoami s))
+        replyLog (show (LR.listAsEmployee whoami s))
+    ShowDenials -> do
+        replyLog (show (LD.listAsEmployee whoami s))
+    ShowVacations -> do
+        replyLog (show (LV.listAsBoss whoami s))
+        replyLog (show (LV.listAsEmployee whoami s))

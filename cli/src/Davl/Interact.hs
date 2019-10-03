@@ -53,6 +53,9 @@ runSubmit h log is uc = do
 data Command
     = GiveTo Party
     | ClaimFrom Party
+    | RequestDate Date
+    | DenyRequestNumber Int String
+    | ApproveRequestNumber Int
     deriving Show
 
 externalizeCommand :: Party -> CS.State -> Command -> Either String DavlCommand
@@ -63,9 +66,55 @@ externalizeCommand whoami state = \case
         case findGiftToMeFrom state whoami boss of
             Nothing -> Left $ "no gift found from: " <> show boss
             Just id -> return $ ClaimGift id
+    RequestDate date -> do
+        case findAnyAllocation state whoami of
+            Nothing -> Left $ "no holiday allocation available"
+            Just (allocationId,Holiday{boss}) ->
+                return $ RequestHoliday $ Request
+                { employee = whoami
+                , boss
+                , allocationId
+                , date
+                }
+    DenyRequestNumber num reason -> do
+        id <- tryFindRequestNumberAsBoss state whoami num
+        return $ DenyRequest id reason
+
+    ApproveRequestNumber num -> do
+        id <- tryFindRequestNumberAsBoss state whoami num
+        return $ ApproveRequest id
 
 
-findGiftToMeFrom :: CS.State ->  Party -> Party -> Maybe DavlContractId
+tryFindRequestNumberAsBoss :: CS.State -> Party -> Int -> Either String DavlContractId
+tryFindRequestNumberAsBoss state whoami num =
+    case findRequestAsBoss state whoami of
+        [] -> Left $ "there are no pending requests for you to deal with"
+        ids ->
+            if num < 1 || num > length ids
+            then Left $ unwords
+                 [ "you have pending requests numbered 1 to",
+                   show (length ids),
+                   "but you typed:",
+                   show num
+                 ]
+            else Right $ ids !! (num-1) -- indexing from 1
+
+findRequestAsBoss :: CS.State -> Party -> [DavlContractId]
+findRequestAsBoss state whoami = do
+    (id,Request{boss}) <- activeRequests state
+    if boss==whoami then return id else []
+
+findAnyAllocation :: CS.State -> Party -> Maybe (DavlContractId,Holiday)
+findAnyAllocation state whoami = listToMaybe $ do
+    (id,hol@Holiday{employee}) <- activeHolidays state
+    if employee==whoami then return (id,hol) else []
+
+activeHolidays :: CS.State ->  [(DavlContractId,Holiday)]
+activeHolidays state = do
+    (id,THoliday holiday) <- CS.activeContracts state
+    return (id,holiday)
+
+findGiftToMeFrom :: CS.State -> Party -> Party -> Maybe DavlContractId
 findGiftToMeFrom state whoami bossK = listToMaybe $ do
     (id,Gift{allocation=Holiday{employee,boss}}) <- activeGifts state
     if boss==bossK && employee==whoami then return id else []
@@ -75,6 +124,11 @@ activeGifts state = do
     (id,TGift gift) <- CS.activeContracts state
     return (id,gift)
 
+activeRequests :: CS.State ->  [(DavlContractId,Request)]
+activeRequests state = do
+    (id,TRequest request) <- CS.activeContracts state
+    return (id,request)
+
 
 -- Manage updates in response to contracts from the ledgerS.
 
@@ -82,12 +136,12 @@ manageUpdates :: Handle -> Party -> Logger -> MVar CS.State -> IO (Stream DavlEv
 manageUpdates h whoami log sv = do
     PastAndFuture{past,future} <- getTrans whoami h
     log $ "replaying " <> show (length past) <> " transactions"
-    modifyMVar_ sv (\s -> return $ foldl (CS.applyTrans whoami) s past)
-    _ <- forkIO (updateX whoami log sv future)
+    modifyMVar_ sv (\s -> return $ foldl CS.applyTrans s past)
+    _ <- forkIO (updateX log sv future)
     return future
 
-updateX :: Party -> Logger -> MVar CS.State -> Stream DavlEvent -> IO ()
-updateX whoami log sv stream = loop
+updateX :: Logger -> MVar CS.State -> Stream DavlEvent -> IO ()
+updateX log sv stream = loop
   where
     loop = do
         takeStream stream >>= \case
@@ -96,12 +150,12 @@ updateX whoami log sv stream = loop
             Left Abnormal{reason} -> do
                 log $ "transaction stream is closed: " <> reason
             Right cc -> do
-                applyX whoami log sv cc
+                applyX log sv cc
                 loop
 
-applyX :: Party -> Logger -> MVar CS.State -> DavlEvent -> IO ()
-applyX whoami log sv event = do
+applyX :: Logger -> MVar CS.State -> DavlEvent -> IO ()
+applyX log sv event = do
     s <- takeMVar sv
-    let s' = CS.applyTrans whoami s event
+    let s' = CS.applyTrans s event
     log $ show event
     putMVar sv s'

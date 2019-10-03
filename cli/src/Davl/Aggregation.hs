@@ -9,98 +9,110 @@ module Davl.Aggregation (
 import Data.List as List
 import Data.List.Key as LK(sort)
 import Data.Map.Strict as Map
-import Data.Map.Merge.Strict as Map
 
 import Davl.Domain
 import Davl.ContractStore(State,activeContracts)
 
 data Counts = Counts
-    { unclaimed_gifts :: Int
-    , unspent_holidays :: Int
+    { gifts :: Int -- unclaimed gifts
+    , holidays :: Int -- unspent holiday (TODO: don't count allocations with pending requests)
+    , requests :: Int -- requests pending an answer: deny/approve
+    , denials :: Int
+    , vacations :: Int
     } deriving Show
 
+counts0 :: Counts
+counts0 = Counts
+    { gifts = 0
+    , holidays = 0
+    , requests = 0
+    , denials = 0
+    , vacations = 0
+    }
+
+-- TODO: rename counts -> grouped
 data SummaryAsBoss = SummaryAsBoss { counts :: Map Party Counts }
 data SummaryAsEmployee = SummaryAsEmployee { counts :: Map Party Counts }
 
 instance Show SummaryAsBoss where
     show SummaryAsBoss{counts} =
-        unlines ("As Boss:" : tab 2 (List.map f (LK.sort fst (Map.toList counts))))
+        unlines ("As Boss (grouped by Employee):" :
+                 tab 2 (List.map f (LK.sort fst (Map.toList counts))))
         where f (party,count) = unwords [show party,":",show count]
 
 instance Show SummaryAsEmployee where
     show SummaryAsEmployee{counts} =
-        unlines ("As Employee:" : tab 2 (List.map f (LK.sort fst (Map.toList counts))))
+        unlines ("As Employee (grouped by Boss)" :
+                 tab 2 (List.map f (LK.sort fst (Map.toList counts))))
         where f (party,count) = unwords [show party,":",show count]
 
 tab :: Int -> [String] -> [String]
 tab n xs = List.map ((spaces <>)) xs where spaces = replicate n ' '
 
-summaryAsBoss :: Party -> State -> SummaryAsBoss -- grouped by Employee
-summaryAsBoss whoami state = do
-    let gifts = giftsAsBoss whoami state
-    let holidays = holidaysAsBoss whoami state
-    let mgs = flip groupByKey gifts $ \Gift{allocation=Holiday{employee}} -> employee
-    let mhs = flip groupByKey holidays $ \Holiday{employee} -> employee
-    let counts = flip Map.map (zipMapOfLists mgs mhs) $ \(gs,hs) ->
-            Counts { unclaimed_gifts = length $ gs
-                   , unspent_holidays = length $ hs
-                   }
-    SummaryAsBoss {counts}
 
-summaryAsEmployee :: Party -> State -> SummaryAsEmployee -- grouped by Boss
-summaryAsEmployee whoami state = do
-    let gifts = giftsAsEmployee whoami state
-    let holidays = holidaysAsEmployee whoami state
-    let mgs = flip groupByKey gifts $ \Gift{allocation=Holiday{boss}} -> boss
-    let mhs = flip groupByKey holidays $ \Holiday{boss} -> boss
-    let counts = flip Map.map (zipMapOfLists mgs mhs) $ \(gs,hs) ->
-            Counts { unclaimed_gifts = length $ gs
-                   , unspent_holidays = length $ hs
-                   }
-    SummaryAsEmployee {counts}
+summaryAsEmployee :: Party -> State -> SummaryAsEmployee
+summaryAsEmployee whoami state =
+    SummaryAsEmployee (genericSummary iAmEmployee tickBoss whoami state)
 
+summaryAsBoss :: Party -> State -> SummaryAsBoss
+summaryAsBoss whoami state =
+    SummaryAsBoss (genericSummary iAmBoss tickEmployee whoami state)
 
-groupByKey :: Ord k => (a -> k) -> [a] -> Map k [a]
-groupByKey getKey elems =
-    Map.fromList $ List.map (\xs -> (getKey (head xs), xs)) $ List.groupBy sameKey elems
-    where sameKey a b = getKey a == getKey b
+type FILTER = (DavlTemplate -> Bool)
+type TICK = (Map Party Counts -> Map Party Counts)
+type INC = (Counts -> Counts)
 
-zipMapOfLists :: Ord k => Map k [v1] -> Map k [v2] -> Map k ([v1],[v2])
-zipMapOfLists m1 m2 =
-    Map.merge (mapMaybeMissing g1) (mapMaybeMissing g2) (zipWithMaybeMatched f) m1 m2
-    where g1 _ v1 = Just (v1,[])
-          g2 _ v2 = Just ([],v2)
-          f _ v1 v2  = Just (v1,v2)
+iAmBoss,iAmEmployee :: Party -> FILTER
+tickBoss,tickEmployee :: DavlTemplate -> TICK
+incGifts,incHolidays,incRequests,incDenials,incVacations :: INC
 
+genericSummary
+    :: (Party -> FILTER)
+    -> (DavlTemplate -> TICK)
+    -> Party -> State -> Map Party Counts
+genericSummary iAmRole tickRole whoami state = counts
+    where
+        counts = List.foldr tickRole Map.empty $ List.filter (iAmRole whoami) templates
+        templates = List.map snd $ activeContracts state
 
-giftsAsBoss :: Party -> State -> [Gift]
-giftsAsBoss whoami state = do
-    g@Gift{allocation=Holiday{boss}} <- gifts state
-    if (boss == whoami) then return g else []
+-- iAm*
+iAmBoss whoami = (whoami ==) . \case
+    TGift Gift{allocation=Holiday{boss}} -> boss
+    THoliday Holiday{boss} -> boss
+    TRequest Request{boss} -> boss
+    TDenial Denial{boss} -> boss
+    TVacation Vacation{boss} -> boss
 
-holidaysAsBoss :: Party -> State -> [Holiday]
-holidaysAsBoss whoami state = do
-    g@Holiday{boss} <- holidays state
-    if (boss == whoami) then return g else []
+iAmEmployee whoami = (whoami ==) . \case
+    TGift Gift{allocation=Holiday{employee}} -> employee
+    THoliday Holiday{employee} -> employee
+    TRequest Request{employee} -> employee
+    TDenial Denial{employee} -> employee
+    TVacation Vacation{employee} -> employee
 
+-- tick*
+tickEmployee = \case
+    TGift Gift{allocation=Holiday{employee}} -> finding employee incGifts
+    THoliday Holiday{employee} -> finding employee incHolidays
+    TRequest Request{employee} -> finding employee incRequests
+    TDenial Denial{employee} -> finding employee incDenials
+    TVacation Vacation{employee} -> finding employee incVacations
 
-giftsAsEmployee :: Party -> State -> [Gift]
-giftsAsEmployee whoami state = do
-    g@Gift{allocation=Holiday{employee}} <- gifts state
-    if (employee == whoami) then return g else []
+tickBoss = \case
+    TGift Gift{allocation=Holiday{boss}} -> finding boss incGifts
+    THoliday Holiday{boss} -> finding boss incHolidays
+    TRequest Request{boss} -> finding boss incRequests
+    TDenial Denial{boss} -> finding boss incDenials
+    TVacation Vacation{boss} -> finding boss incVacations
 
-holidaysAsEmployee :: Party -> State -> [Holiday]
-holidaysAsEmployee whoami state = do
-    g@Holiday{employee} <- holidays state
-    if (employee == whoami) then return g else []
+finding :: Party -> INC -> TICK
+finding key f m = do
+    let counts = case m !? key of Nothing -> counts0; Just counts -> counts
+    Map.insert key (f counts) m
 
-
-gifts :: State -> [Gift]
-gifts state = do
-    (_,TGift gift) <- activeContracts state
-    return gift
-
-holidays :: State -> [Holiday]
-holidays state = do
-    (_,THoliday holiday) <- activeContracts state
-    return holiday
+-- inc*
+incGifts c@Counts{gifts} = c { gifts = gifts + 1 }
+incHolidays c@Counts{holidays} = c { holidays = holidays + 1 }
+incRequests c@Counts{requests} = c { requests = requests + 1 }
+incDenials c@Counts{denials} = c { denials = denials + 1 }
+incVacations c@Counts{vacations} = c { vacations = vacations + 1 }

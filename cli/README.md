@@ -2,6 +2,8 @@
 
 Command line interface for the `DAVL` Holiday tracking application, driven by `DAML`.
 
+WIP: See [TODOs](/cli/TODO.md).
+
 `davl-cli` connects (via `gRPC`) to a DAML ledger  hosting the davl-DAML-model
 
 ### build
