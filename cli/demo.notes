@@ -1,0 +1,59 @@
+
+Demo...
+
+It takes place from the POV of Alice (share screen)
+Bob/Charlie/God are off-screen actors.
+
+Alice is the manager or Bob and Charlie.
+She starts by reviewing the vacations of the previous year.
+(pre-demo, the ledger is setup using: dev-setup-ledger.sh)
+
+First we go through the workflow from the manager POV:
+- Alice gives B/C their holiday allocation.
+- B/C claim, then request.
+- Alice does request/deny, and reviews.
+
+Then we go through workflow from employee POV:
+- God gives Alice her holiday allocation.
+- Alice claims, then requests.
+- God requests/denies.
+- Alice reviews
+
+
+There are couple of things to do before this demo script will work:
+- multi give
+- claim all
+- fix requests to not request an allocation with a pending request
+(There are workarounds if this doesn't get done in time.)
+
+
+Alice               Bob             Charlie             God
+
+<ret>
+vacations
+give 3 Bob
+give 3 Charlie
+                    claim all
+                    request 18255
+                    request 18262
+                                    claim all
+                                    request 18255
+<ret>
+pending
+approve 3
+deny 2 sorry
+approve 1
+vacations
+                                                        give 5 Alice
+<ret>
+claim all
+request 18255
+request 18256
+request 18262
+                                                        pending
+                                                        approve 3
+                                                        approve 2
+                                                        deny 1 sorry
+<ret>
+denials
+vacations

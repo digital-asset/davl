@@ -17,6 +17,7 @@ import DA.Ledger.Stream (Stream,Closed(EOS,Abnormal,reason),takeStream)
 
 import Davl.DavlLedger (Handle,sendCommand,getTrans)
 import Davl.Domain
+import Davl.Query(requestsAsEmployee)
 import Davl.Logging (Logger,colourLog)
 import qualified Davl.ContractStore as CS
 
@@ -46,43 +47,57 @@ runSubmit h log is uc = do
     s <- readMVar sv
     case externalizeCommand whoami s uc of
         Left reason -> log reason
-        Right cc -> sendShowingRejection whoami h log cc
+        Right dcs -> mapM_ (sendShowingRejection whoami h log) dcs
 
 -- user commands, to be interpreted w.r.t the local state
 
 data Command
-    = GiveTo Party
-    | ClaimFrom Party
+    = GiveTo Int Party
+    | ClaimFrom Party -- claim 1 from given party
+    | ClaimAll -- claim everything from all parties
     | RequestDate Date
+    | RequestDateWithNoPendingAllocation Date
     | DenyRequestNumber Int String
     | ApproveRequestNumber Int
     deriving Show
 
-externalizeCommand :: Party -> CS.State -> Command -> Either String DavlCommand
+externalizeCommand :: Party -> CS.State -> Command -> Either String [DavlCommand]
 externalizeCommand whoami state = \case
-    GiveTo employee ->
-        return $ GiveGift $ Gift { allocation = Holiday { boss = whoami, employee } }
+    GiveTo n employee ->
+        return $ replicate n $ GiveGift $ Gift { allocation = Holiday { boss = whoami, employee } }
     ClaimFrom boss -> do
         case findGiftToMeFrom state whoami boss of
             Nothing -> Left $ "no gift found from: " <> show boss
-            Just id -> return $ ClaimGift id
+            Just id -> return [ClaimGift id]
+    ClaimAll -> do
+        return $ map ClaimGift (findAllGiftsToMe state whoami)
     RequestDate date -> do
         case findAnyAllocation state whoami of
             Nothing -> Left $ "no holiday allocation available"
             Just (allocationId,Holiday{boss}) ->
-                return $ RequestHoliday $ Request
+                return [RequestHoliday $ Request
                 { employee = whoami
                 , boss
                 , allocationId
                 , date
-                }
+                }]
+    RequestDateWithNoPendingAllocation date -> do
+        case findNonPendingAllocation state whoami of
+            Nothing -> Left $ "no holiday allocation (without a pending request) available"
+            Just (allocationId,Holiday{boss}) ->
+                return [RequestHoliday $ Request
+                { employee = whoami
+                , boss
+                , allocationId
+                , date
+                }]
     DenyRequestNumber num reason -> do
         id <- tryFindRequestNumberAsBoss state whoami num
-        return $ DenyRequest id reason
+        return [DenyRequest id reason]
 
     ApproveRequestNumber num -> do
         id <- tryFindRequestNumberAsBoss state whoami num
-        return $ ApproveRequest id
+        return [ApproveRequest id]
 
 
 tryFindRequestNumberAsBoss :: CS.State -> Party -> Int -> Either String DavlContractId
@@ -109,6 +124,20 @@ findAnyAllocation state whoami = listToMaybe $ do
     (id,hol@Holiday{employee}) <- activeHolidays state
     if employee==whoami then return (id,hol) else []
 
+
+findNonPendingAllocation :: CS.State -> Party -> Maybe (DavlContractId,Holiday)
+findNonPendingAllocation state whoami = listToMaybe $ do
+    let pending = allocationsWithPendingRequest state whoami
+    (id,hol@Holiday{employee}) <- activeHolidays state
+    if id `elem` pending then [] else return ()
+    if employee==whoami then return (id,hol) else []
+
+allocationsWithPendingRequest :: CS.State -> Party -> [DavlContractId]
+allocationsWithPendingRequest state whoami = do
+    Request{allocationId} <- requestsAsEmployee whoami state
+    return allocationId
+
+
 activeHolidays :: CS.State ->  [(DavlContractId,Holiday)]
 activeHolidays state = do
     (id,THoliday holiday) <- CS.activeContracts state
@@ -118,6 +147,11 @@ findGiftToMeFrom :: CS.State -> Party -> Party -> Maybe DavlContractId
 findGiftToMeFrom state whoami bossK = listToMaybe $ do
     (id,Gift{allocation=Holiday{employee,boss}}) <- activeGifts state
     if boss==bossK && employee==whoami then return id else []
+
+findAllGiftsToMe :: CS.State -> Party -> [DavlContractId]
+findAllGiftsToMe state whoami = do
+    (id,Gift{allocation=Holiday{employee}}) <- activeGifts state
+    if employee==whoami then return id else []
 
 activeGifts :: CS.State ->  [(DavlContractId,Gift)]
 activeGifts state = do
