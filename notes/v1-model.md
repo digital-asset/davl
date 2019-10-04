@@ -9,6 +9,9 @@ let's specify what is supported in version 1 in more detail.
 This document should be read in conjuction with the DAML model
 [here](/daml/Model.daml).
 
+Here are some things we learned while implementing a simple CLI for the V1 model
+[here](/notes/v1-learnings.md).
+
 
 ## Terminology
 
