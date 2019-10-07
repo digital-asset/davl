@@ -12,6 +12,9 @@ This document should be read in conjuction with the DAML model
 Here are some things we learned while implementing a simple CLI for the V1 model
 [here](/notes/v1-learnings.md).
 
+Here is the discussion following the v1 demo on Friday 2019-10-04
+[here](/notes/v1-post-demo-discussion.md).
+
 
 ## Terminology
 
