@@ -30,3 +30,13 @@ Even though the V1 model encodes all core workflow in DAML, there are still plac
 ### Migration via central authority
 
 Following a discussion on the challenges of migration from one model version to another, it was suggested that to make upgrading really simple, the issue of authority can be completely sidestepped by having a single `Admin` signatory as the only signatory on all contracts.
+
+### Explicit checks vs Signatory authority
+
+Should the model have more explicit assertions to help guide the reader? For example, when the `Request_Approve` choice is exercised, should the DAML code explicitly check that the `Holiday` allocation referenced by the `Request` belongs to the employee making the request?
+
+Indeed it would be terrible if it were possible for one employee to _spend_ another employees holiday allocation - and in fact this is not possible in the current model, because the `Request_Approve` archives the holiday allocation being spent, and this will fail without the authority of the employee who the allocation belongs to. But would the DAML be better if this were made explicit, as well as being enforced by signatory authority?
+
+### Role-based contracts
+
+Should our model have the explicit notion of roles: Using a fictional situation, if my boss is Alice and she leaves, and my new boss is Angelina, I don't want to lose my existing allocation. Apparently this issue is addressed in the DAML docs, under the heading of _Role-based contracts_.
