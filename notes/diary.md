@@ -15,27 +15,23 @@ Martin suggest that perhaps these file could be hosted as Github pages.
 
 One of the hopes for these notes is they might form the basis of future blog posts about the experiences of team-davl in developing a kick-ass DAML ledger app.
 
-
-### Tue 17th September (Nick)
+### Tue 17th September
 
 - Nick and Gary pairing to get a quick first cut for `davl-cli`. As gary puts it: _What we've done today is basically taking Nick's [chat app](https://github.com/digital-asset/daml/tree/master/language-support/hs/bindings/examples/chat) and changing the core datatypes from under it, then try to play whack-a-mole with the compiler error messages._
 - Constructing/Interpreting `DAML-LF` values (in Haskell) for communication over the ledger API could be easier. When there are mistakes, error messages from the runtime system could be more illuminating.
 
-
-### Wed 18th September (Nick)
+### Wed 18th September
 
 - created subdir for `davl-cli` code and added README
 - created this diary
 
-
-### Thu 19th September (Nick)
+### Thu 19th September
 
 - fixing model version 1. DAML and spec.
 - choosing simpler un-compunded names: i.e `Holiday`, `Vacation`
-
 - renamed this project to `davl` - _DA Vacation Ledger_
 
-### Fri 26th September (Nick)
+### Fri 26th September
 
 - continuing to hack on the CLI
 - trying to figure out the best way to organize the code to be malliable for incremental changes
@@ -45,8 +41,12 @@ One of the hopes for these notes is they might form the basis of future blog pos
 
 ### Fri 4th October
 
-Here are some things we learned while implementing a simple CLI for the V1 model
+- Here are some things we learned while implementing a simple CLI for the V1 model
 [here](/notes/v1-learnings.md).
-
-Here is the discussion following the v1 demo on Friday 2019-10-04
+- Here is the discussion following the v1 demo on Friday 2019-10-04
 [here](/notes/v1-post-demo-discussion.md).
+
+### Mon 7th October
+
+- Following the demo and discussions on Friday, we are now considering what features to add in the V2 model
+And how we plan to migrate from V1 to V2.
