@@ -7,6 +7,7 @@ module Davl where -- TODO: Should this name include the version?
 -- V2
 -- following proposal doc.. plus
 -- rename: employee -> worker
+-- TODO: visibiliy of vacations for all
 
 import DA.List as List
 
