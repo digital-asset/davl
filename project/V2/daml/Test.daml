@@ -1,0 +1,38 @@
+daml 1.2
+
+module Test where
+
+import Davl
+import DA.Date
+
+basic_flow = scenario do
+
+  company <- getParty "theCompany"
+  boss <- getParty "someBoss"
+  worker <- getParty "minion1"
+
+  pb <- submit company $ create Propose_Boss with b = Boss with boss; company
+  b <- submit boss $ exercise pb Propose_Boss_Accept
+
+  pw <- submit company $ exercise b Boss_Propose_Worker with worker
+  w <- submit worker $ exercise pw Propose_Worker_Accept
+
+  -- Found bug in model - need to create initial Allocation for worker! - fixed
+  submit boss $ exercise w Worker_Allocate_Holiday with n = 3
+
+  let xmas : Date = date 2019 Dec 25
+  let boxing : Date = date 2019 Dec 26
+  r1 <- submit worker $ exercise w Worker_Request_Vacation with dates = [xmas,boxing]
+
+  let nyEve : Date = date 2019 Dec 31
+  let nyDay : Date = date 2020 Jan 1
+  r2 <- submit worker $ exercise w Worker_Request_Vacation with dates = [nyEve,nyDay]
+
+  -- Found bug. Archive of Holiday is missing authority from theCompany
+  -- Fixed model by adding company as signatory on Allocation contract
+  v1 <- submit boss $ exercise r1 Request_Approve
+
+  submitMustFail boss $ exercise r2 Request_Approve
+  d1 <- submit boss $ exercise r2 Request_Deny with reason = "you only have 1 day"
+
+  return ()

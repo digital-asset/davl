@@ -1,0 +1,13 @@
+sdk-version: 0.13.29
+name: davl
+source: daml
+#scenario: Main:test
+parties:
+  - Alice
+  - Bob
+  - Charlie
+version: 0.0.1
+#exposed-modules: []
+dependencies:
+  - daml-prim
+  - daml-stdlib
