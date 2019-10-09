@@ -68,6 +68,11 @@ jobs:
           cd $DIR
           (cd project/V1; ~/.daml/bin/daml test)
           cd cli
+          # The process to generate the Haskell bindings tarball ("sdist") is
+          # not reproducible, and Azure doesn't clean as much as one would hope
+          # between builds, so sometimes we get an existing .lock file with the
+          # wrong tarball size/sha.
+          rm -f stack.yaml.lock
           export PATH="$PATH:~/.daml/bin"
           export LD_LIBRARY_PATH=/usr/local/grpc/lib
           ./test.sh

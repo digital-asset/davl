@@ -1,149 +1,169 @@
+As Alice: give Bob
 Connecting as 'Alice' to: localhost:6865
-[94mreplaying 0 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[92m'Alice'> [97mConnecting as 'Alice' to: localhost:6865
-[94mreplaying 1 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[92m'Alice'> [97mConnecting as 'Alice' to: localhost:6865
-[94mreplaying 2 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[92m'Alice'> [97mConnecting as 'Alice' to: localhost:6865
-[94mreplaying 3 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[92m'Alice'> [97mConnecting as 'Alice' to: localhost:6865
-[94mreplaying 4 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[96mAs Boss (grouped by Employee):
+[94mreplaying 0 transactions[97m[96mtype "help" to see available commands[97m[92m'Alice'> [97m[94mCREATE: [#0:0] = Gift {allocation = Holiday {employee = 'Bob', boss = 'Alice'}}[97m[92m'Alice'> [97m
+--
+As Alice: give Bob
+Connecting as 'Alice' to: localhost:6865
+[94mreplaying 1 transactions[97m[96mtype "help" to see available commands[97m[92m'Alice'> [97m[94mCREATE: [#1:0] = Gift {allocation = Holiday {employee = 'Bob', boss = 'Alice'}}[97m[92m'Alice'> [97m
+--
+As Alice: give Charlie
+Connecting as 'Alice' to: localhost:6865
+[94mreplaying 2 transactions[97m[96mtype "help" to see available commands[97m[92m'Alice'> [97m[94mCREATE: [#2:0] = Gift {allocation = Holiday {employee = 'Charlie', boss = 'Alice'}}[97m[92m'Alice'> [97m
+--
+As Alice: give Charlie
+Connecting as 'Alice' to: localhost:6865
+[94mreplaying 3 transactions[97m[96mtype "help" to see available commands[97m[92m'Alice'> [97m[94mCREATE: [#3:0] = Gift {allocation = Holiday {employee = 'Charlie', boss = 'Alice'}}[97m[92m'Alice'> [97m
+--
+As Alice: summary
+Connecting as 'Alice' to: localhost:6865
+[94mreplaying 4 transactions[97m[96mtype "help" to see available commands[97m[92m'Alice'> [97m[96mAs Boss (grouped by Employee):
   'Bob' : Counts {gifts = 2, holidays = 0, requests = 0, denials = 0, vacations = 0}
   'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0, denials = 0, vacations = 0}
-[97m
-[96mAs Employee (grouped by Boss)
-[97m
-[92m'Alice'> [97mConnecting as 'Bob' to: localhost:6865
-[94mreplaying 2 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Bob'> [97m[96mCREATE: [#0:0] = Gift {allocation = Holiday {employee = 'Bob', boss = 'Alice'}}
+[97m[96mAs Employee (grouped by Boss)
+[97m[92m'Alice'> [97m
+--
+As Bob: history
+Connecting as 'Bob' to: localhost:6865
+[94mreplaying 2 transactions[97m[96mtype "help" to see available commands[97m[92m'Bob'> [97m[96mCREATE: [#0:0] = Gift {allocation = Holiday {employee = 'Bob', boss = 'Alice'}}
 CREATE: [#1:0] = Gift {allocation = Holiday {employee = 'Bob', boss = 'Alice'}}
-[97m
-[92m'Bob'> [97mConnecting as 'Bob' to: localhost:6865
-[94mreplaying 2 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Bob'> [97m[96mAs Boss (grouped by Employee):
-[97m
-[96mAs Employee (grouped by Boss)
+[97m[92m'Bob'> [97m
+--
+As Bob: summary
+Connecting as 'Bob' to: localhost:6865
+[94mreplaying 2 transactions[97m[96mtype "help" to see available commands[97m[92m'Bob'> [97m[96mAs Boss (grouped by Employee):
+[97m[96mAs Employee (grouped by Boss)
   'Alice' : Counts {gifts = 2, holidays = 0, requests = 0, denials = 0, vacations = 0}
-[97m
-[92m'Bob'> [97mConnecting as 'Bob' to: localhost:6865
-[94mreplaying 2 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Bob'> [97m[92m'Bob'> [97mConnecting as 'Alice' to: localhost:6865
-[94mreplaying 6 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[96mCREATE: [#0:0] = Gift {allocation = Holiday {employee = 'Bob', boss = 'Alice'}}
+[97m[92m'Bob'> [97m
+--
+As Bob: claim Alice
+Connecting as 'Bob' to: localhost:6865
+[94mreplaying 2 transactions[97m[96mtype "help" to see available commands[97m[92m'Bob'> [97m[94mARCHIVE: [#0:0][97m[94mCREATE: [#4:1] = Holiday {employee = 'Bob', boss = 'Alice'}[97m[92m'Bob'> [97m
+--
+As Alice: history
+Connecting as 'Alice' to: localhost:6865
+[94mreplaying 6 transactions[97m[96mtype "help" to see available commands[97m[92m'Alice'> [97m[96mCREATE: [#0:0] = Gift {allocation = Holiday {employee = 'Bob', boss = 'Alice'}}
 CREATE: [#1:0] = Gift {allocation = Holiday {employee = 'Bob', boss = 'Alice'}}
 CREATE: [#2:0] = Gift {allocation = Holiday {employee = 'Charlie', boss = 'Alice'}}
 CREATE: [#3:0] = Gift {allocation = Holiday {employee = 'Charlie', boss = 'Alice'}}
 ARCHIVE: [#0:0]
 CREATE: [#4:1] = Holiday {employee = 'Bob', boss = 'Alice'}
-[97m
-[92m'Alice'> [97mConnecting as 'Alice' to: localhost:6865
-[94mreplaying 6 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[96mAs Boss (grouped by Employee):
+[97m[92m'Alice'> [97m
+--
+As Alice: summary
+Connecting as 'Alice' to: localhost:6865
+[94mreplaying 6 transactions[97m[96mtype "help" to see available commands[97m[92m'Alice'> [97m[96mAs Boss (grouped by Employee):
   'Bob' : Counts {gifts = 1, holidays = 1, requests = 0, denials = 0, vacations = 0}
   'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0, denials = 0, vacations = 0}
-[97m
-[96mAs Employee (grouped by Boss)
-[97m
-[92m'Alice'> [97mConnecting as 'Bob' to: localhost:6865
-[94mreplaying 4 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Bob'> [97m[92m'Bob'> [97mConnecting as 'Bob' to: localhost:6865
-[94mreplaying 5 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Bob'> [97m[96mAs Boss (grouped by Employee):
-[97m
-[96mAs Employee (grouped by Boss)
+[97m[96mAs Employee (grouped by Boss)
+[97m[92m'Alice'> [97m
+--
+As Bob: request 100
+Connecting as 'Bob' to: localhost:6865
+[94mreplaying 4 transactions[97m[96mtype "help" to see available commands[97m[92m'Bob'> [97m[94mCREATE: [#5:0] = Request {employee = 'Bob', boss = 'Alice', allocationId = [#4:1], date = Date {daysSinceEpoch = 100}}[97m[92m'Bob'> [97m
+--
+As Bob: summary
+Connecting as 'Bob' to: localhost:6865
+[94mreplaying 5 transactions[97m[96mtype "help" to see available commands[97m[92m'Bob'> [97m[96mAs Boss (grouped by Employee):
+[97m[96mAs Employee (grouped by Boss)
   'Alice' : Counts {gifts = 1, holidays = 1, requests = 1, denials = 0, vacations = 0}
-[97m
-[92m'Bob'> [97mConnecting as 'Alice' to: localhost:6865
-[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[96mAs Boss (grouped by Employee):
+[97m[92m'Bob'> [97m
+--
+As Alice: summary
+Connecting as 'Alice' to: localhost:6865
+[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m[92m'Alice'> [97m[96mAs Boss (grouped by Employee):
   'Bob' : Counts {gifts = 1, holidays = 1, requests = 1, denials = 0, vacations = 0}
   'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0, denials = 0, vacations = 0}
-[97m
-[96mAs Employee (grouped by Boss)
-[97m
-[92m'Alice'> [97mConnecting as 'Alice' to: localhost:6865
-[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[96mAs Boss:
+[97m[96mAs Employee (grouped by Boss)
+[97m[92m'Alice'> [97m
+--
+As Alice: pending
+Connecting as 'Alice' to: localhost:6865
+[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m[92m'Alice'> [97m[96mAs Boss:
   #1 Request {employee = 'Bob', boss = 'Alice', allocationId = [#4:1], date = Date {daysSinceEpoch = 100}}
-[97m
-[96mAs Employee:
-[97m
-[92m'Alice'> [97mConnecting as 'Alice' to: localhost:6865
-[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[92m'Alice'> [97mConnecting as 'Alice' to: localhost:6865
-[94mreplaying 8 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[96mAs Boss (grouped by Employee):
+[97m[96mAs Employee:
+[97m[92m'Alice'> [97m
+--
+As Alice: deny 1 not-that-day-please
+Connecting as 'Alice' to: localhost:6865
+[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m[92m'Alice'> [97m[94mARCHIVE: [#5:0][97m[92m'Alice'> [97m
+--
+As Alice: summary
+Connecting as 'Alice' to: localhost:6865
+[94mreplaying 8 transactions[97m[96mtype "help" to see available commands[97m[92m'Alice'> [97m[96mAs Boss (grouped by Employee):
   'Bob' : Counts {gifts = 1, holidays = 1, requests = 0, denials = 0, vacations = 0}
   'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0, denials = 0, vacations = 0}
-[97m
-[96mAs Employee (grouped by Boss)
-[97m
-[92m'Alice'> [97mConnecting as 'Bob' to: localhost:6865
-[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Bob'> [97m[96mAs Boss (grouped by Employee):
-[97m
-[96mAs Employee (grouped by Boss)
+[97m[96mAs Employee (grouped by Boss)
+[97m[92m'Alice'> [97m
+--
+As Bob: summary
+Connecting as 'Bob' to: localhost:6865
+[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m[92m'Bob'> [97m[96mAs Boss (grouped by Employee):
+[97m[96mAs Employee (grouped by Boss)
   'Alice' : Counts {gifts = 1, holidays = 1, requests = 0, denials = 1, vacations = 0}
-[97m
-[92m'Bob'> [97mConnecting as 'Bob' to: localhost:6865
-[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Bob'> [97m[96mAs Employee:
+[97m[92m'Bob'> [97m
+--
+As Bob: denials
+Connecting as 'Bob' to: localhost:6865
+[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m[92m'Bob'> [97m[96mAs Employee:
   #1 Denial {employee = 'Bob', boss = 'Alice', allocationId = [#4:1], date = Date {daysSinceEpoch = 100}, reason = "not-that-day-please"}
-[97m
-[92m'Bob'> [97mConnecting as 'Bob' to: localhost:6865
-[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Bob'> [97m[92m'Bob'> [97mConnecting as 'Bob' to: localhost:6865
-[94mreplaying 8 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Bob'> [97m[96mAs Boss (grouped by Employee):
-[97m
-[96mAs Employee (grouped by Boss)
+[97m[92m'Bob'> [97m
+--
+As Bob: request 200
+Connecting as 'Bob' to: localhost:6865
+[94mreplaying 7 transactions[97m[96mtype "help" to see available commands[97m[92m'Bob'> [97m[94mCREATE: [#7:0] = Request {employee = 'Bob', boss = 'Alice', allocationId = [#4:1], date = Date {daysSinceEpoch = 200}}[97m[92m'Bob'> [97m
+--
+As Bob: summary
+Connecting as 'Bob' to: localhost:6865
+[94mreplaying 8 transactions[97m[96mtype "help" to see available commands[97m[92m'Bob'> [97m[96mAs Boss (grouped by Employee):
+[97m[96mAs Employee (grouped by Boss)
   'Alice' : Counts {gifts = 1, holidays = 1, requests = 1, denials = 1, vacations = 0}
-[97m
-[92m'Bob'> [97mConnecting as 'Alice' to: localhost:6865
-[94mreplaying 9 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[96mAs Boss (grouped by Employee):
+[97m[92m'Bob'> [97m
+--
+As Alice: summary
+Connecting as 'Alice' to: localhost:6865
+[94mreplaying 9 transactions[97m[96mtype "help" to see available commands[97m[92m'Alice'> [97m[96mAs Boss (grouped by Employee):
   'Bob' : Counts {gifts = 1, holidays = 1, requests = 1, denials = 0, vacations = 0}
   'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0, denials = 0, vacations = 0}
-[97m
-[96mAs Employee (grouped by Boss)
-[97m
-[92m'Alice'> [97mConnecting as 'Alice' to: localhost:6865
-[94mreplaying 9 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[96mAs Boss:
+[97m[96mAs Employee (grouped by Boss)
+[97m[92m'Alice'> [97m
+--
+As Alice: pending
+Connecting as 'Alice' to: localhost:6865
+[94mreplaying 9 transactions[97m[96mtype "help" to see available commands[97m[92m'Alice'> [97m[96mAs Boss:
   #1 Request {employee = 'Bob', boss = 'Alice', allocationId = [#4:1], date = Date {daysSinceEpoch = 200}}
-[97m
-[96mAs Employee:
-[97m
-[92m'Alice'> [97mConnecting as 'Alice' to: localhost:6865
-[94mreplaying 9 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[92m'Alice'> [97mConnecting as 'Alice' to: localhost:6865
-[94mreplaying 12 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Alice'> [97m[96mAs Boss (grouped by Employee):
+[97m[96mAs Employee:
+[97m[92m'Alice'> [97m
+--
+As Alice: approve 1
+Connecting as 'Alice' to: localhost:6865
+[94mreplaying 9 transactions[97m[96mtype "help" to see available commands[97m[92m'Alice'> [97m[94mARCHIVE: [#7:0][97m[94mARCHIVE: [#4:1][97m[94mCREATE: [#8:3] = Vacation {employee = 'Bob', boss = 'Alice', date = Date {daysSinceEpoch = 200}}[97m[92m'Alice'> [97m
+--
+As Alice: summary
+Connecting as 'Alice' to: localhost:6865
+[94mreplaying 12 transactions[97m[96mtype "help" to see available commands[97m[92m'Alice'> [97m[96mAs Boss (grouped by Employee):
   'Bob' : Counts {gifts = 1, holidays = 0, requests = 0, denials = 0, vacations = 1}
   'Charlie' : Counts {gifts = 2, holidays = 0, requests = 0, denials = 0, vacations = 0}
-[97m
-[96mAs Employee (grouped by Boss)
-[97m
-[92m'Alice'> [97mConnecting as 'Bob' to: localhost:6865
-[94mreplaying 11 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Bob'> [97m[96mAs Boss:
-[97m
-[96mAs Employee:
+[97m[96mAs Employee (grouped by Boss)
+[97m[92m'Alice'> [97m
+--
+As Alice: vacations
+Connecting as 'Alice' to: localhost:6865
+[94mreplaying 12 transactions[97m[96mtype "help" to see available commands[97m[92m'Alice'> [97m[96mAs Boss:
   #1 Vacation {employee = 'Bob', boss = 'Alice', date = Date {daysSinceEpoch = 200}}
-[97m
-[92m'Bob'> [97mConnecting as 'Bob' to: localhost:6865
-[94mreplaying 11 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Bob'> [97m[96mAs Boss (grouped by Employee):
-[97m
-[96mAs Employee (grouped by Boss)
+[97m[96mAs Employee:
+[97m[92m'Alice'> [97m
+--
+As Bob: summary
+Connecting as 'Bob' to: localhost:6865
+[94mreplaying 11 transactions[97m[96mtype "help" to see available commands[97m[92m'Bob'> [97m[96mAs Boss (grouped by Employee):
+[97m[96mAs Employee (grouped by Boss)
   'Alice' : Counts {gifts = 1, holidays = 0, requests = 0, denials = 1, vacations = 1}
-[97m
-[92m'Bob'> [97mConnecting as 'Bob' to: localhost:6865
-[94mreplaying 11 transactions[97m[96mtype "help" to see available commands[97m
-[92m'Bob'> [97m[96mAs Boss:
-[97m
-[96mAs Employee:
+[97m[92m'Bob'> [97m
+--
+As Bob: vacations
+Connecting as 'Bob' to: localhost:6865
+[94mreplaying 11 transactions[97m[96mtype "help" to see available commands[97m[92m'Bob'> [97m[96mAs Boss:
+[97m[96mAs Employee:
   #1 Vacation {employee = 'Bob', boss = 'Alice', date = Date {daysSinceEpoch = 200}}
-[97m
-[92m'Bob'> [97m
+[97m[92m'Bob'> [97m
+--

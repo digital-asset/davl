@@ -3,6 +3,7 @@
 
 module Davl.UI (interactiveMain) where
 
+import Control.Concurrent (threadDelay)
 import Control.Concurrent.MVar
 import Control.Monad.Trans.Class (lift)
 import Data.Text.Lazy as Text (pack)
@@ -12,7 +13,7 @@ import qualified System.Console.Haskeline as HL
 import Davl.HostAndPort(HostAndPort)
 import Davl.DavlLedger (Handle,connect)
 import Davl.Domain
-import Davl.Logging (colourLog,plainLog,colourWrap)
+import Davl.Logging (Logger,colourLog,colourWrap)
 
 import qualified Davl.Interact as Interact
 import qualified Davl.ContractStore as CS
@@ -21,17 +22,15 @@ import qualified Davl.ListRequests as LR
 import qualified Davl.ListDenials as LD
 import qualified Davl.ListVacations as LV
 
-replyLog :: String -> IO ()
-replyLog = colourLog Cyan plainLog
-
 interactiveMain :: HostAndPort -> Party -> IO ()
 interactiveMain hp party = HL.runInputT HL.defaultSettings $ do
     xlog <- HL.getExternalPrint
     let errLog = colourLog Red xlog
     h <- lift (connect hp errLog)
     ps <- lift $ Interact.makeState h xlog party
+    let replyLog = colourLog Cyan xlog
     lift $ replyLog "type \"help\" to see available commands"
-    readLoop h ps
+    readLoop replyLog h ps
 
 -- readLoop
 
@@ -39,14 +38,15 @@ prompt :: Interact.State -> String
 prompt Interact.State{whoami} =
     colourWrap Green (show whoami <> "> ")
 
-readLoop :: Handle -> Interact.State -> HL.InputT IO ()
-readLoop h is = do
+readLoop :: Logger -> Handle -> Interact.State -> HL.InputT IO ()
+readLoop replyLog h is = do
     lineOpt <- HL.getInputLine (prompt is)
     case lineOpt of
       Nothing -> return ()
       Just line -> do
-          is' <- lift $ runCommand h is $ parseLine line
-          readLoop h is'
+          is' <- lift $ runCommand replyLog h is $ parseLine line
+          lift $ threadDelay 1000000
+          readLoop replyLog h is'
 
 -- console commands
 
@@ -124,8 +124,8 @@ helpText = unlines
 
 -- run the parsed command
 
-runCommand :: Handle -> Interact.State -> Command -> IO Interact.State
-runCommand h is = \case
+runCommand :: Logger -> Handle -> Interact.State -> Command -> IO Interact.State
+runCommand replyLog h is = \case
     Unexpected words -> do
         replyLog $ "Parse error: " <> unwords words
         return is
@@ -135,11 +135,11 @@ runCommand h is = \case
     Query lq -> do
         let Interact.State{sv,whoami} = is
         s <- readMVar sv
-        runLocalQuery whoami s lq
+        runLocalQuery replyLog whoami s lq
         return is
 
-runLocalQuery :: Party -> CS.State -> Query -> IO ()
-runLocalQuery whoami s = \case
+runLocalQuery :: Logger -> Party -> CS.State -> Query -> IO ()
+runLocalQuery replyLog whoami s = \case
     Help -> replyLog helpText
     ShowHistory -> replyLog (unlines $ map show (CS.history s))
     ShowSummary -> do

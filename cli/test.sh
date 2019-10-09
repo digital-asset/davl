@@ -13,7 +13,15 @@ cd testcases
 rm -f *.log
 
 echo start sandbox
-(daml sandbox &) > /dev/null
+daml sandbox > /dev/null &
+# Register sandbox killing as a trap so it executes regardless of whether this
+# script succeeds
+SANDBOX_PID=$!
+kill_sandbox() {
+  echo kill sandbox
+  kill -9 $SANDBOX_PID
+}
+trap kill_sandbox EXIT
 sleep 5 # TODO: do better!
 
 echo deploy
@@ -25,7 +33,4 @@ echo cli, case1
 # The log files would be much cleaner if the CLI really was a CLI,
 # instead of a console which displays colour etc
 echo compare
-cmp case1.log{.expected,}
-
-echo kill sandbox
-pkill -f sandbox.jar
+diff case1.log{.expected,}
