@@ -1,0 +1,9 @@
+FROM openjdk:8-alpine
+
+RUN mkdir /app
+COPY sandbox.jar /app/sandbox.jar
+COPY daml.dar /app/daml.dar
+
+WORKDIR /app
+
+ENTRYPOINT ["java", "-jar", "/app/sandbox.jar", "--eager-package-loading", "/app/daml.dar", "--ledgerid", "DAVL"]

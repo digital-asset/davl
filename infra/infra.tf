@@ -7,27 +7,47 @@ terraform {
 
 provider "google" {
   project = "da-dev-pinacolada"
-  region = "us-east4"
+  region  = "us-east4"
 }
 
-resource "google_compute_network" "network" {
-  name = "davl-network"
-  auto_create_subnetworks = true
+# Network created by the security team. Allows all traffic from offices and
+# VPN.
+data "google_compute_network" "network" {
+  name = "da-pinacolada-vpc-1"
 }
 
-resource "google_compute_firewall" "default" {
-  name = "allow-ssh"
-  network = "davl-network"
+data "google_compute_subnetwork" "subnet" {
+  name = "da-gcp-pinacolada-subnet-1"
+}
+
+resource "google_compute_firewall" "allow-external-ssh" {
+  name    = "allow-external-ssh"
+  network = "${data.google_compute_network.network.self_link}"
   allow {
     protocol = "tcp"
-    ports = ["22"]
+    ports    = ["22"]
   }
 }
 
-resource "google_compute_instance" "demo-ledger" {
-  name = "demo-ledger"
+resource "google_compute_firewall" "allow-internal" {
+  name    = "allow-internal"
+  network = "${data.google_compute_network.network.self_link}"
+  allow {
+    protocol = "tcp"
+  }
+  allow {
+    protocol = "udp"
+  }
+  allow {
+    protocol = "icmp"
+  }
+  source_ranges = ["${data.google_compute_subnetwork.subnet.ip_cidr_range}"]
+}
+
+resource "google_compute_instance" "db" {
+  name         = "db"
   machine_type = "n1-standard-2"
-  zone = "us-east4-a"
+  zone         = "us-east4-a"
 
   boot_disk {
     initialize_params {
@@ -36,7 +56,8 @@ resource "google_compute_instance" "demo-ledger" {
   }
 
   network_interface {
-    network = "davl-network"
+    network    = "${data.google_compute_network.network.self_link}"
+    subnetwork = "${data.google_compute_subnetwork.subnet.self_link}"
     access_config {
       // auto-generate ephemeral IP
     }
@@ -45,17 +66,107 @@ resource "google_compute_instance" "demo-ledger" {
   metadata_startup_script = <<STARTUP
 set -euxo pipefail
 
-mkdir -p /home/ubuntu/.ssh
-AUTH=/home/ubuntu/.ssh/authorized_keys
-echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCz3adQiDsx63+7CfxviHQueCPgGtt0/q86E5FGW9zKIvFqKIN3UCKJw0dQmZoNB7nVuYmOMq8PL/p8trXZOamtwFJWyGiDqO+tjfGj6LptNnfWm7iBHMnqSbzgFmsI5/M9bm75qa7VYddRSnTTiXrMTq42kDdl8SHiFHrZa+Xi6MJspY8NZOxhw1lSXsClIEzpimv+sEgRHpDWNxC4rOvrJFZqIA63NkR5WVyODxCUUp0i3lyiyAsVjhDMS2P5+PB6hYSJMeztBkIbS6858npT/8FaoUtcPMQGuKrFxsjKTomaKcEytDrYSA6VXXXJvinkUPeXXOP60DSrd+IZtsrgFI9lNZo4NAK72OZTQbTqVVEjS2Fx34/l4eM2sbQte3JUXYo640miW6HwcdFxDaPDLfwqK+5gL2oFChbB/k5Bsq61KWx0x0kTYX+rKHa12p3zvtOMls2wqebEWeWpN/yuHyNF0ppi3wAB9Khcy8Ea8baUqi0Wy3EMUMWJItrQeirgMBf/6dNF/oXxmKClTD/VCznqtQUjxMEPziwOrpGE9KQCNTlSqQDHK/YsRtlbYtok4EOFG9DixRsa++XP9oBdCYkhwY5CX20IWJGEGdtgzr5hQ0LiNKbYaC51mkH6IUxGN77Q1uHr8QDKbGW8Bp4HUpyZAFxcfD5vQVX3+4+mRw== nick.chapman@digitalasset.com" >> $AUTH
-echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDZiU8pGsaOzd+hNhK58bp93Zf8wAW3KDB5ucAg0kW1RvQjix99cK059EPSZednMXMujaVCQyMP1WUMyxMo3tBhlgnTCvgH1bdCa6RJ2woyCzj98sjnc+aaEnhZk3QBNhwVObiamlW9WzSddunHrxfthooi/AK/ZXnL0dsawpkBzA1LSW6UTNh87QtKdDjzsJJwRjSuQflMqKmPXsadBIUx0fj5GdUexifxQLTwpBW38A6p7dWYdiMyo56qoR67VzYhiM6rTbEDUF7M3fgch2f4YXccY3ugQivKMYpf7pBa4DEbJ7Q10+xRyw6Qjw2wp8aGjVQuoRvcb7UbrpkqSlNdJLUYfiJsZx4anr2KmepvHXOo0wXrGMfGv30HqsLa4pDNcqxLpHtJ9eRZXVnHWdvk+uricgVnP0K4KmdIDxr9X/Mb/0QV6opYnJYFGX4CBY1C2s+Uo/xc3l+4BaWVoEjHImoWp3z+OChK7FWAacSCPp40+uD1PK2Dvmqm6Ka01+LcUduDKmrsMMJaqYkIiDLlMI7qn2qIxfF+e0Otv6uU8GPwtltkvPKUVXsn0gaDpNKlc49b5mG0dASQUhyqHYOg2R0iuM6fav+oMtxVhDfxD5gDwDHtIVpXaCGvrOKouWMSYiy8jqz0QdGlkqcqtmN0JVc6T0knRmtmV3dyCLZ4oQ== gary.verhaegen@digitalasset.com" >> $AUTH
-chown ubuntu:ubuntu $AUTH
-chmod 0400 $AUTH
+apt-get update
+apt-get install -y docker.io
+
+docker run -e POSTGRES_USER=davl \
+           -e POSTGRES_PASSWORD=s3cr3t \
+           -e POSTGRES_DB=davl-db \
+           -e PGDATA=/var/lib/postgresql/data/pgdata \
+           -v /db:/var/lib/postgresql/data \
+           -p 5432:5432 \
+           postgres:11.5-alpine
+
+STARTUP
+}
+
+resource "google_compute_instance" "ledger" {
+  name         = "ledger"
+  machine_type = "n1-standard-2"
+  zone         = "us-east4-a"
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-1804-lts"
+    }
+  }
+
+  network_interface {
+    network    = "${data.google_compute_network.network.self_link}"
+    subnetwork = "${data.google_compute_subnetwork.subnet.self_link}"
+    access_config {
+      // auto-generate ephemeral IP
+    }
+  }
+
+  service_account {
+    scopes = ["https://www.googleapis.com/auth/devstorage.read_only"]
+  }
+
+  metadata_startup_script = <<STARTUP
+set -euxo pipefail
 
 apt-get update
-apt-get install -y openjdk-8-jdk
+apt-get install -y docker.io
 
-su -c 'curl https://get.daml.com | sh -s 0.13.27' ubuntu
+curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-270.0.0-linux-x86_64.tar.gz | tar xz
+export PATH="$(pwd)/google-cloud-sdk/bin:$PATH"
+
+gcloud components install docker-credential-gcr
+gcloud auth configure-docker --quiet
+
+# Wait for postgres machine to be listening
+while ! nc -z ${google_compute_instance.db.network_interface.0.network_ip} 5432; do
+  sleep 1
+done
+
+docker run --name sandbox -d -p 127.0.0.1:6865:6865 gcr.io/da-dev-pinacolada/sandbox:20191107-1954-d7dad6ce96 --sql-backend-jdbcurl 'jdbc:postgresql://${google_compute_instance.db.network_interface.0.network_ip}/davl-db?user=davl&password=s3cr3t'
+
+# Wait for ledger to be ready
+docker exec sandbox /bin/sh -c "while ! nc -z localhost:6865; do sleep 1; done"
+
+docker run --name json-api -d --link sandbox -p 7575:7575 gcr.io/da-dev-pinacolada/json-api:20191107-1954-d7dad6ce96 --ledger-host sandbox --ledger-port 6865 --http-port 7575
+
+STARTUP
+}
+
+resource "google_compute_instance" "proxy" {
+  name         = "proxy"
+  machine_type = "n1-standard-2"
+  zone         = "us-east4-a"
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-1804-lts"
+    }
+  }
+
+  network_interface {
+    network    = "${data.google_compute_network.network.self_link}"
+    subnetwork = "${data.google_compute_subnetwork.subnet.self_link}"
+    access_config {
+      // auto-generate ephemeral IP
+    }
+  }
+
+  tags = ["http-enabled"]
+
+  service_account {
+    scopes = ["https://www.googleapis.com/auth/devstorage.read_only"]
+  }
+  metadata_startup_script = <<STARTUP
+set -euxo pipefail
+
+apt-get update
+apt-get install -y docker.io
+
+curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-270.0.0-linux-x86_64.tar.gz | tar xz
+export PATH="$(pwd)/google-cloud-sdk/bin:$PATH"
+
+gcloud components install docker-credential-gcr
+gcloud auth configure-docker --quiet
+
+docker run -p 80:80 -e LEDGER_IP_PORT=${google_compute_instance.ledger.network_interface.0.network_ip}:7575 gcr.io/da-dev-pinacolada/ui:20191107-1626-4e3f3cc81e
 
 STARTUP
 }
