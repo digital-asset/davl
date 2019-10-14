@@ -1,0 +1,32 @@
+
+Redesign V2, goals:
+
+- Handle the visibility issue.
+- The boss-of relationship is entirely transitory.
+- Any worker can be the boss of another at the behest of the company.
+- Being a boss-of another simply means being able to approve/deny their vacation requests.
+- No constraints on boss-of structure. Allow: self-boss, multi-boss, cyclic-boss, no-boss.
+
+Workflow...
+
+Company:
+- propose worker relationship (allowing company to make any worker a boss of another)
+- allocate N-days holiday to worker
+- allocate/de-allocate a worker as a (no-exclusive) team-member of another worker (boss role)
+- see the org chart: worker->[worker] boss-of links
+
+Worker
+- accept worker relationship
+- who are my bosses now?
+- make a vacation request for a list of dates (no holiday allocation needed at this time)
+- cancel a request
+- count unspent holiday allocation
+- view denials
+- viee open requests
+- view booked vacations of everyone
+
+Worker (in Boss role)
+- who works for me now?
+- see pending vacations requests from my team
+- approve/deny a team member's pending request
+- see denials I made
