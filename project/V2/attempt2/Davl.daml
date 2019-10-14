@@ -1,0 +1,215 @@
+-- Copyright (c) 2019 The DAML Authors. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
+daml 1.2
+module Davl where -- V2, Attempt 2. -- WIP, stuck
+
+
+import DA.List as List
+
+
+template AsCompany -- workflow
+  with
+    company : Party
+  where
+    signatory company
+
+    nonconsuming choice AsCompany_ProposeWorker : ContractId ProposeWorker
+      with
+        worker : Party
+      controller company
+        do
+          create ProposeWorker with w = Worker with worker; company; minions = []; requests = []
+
+    nonconsuming choice AsCompany_AllocateHoliday : Hols
+      with
+        worker : Party
+        nDays : Int
+      controller company
+        do
+          exerciseByKey @Worker worker Worker_AllocateHoliday with nDays
+
+    nonconsuming choice AsCompany_AddTeam : ContractId Worker
+      with
+        boss : Party
+        minion : Party
+      controller company
+        do
+          exerciseByKey @Worker boss Worker_AddTeam with minion
+
+
+
+template AsWorker -- workflow
+  with
+    worker : Party
+  where
+    signatory worker
+
+    nonconsuming choice AsWorker_AcceptProposeWorker : ContractId Worker
+      with
+        proposal : ContractId ProposeWorker
+      controller worker
+        do
+          exercise proposal ProposeWorker_Accept
+
+    nonconsuming choice AsWorker_RequestVacation : ContractId Request
+      with
+        dates : [Date]
+      controller worker
+        do
+          exerciseByKey @Worker worker Worker_RequestVacation with dates
+
+    nonconsuming choice AsWorker_CancelRequest : ()
+      with
+        req : ContractId Request
+      controller worker
+        do
+          exerciseByKey @Worker worker Worker_CancelRequest with req
+
+    nonconsuming choice AsWorker_GetPending : [ContractId Request]
+      controller worker
+        do
+          (_,w) <- fetchByKey @Worker worker
+          return w.requests
+
+
+template AsBoss -- workflow
+  with
+    boss : Party
+  where
+    signatory boss
+
+    nonconsuming choice AsBoss_GetMinionRequests : [ContractId Request]
+      controller boss
+        do
+          exerciseByKey @Worker boss Worker_GetMinionRequests
+
+
+
+template ProposeWorker
+  with
+    w : Worker
+  where
+    signatory w.company
+    observer w.worker
+    choice ProposeWorker_Accept : ContractId Worker
+      controller w.worker
+        do
+          create Allocation with worker = w.worker; company = w.company; hols = []
+          create w
+
+template Worker --Relationship
+  with
+    worker : Party
+    company : Party
+
+    -- TODO: keep holiday allocation here, instead of separate allocations
+    requests : [ContractId Request]
+
+    minions : [Party] -- workers whose vacation requests we can approve
+    -- TODO: keep bosses here?
+
+  where
+    signatory worker, company
+    key worker : Party
+    maintainer key
+
+    nonconsuming choice Worker_AllocateHoliday : Hols
+      with
+        nDays : Int
+      controller company
+        do
+          assert (nDays > 0)
+          newHols <- mapA create (replicate nDays (Holiday with worker; company))
+          exerciseByKey @Allocation worker Allocation_Add with newHols
+          return newHols
+
+    choice Worker_AddTeam : ContractId Worker
+      with
+        minion : Party
+      controller company
+        do
+          create this with minions = minion::minions
+
+    choice Worker_RequestVacation : ContractId Request
+      with
+        dates : [Date]
+      controller worker
+        do
+          r <- create Request with vac = Vacation with worker; company; dates
+          create this with requests = r::requests
+          return r
+
+    choice Worker_CancelRequest : ()
+      with
+        req : ContractId Request
+      controller worker
+        do
+          archive req
+          create this with requests = filter (/= req) requests
+          return ()
+
+    nonconsuming choice Worker_GetMinionRequests : [ContractId Request]
+      controller worker
+        do
+          ws <- mapA (fmap snd . fetchByKey @Worker) minions
+          return $ concatMap (.requests) ws
+
+
+type Hols = [ContractId Holiday]
+
+template Allocation -- Store of Holiday per Worker
+  with
+    worker : Party
+    company : Party
+    hols : Hols
+  where
+    signatory worker, company
+    key worker : Party
+    maintainer key
+
+    choice Allocation_Add : ContractId Allocation
+      with
+        newHols : Hols
+      controller worker
+        do
+          create Allocation with worker; company; hols = hols ++ newHols
+
+    choice Allocation_Spend : ContractId Vacation
+      with
+        vac : Vacation
+      controller worker
+        do
+          let n = length vac.dates
+          let (spentHols,remainingHols) = List.splitAt n hols
+          assert (length spentHols == n)
+          mapA archive spentHols
+          create Allocation with worker; company; hols = remainingHols
+          create vac
+
+
+
+
+template Request -- aka Propose_Vacation
+  with
+    vac : Vacation
+  where
+    signatory vac.worker
+
+
+template Holiday
+  with
+    worker : Party
+    company : Party
+  where
+    signatory worker, company
+
+
+template Vacation
+  with
+    worker : Party
+    company : Party
+    dates : [Date] -- Multi-date vacation
+  where
+    signatory worker, company
+

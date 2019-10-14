@@ -1,6 +1,6 @@
 sdk-version: 0.13.29
 name: davl
-source: daml
+source: attempt2
 #scenario: Main:test
 parties:
   - Alice
