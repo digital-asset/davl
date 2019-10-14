@@ -2,7 +2,7 @@
 -- SPDX-License-Identifier: Apache-2.0
 
 daml 1.2
-module Davl where -- TODO: Should this name include the version?
+module Attempt1 where -- TODO: Should this name include the version?
 
 -- V2
 -- following proposal doc.. plus

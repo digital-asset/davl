@@ -1,8 +1,8 @@
 daml 1.2
 
-module Test where
+module TestAttempt1 where
 
-import Davl
+import Attempt1
 import DA.Date
 
 basic_flow = scenario do
