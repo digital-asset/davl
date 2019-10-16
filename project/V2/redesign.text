@@ -13,12 +13,12 @@ Company:
 + propose worker relationship (allowing company to make any worker a boss of another)
 + allocate N-days holiday to worker
 + allocate a worker as a (no-exclusive) team-member of another worker (boss role)
-- de-allocate a worker to a boss
++ de-allocate a worker to a boss
 - see the org chart: worker->[worker] boss-of links
 
 Worker
 + accept worker relationship
-- who are my bosses now?
++ who are my bosses now?
 + make a vacation request for a list of dates (no holiday allocation needed at this time)
 + cancel a request
 - count unspent holiday allocation

@@ -10,40 +10,51 @@ basic_flow = scenario do
   company <- getParty "the-company"
   dilbert <- getParty "dilbert"
   pointy <- getParty "pointy-haired-boss"
+  alice <- getParty "alice"
 
   ac <- submit company $ create AsCompany with company
   ad <- submit dilbert $ create AsWorker with worker = dilbert
   ap <- submit pointy $ create AsWorker with worker = pointy
+  aa <- submit alice $ create AsWorker with worker = alice
   apb <- submit pointy $ create AsBoss with boss = pointy
 
   p1 <- submit company $ exercise ac AsCompany_ProposeWorker with worker = dilbert
   submit dilbert $ exercise ad AsWorker_AcceptProposeWorker with proposal = p1
-
-  [h1,h2,h3] <- submit company $ exercise ac AsCompany_AllocateHoliday with worker = dilbert; nDays = 3
+  [_,_,_] <- submit company $ exercise ac AsCompany_AllocateHoliday with worker = dilbert; nDays = 3
 
   let xmas : Date = date 2019 Dec 25
   let boxing : Date = date 2019 Dec 26
   r1 <- submit dilbert $ exercise ad AsWorker_RequestVacation with dates = [xmas,boxing]
-
-  xs <- submit dilbert $ exercise ad AsWorker_GetPending
-  assertMsg "dilbert, penning=1" (length xs==1)
+  [_] <- submit dilbert $ exercise ad AsWorker_GetPending
 
   let newYearEve : Date = date 2019 Dec 31
   let newYearDay : Date = date 2020 Jan 01
   r2 <- submit dilbert $ exercise ad AsWorker_RequestVacation with dates = [newYearEve,newYearDay]
+  [_,_] <- submit dilbert $ exercise ad AsWorker_GetPending
+  [] <- submit dilbert $ exercise ad AsWorker_GetBosses
 
-  xs <- submit dilbert $ exercise ad AsWorker_GetPending
-  assertMsg "dilbert, pending=2" (length xs==2)
+  proposal <- submit company $ exercise ac AsCompany_ProposeWorker with worker = pointy
+  submit pointy $ exercise ap AsWorker_AcceptProposeWorker with proposal
+  [] <- submit pointy $ exercise apb AsBoss_GetMinionRequests
 
-  p2 <- submit company $ exercise ac AsCompany_ProposeWorker with worker = pointy
-  submit pointy $ exercise ap AsWorker_AcceptProposeWorker with proposal = p2
+  submit company $ exercise ac AsCompany_AddManagement with boss = pointy; minion = dilbert
+  [b1] <- submit dilbert $ exercise ad AsWorker_GetBosses
+  assertMsg "dilbert, bosses, b1" (b1==pointy)
+  [_,_] <- submit pointy $ exercise apb AsBoss_GetMinionRequests
 
-  xs <- submit pointy $ exercise apb AsBoss_GetMinionRequests
-  assertMsg "pointy, minion pending=0" (length xs==0)
 
-  submit company $ exercise ac AsCompany_AddMinion with boss = pointy; minion = dilbert
+  -- Alice starts work, and becomes a 2nd boss of Dilbert
+  proposal <- submit company $ exercise ac AsCompany_ProposeWorker with worker = alice
+  submit alice $ exercise aa AsWorker_AcceptProposeWorker with proposal
+  submit company $ exercise ac AsCompany_AddManagement with boss = alice; minion = dilbert
+  [_,_] <- submit pointy $ exercise apb AsBoss_GetMinionRequests
+  [_,_] <- submit dilbert $ exercise ad AsWorker_GetBosses
 
-  xs <- submit pointy $ exercise apb AsBoss_GetMinionRequests
-  assertMsg "pointy, minion pending=2" (length xs==2)
+  submit company $ exercise ac AsCompany_RemoveManagement with boss = pointy; minion = dilbert
+  [] <- submit pointy $ exercise apb AsBoss_GetMinionRequests
+  [b2] <- submit dilbert $ exercise ad AsWorker_GetBosses
+  assertMsg "dilbert, bosses, b2" (b2==alice)
+
+  -- TODO: have Alice approve Dilbert's vacation request
 
   return ()

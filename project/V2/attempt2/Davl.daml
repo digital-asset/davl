@@ -19,7 +19,7 @@ template AsCompany -- workflow
         worker : Party
       controller company
         do
-          create ProposeWorker with w = Worker with worker; company; minions = []; requests = []; obs = []
+          create ProposeWorker with w = Worker with worker; company; bosses = []; minions = []; requests = []
 
     nonconsuming choice AsCompany_AllocateHoliday : Hols
       with
@@ -29,16 +29,25 @@ template AsCompany -- workflow
         do
           exerciseByKey @Worker worker Worker_AllocateHoliday with nDays
 
-    nonconsuming choice AsCompany_AddMinion : ()
+    nonconsuming choice AsCompany_AddManagement : ()
       with
         boss : Party
         minion : Party
       controller company
         do
           exerciseByKey @Worker boss Worker_AddMinion with minion
-          exerciseByKey @Worker minion Worker_AddObserver with ob = boss
+          exerciseByKey @Worker minion Worker_AddBoss with boss
           return ()
 
+    nonconsuming choice AsCompany_RemoveManagement : ()
+      with
+        boss : Party
+        minion : Party
+      controller company
+        do
+          exerciseByKey @Worker boss Worker_RemoveMinion with minion
+          exerciseByKey @Worker minion Worker_RemoveBoss with boss
+          return ()
 
 template AsWorker -- workflow
   with
@@ -73,6 +82,12 @@ template AsWorker -- workflow
           (_,w) <- fetchByKey @Worker worker
           return w.requests
 
+    nonconsuming choice AsWorker_GetBosses : [Party]
+      controller worker
+        do
+          (_,w) <- fetchByKey @Worker worker
+          return w.bosses
+
 
 template AsBoss -- workflow
   with
@@ -104,29 +119,35 @@ template Worker --Relationship
   with
     worker : Party
     company : Party
-    obs : [Party]
 
     -- TODO: keep holiday allocation here, instead of separate allocations
     requests : [ContractId Request]
 
+    bosses : [Party] -- workers who can approve our vacation requests
     minions : [Party] -- workers whose vacation requests we can approve
-    -- TODO: keep bosses here?
 
   where
     signatory worker, company
-    observer obs
+    observer bosses
 
     key worker : Party
     maintainer key
 
-    choice Worker_AddObserver : ContractId Worker
+    choice Worker_AddBoss : ContractId Worker
       with
-        ob : Party
+        boss : Party
       controller company
         do
-          -- TODO: update observsers on other things
-          requests <- mapA (\r  -> exercise r Request_AddObserver with ob) requests
-          create this with obs = ob::obs; requests
+          requests <- mapA (\r  -> exercise r Request_AddObserver with ob = boss) requests
+          create this with bosses = boss::bosses; requests
+
+    choice Worker_RemoveBoss : ContractId Worker
+      with
+        boss : Party
+      controller company
+        do
+          requests <- mapA (\r  -> exercise r Request_RemoveObserver with ob = boss) requests
+          create this with bosses = filter (/= boss) bosses; requests
 
 
     nonconsuming choice Worker_GetMinionRequests : [ContractId Request]
@@ -152,7 +173,13 @@ template Worker --Relationship
         do
           create this with minions = minion::minions
 
-    -- TODO: RemoveMinion
+    choice Worker_RemoveMinion : ContractId Worker
+      with
+        minion : Party
+      controller company
+        do
+          create this with minions = filter (/= minion) minions
+
 
     choice Worker_RequestVacation : ContractId Request
       with
@@ -213,12 +240,20 @@ template Request -- aka Propose_Vacation
   where
     signatory vac.worker
     observer obs
+
     choice Request_AddObserver : ContractId Request
       with
         ob : Party
       controller vac.company
         do
           create this with obs = ob::obs
+
+    choice Request_RemoveObserver : ContractId Request
+      with
+        ob : Party
+      controller vac.company
+        do
+          create this with obs = filter (/=ob) obs
 
 
 template Holiday
