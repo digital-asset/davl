@@ -21,8 +21,9 @@ Worker
 - make a vacation request for a list of dates (no holiday allocation needed at this time)
 - cancel a request
 - count unspent holiday allocation
+- count unspent holiday allocation - days for pending request
 - view denials
-- viee open requests
+- view open requests
 - view booked vacations of everyone
 
 Worker (in Boss role)
@@ -30,3 +31,13 @@ Worker (in Boss role)
 - see pending vacations requests from my team
 - approve/deny a team member's pending request
 - see denials I made
+
+
+----------------------------------------------------------------------
+Tue Oct 15 15:54:23 2019
+review with Gary
+- HR instead of company?
+- As* contracts.. Always making choices consuming to force the create/exercise workflow?
+- "subordinate" instead of "team" -- or just use "minion"
+- How does the frontend discover what `workflow' choices are available?
+- should ProposeWorker also have contract key, for discovery by accept choice?
