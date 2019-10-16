@@ -19,7 +19,7 @@ template AsCompany -- workflow
         worker : Party
       controller company
         do
-          create ProposeWorker with w = Worker with worker; company; minions = []; requests = []
+          create ProposeWorker with w = Worker with worker; company; minions = []; requests = []; obs = []
 
     nonconsuming choice AsCompany_AllocateHoliday : Hols
       with
@@ -29,14 +29,15 @@ template AsCompany -- workflow
         do
           exerciseByKey @Worker worker Worker_AllocateHoliday with nDays
 
-    nonconsuming choice AsCompany_AddTeam : ContractId Worker
+    nonconsuming choice AsCompany_AddMinion : ()
       with
         boss : Party
         minion : Party
       controller company
         do
-          exerciseByKey @Worker boss Worker_AddTeam with minion
-
+          exerciseByKey @Worker boss Worker_AddMinion with minion
+          exerciseByKey @Worker minion Worker_AddObserver with ob = boss
+          return ()
 
 
 template AsWorker -- workflow
@@ -98,10 +99,12 @@ template ProposeWorker
           create Allocation with worker = w.worker; company = w.company; hols = []
           create w
 
+
 template Worker --Relationship
   with
     worker : Party
     company : Party
+    obs : [Party]
 
     -- TODO: keep holiday allocation here, instead of separate allocations
     requests : [ContractId Request]
@@ -111,8 +114,26 @@ template Worker --Relationship
 
   where
     signatory worker, company
+    observer obs
+
     key worker : Party
     maintainer key
+
+    choice Worker_AddObserver : ContractId Worker
+      with
+        ob : Party
+      controller company
+        do
+          -- TODO: update observsers on other things
+          requests <- mapA (\r  -> exercise r Request_AddObserver with ob) requests
+          create this with obs = ob::obs; requests
+
+
+    nonconsuming choice Worker_GetMinionRequests : [ContractId Request]
+      controller worker
+        do
+          ws <- mapA (fmap snd . fetchByKey @Worker) minions
+          return $ concatMap (.requests) ws
 
     nonconsuming choice Worker_AllocateHoliday : Hols
       with
@@ -124,19 +145,21 @@ template Worker --Relationship
           exerciseByKey @Allocation worker Allocation_Add with newHols
           return newHols
 
-    choice Worker_AddTeam : ContractId Worker
+    choice Worker_AddMinion : ContractId Worker
       with
         minion : Party
       controller company
         do
           create this with minions = minion::minions
 
+    -- TODO: RemoveMinion
+
     choice Worker_RequestVacation : ContractId Request
       with
         dates : [Date]
       controller worker
         do
-          r <- create Request with vac = Vacation with worker; company; dates
+          r <- create Request with vac = (Vacation with worker; company; dates); obs = []
           create this with requests = r::requests
           return r
 
@@ -148,12 +171,6 @@ template Worker --Relationship
           archive req
           create this with requests = filter (/= req) requests
           return ()
-
-    nonconsuming choice Worker_GetMinionRequests : [ContractId Request]
-      controller worker
-        do
-          ws <- mapA (fmap snd . fetchByKey @Worker) minions
-          return $ concatMap (.requests) ws
 
 
 type Hols = [ContractId Holiday]
@@ -189,12 +206,19 @@ template Allocation -- Store of Holiday per Worker
 
 
 
-
 template Request -- aka Propose_Vacation
   with
     vac : Vacation
+    obs : [Party]
   where
     signatory vac.worker
+    observer obs
+    choice Request_AddObserver : ContractId Request
+      with
+        ob : Party
+      controller vac.company
+        do
+          create this with obs = ob::obs
 
 
 template Holiday

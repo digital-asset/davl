@@ -39,12 +39,11 @@ basic_flow = scenario do
   submit pointy $ exercise ap AsWorker_AcceptProposeWorker with proposal = p2
 
   xs <- submit pointy $ exercise apb AsBoss_GetMinionRequests
-  assertMsg "dilbert, minion pending=0" (length xs==0)
+  assertMsg "pointy, minion pending=0" (length xs==0)
 
-  submit company $ exercise ac AsCompany_AddTeam with boss = pointy; minion = dilbert
+  submit company $ exercise ac AsCompany_AddMinion with boss = pointy; minion = dilbert
 
-  -- TODO: next line fails, and I dont understand why
-  --xs <- submit pointy $ exercise apb AsBoss_GetMinionRequests
-  --assertMsg "dilbert, minion pending=2" (length xs==2)
+  xs <- submit pointy $ exercise apb AsBoss_GetMinionRequests
+  assertMsg "pointy, minion pending=2" (length xs==2)
 
   return ()
