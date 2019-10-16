@@ -12,7 +12,8 @@ Workflow...
 Company:
 + propose worker relationship (allowing company to make any worker a boss of another)
 + allocate N-days holiday to worker
-- allocate/de-allocate a worker as a (no-exclusive) team-member of another worker (boss role)
++ allocate a worker as a (no-exclusive) team-member of another worker (boss role)
+- de-allocate a worker to a boss
 - see the org chart: worker->[worker] boss-of links
 
 Worker
@@ -28,7 +29,7 @@ Worker
 
 Worker (in Boss role)
 - who works for me now?
-- see pending vacations requests from my team
++ see pending vacations requests from my team
 - approve/deny a team member's pending request
 - see denials I made
 
