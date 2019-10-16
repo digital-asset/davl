@@ -10,16 +10,16 @@ Redesign V2, goals:
 Workflow...
 
 Company:
-- propose worker relationship (allowing company to make any worker a boss of another)
-- allocate N-days holiday to worker
++ propose worker relationship (allowing company to make any worker a boss of another)
++ allocate N-days holiday to worker
 - allocate/de-allocate a worker as a (no-exclusive) team-member of another worker (boss role)
 - see the org chart: worker->[worker] boss-of links
 
 Worker
-- accept worker relationship
++ accept worker relationship
 - who are my bosses now?
-- make a vacation request for a list of dates (no holiday allocation needed at this time)
-- cancel a request
++ make a vacation request for a list of dates (no holiday allocation needed at this time)
++ cancel a request
 - count unspent holiday allocation
 - count unspent holiday allocation - days for pending request
 - view denials
