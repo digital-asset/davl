@@ -5,7 +5,39 @@ module Test where
 import Davl
 import DA.Date
 
-basic_flow = scenario do
+simpler_flow = scenario do
+
+  company <- getParty "the-company"
+  dilbert <- getParty "dilbert"
+  alice <- getParty "alice"
+
+  ac <- submit company $ create AsCompany with company
+  ad <- submit dilbert $ create AsWorker with worker = dilbert
+  aa <- submit alice $ create AsWorker with worker = alice
+  aab <- submit alice $ create AsBoss with boss = alice
+
+  -- Dilbert becomes a worker for the company and gets 1 day holiday allocation
+  p1 <- submit company $ exercise ac AsCompany_ProposeWorker with worker = dilbert
+  submit dilbert $ exercise ad AsWorker_AcceptProposeWorker with proposal = p1
+  [_] <- submit company $ exercise ac AsCompany_AllocateHoliday with worker = dilbert; nDays = 1
+
+  -- Dilbert makes a Holiday requests, of 1 day
+  let xmas : Date = date 2019 Dec 25
+  submit dilbert $ exercise ad AsWorker_RequestVacation with dates = [xmas]
+
+  -- Alice becomes a worker, and Dilbert's boss
+  proposal <- submit company $ exercise ac AsCompany_ProposeWorker with worker = alice
+  submit alice $ exercise aa AsWorker_AcceptProposeWorker with proposal
+  submit company $ exercise ac AsCompany_AddManagement with boss = alice; minion = dilbert
+
+  -- Alice approves Dilert's request
+  [req] <- submit alice $ exercise aab AsBoss_GetMinionRequests
+  submit alice $ exercise aab AsBoss_ApproveMinionRequest with req
+
+  return ()
+
+
+longer_flow = scenario do
 
   company <- getParty "the-company"
   dilbert <- getParty "dilbert"
@@ -100,4 +132,32 @@ basic_flow = scenario do
   1 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidays
   1 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidaysWithoutPendingRequests
 
+  -- Dilbert, re-requests his new-year's vacation
+  submit dilbert $ exercise ad AsWorker_RequestVacation with dates = [newYearEve,newYearDay]
+  1 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidays
+  (-1) <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidaysWithoutPendingRequests
+
+  -- Alice cannot appove that request even if she want to, because Dilbert does not have enough holiday
+  [req] <- submit alice $ exercise aab AsBoss_GetMinionRequests
+  submitMustFail alice $ exercise aab AsBoss_ApproveMinionRequest with req
+
+  -- Company grants Dilbert 3 more days of holiday allocation
+  [_,_,_] <- submit company $ exercise ac AsCompany_AllocateHoliday with worker = dilbert; nDays = 3
+  4 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidays
+  (2) <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidaysWithoutPendingRequests
+
+  -- And now alice can approve
+  [req] <- submit alice $ exercise aab AsBoss_GetMinionRequests
+  submit alice $ exercise aab AsBoss_ApproveMinionRequest with req
+
+  -- Another request from Dilbert
+  let valentines : Date = date 2020 Feb 14
+  submit dilbert $ exercise ad AsWorker_RequestVacation with dates = [valentines]
+
+  -- But Alice denies this one
+  [req] <- submit alice $ exercise aab AsBoss_GetMinionRequests
+  d1 <- submit alice $ exercise aab AsBoss_DenyMinionRequest with req; reason = "sorry"
+
+
   return ()
+

@@ -21,6 +21,7 @@ template AsCompany -- workflow
       controller company
         do
           create ProposeWorker with w = Worker with worker; company; bosses = []; minions = []; requests = []
+
     nonconsuming choice AsCompany_AllocateHoliday : [ContractId Holiday]
       with
         worker : Party
@@ -130,6 +131,14 @@ template AsBoss -- workflow -- TODO: don't bother to distinguish from AsWorker
         do
           exerciseByKey @Worker boss Worker_ApproveMinionRequest with req
 
+    nonconsuming choice AsBoss_DenyMinionRequest : ContractId Denial
+      with
+        req : ContractId Request
+        reason : Text
+      controller boss
+        do
+          exerciseByKey @Worker boss Worker_DenyMinionRequest with req; reason; boss
+
 
 template ProposeWorker
   with
@@ -203,13 +212,36 @@ template Worker --Relationship
           create this with requests = filter (/= req) requests
           return v
 
+    nonconsuming choice Worker_DenyMinionRequest : ContractId Denial
+      with
+        req : ContractId Request
+        reason : Text
+        boss : Party
+      controller worker
+        do
+          minionRequests <- exercise self Worker_GetMinionRequests
+          assert (req `elem` minionRequests)
+          Request{vac} <- fetch req
+          exerciseByKey @Worker vac.worker Worker_DenyMyRequest with req; reason; boss
+
+    choice Worker_DenyMyRequest : ContractId Denial
+      with
+        req : ContractId Request
+        reason : Text
+        boss : Party
+      controller company, boss
+        do
+          d <- exercise req Request_Deny with reason; boss
+          create this with requests = filter (/= req) requests
+          return d
+
     nonconsuming choice Worker_AllocateHoliday : [ContractId Holiday]
       with
         nDays : Int
       controller company
         do
           assert (nDays > 0)
-          newHols <- mapA create (replicate nDays (Holiday with worker; company; obs = []))
+          newHols <- mapA create (replicate nDays (Holiday with worker; company; obs = bosses))
           exerciseByKey @Allocation worker Allocation_Add with newHols
           return newHols
 
@@ -232,7 +264,7 @@ template Worker --Relationship
         dates : [Date]
       controller worker
         do
-          r <- create Request with vac = (Vacation with worker; company; dates); obs = []
+          r <- create Request with vac = (Vacation with worker; company; dates); obs = bosses
           create this with requests = r::requests
           return r
 
@@ -264,21 +296,21 @@ template Allocation -- Store of Holiday per Worker
         ob : Party
       controller company
         do
-          hols <- mapA (\r  -> exercise r Holiday_AddObserver with ob) hols
-          create this with obs = ob::obs; hols
+          hols1 <- mapA (\h -> exercise h Holiday_AddObserver with ob) hols
+          create this with obs = ob::obs; hols = hols1
 
     choice Allocation_RemoveObserver : ContractId Allocation
       with
         ob : Party
       controller company
         do
-          hols <- mapA (\r  -> exercise r Holiday_RemoveObserver with ob) hols
-          create this with obs = filter (/=ob) obs; hols
+          hols1 <- mapA (\h -> exercise h Holiday_RemoveObserver with ob) hols
+          create this with obs = filter (/=ob) obs; hols = hols1
 
     choice Allocation_Add : ContractId Allocation
       with
         newHols : [ContractId Holiday]
-      controller worker
+      controller company
         do
           create this with hols = hols ++ newHols
 
@@ -322,6 +354,14 @@ template Request -- aka Propose_Vacation
         do
           exerciseByKey @Allocation vac.worker Allocation_Spend with vac
 
+    choice Request_Deny : ContractId Denial
+      with
+        boss : Party
+        reason : Text
+      controller vac.company, boss
+        do
+          create Denial with vac; boss; reason
+
 
 template Holiday
   with
@@ -330,6 +370,7 @@ template Holiday
     obs : [Party]
   where
     signatory worker, company
+    observer obs
 
     choice Holiday_AddObserver : ContractId Holiday
       with
@@ -357,3 +398,12 @@ template Vacation
     -- TODO: allow visability to everyone (authorized by the company)
     -- either by adding/removing observers, as we do in other places
     -- or by using the ValidatedCopy idiom.
+
+
+template Denial
+  with
+    vac : Vacation
+    reason : Text
+    boss : Party
+  where
+    signatory vac.worker, vac.company, boss
