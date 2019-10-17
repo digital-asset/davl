@@ -2,10 +2,11 @@
 -- SPDX-License-Identifier: Apache-2.0
 
 daml 1.2
-module Davl where -- V2, Attempt 2. -- WIP, stuck
-
+module Davl where -- V2, Attempt 2. -- WIP, see ../redesign.text
 
 import DA.List as List
+
+-- TODO: split this DAML code over multiple files
 
 
 template AsCompany -- workflow
@@ -20,8 +21,7 @@ template AsCompany -- workflow
       controller company
         do
           create ProposeWorker with w = Worker with worker; company; bosses = []; minions = []; requests = []
-
-    nonconsuming choice AsCompany_AllocateHoliday : Hols
+    nonconsuming choice AsCompany_AllocateHoliday : [ContractId Holiday]
       with
         worker : Party
         nDays : Int
@@ -37,6 +37,7 @@ template AsCompany -- workflow
         do
           exerciseByKey @Worker boss Worker_AddMinion with minion
           exerciseByKey @Worker minion Worker_AddBoss with boss
+          exerciseByKey @Allocation minion Allocation_AddObserver with ob = boss
           return ()
 
     nonconsuming choice AsCompany_RemoveManagement : ()
@@ -47,7 +48,9 @@ template AsCompany -- workflow
         do
           exerciseByKey @Worker boss Worker_RemoveMinion with minion
           exerciseByKey @Worker minion Worker_RemoveBoss with boss
+          exerciseByKey @Allocation minion Allocation_RemoveObserver with ob = boss
           return ()
+
 
 template AsWorker -- workflow
   with
@@ -89,7 +92,7 @@ template AsWorker -- workflow
           return w.bosses
 
 
-template AsBoss -- workflow
+template AsBoss -- workflow -- TODO: don't bother to distinguish from AsWorker
   with
     boss : Party
   where
@@ -100,6 +103,12 @@ template AsBoss -- workflow
         do
           exerciseByKey @Worker boss Worker_GetMinionRequests
 
+    nonconsuming choice AsBoss_ApproveMinionRequest : ContractId Vacation
+      with
+        req : ContractId Request
+      controller boss
+        do
+          exerciseByKey @Worker boss Worker_ApproveMinionRequest with req
 
 
 template ProposeWorker
@@ -111,7 +120,7 @@ template ProposeWorker
     choice ProposeWorker_Accept : ContractId Worker
       controller w.worker
         do
-          create Allocation with worker = w.worker; company = w.company; hols = []
+          create Allocation with worker = w.worker; company = w.company; obs = []; hols = []
           create w
 
 
@@ -121,8 +130,7 @@ template Worker --Relationship
     company : Party
 
     -- TODO: keep holiday allocation here, instead of separate allocations
-    requests : [ContractId Request]
-
+    requests : [ContractId Request] -- our requests
     bosses : [Party] -- workers who can approve our vacation requests
     minions : [Party] -- workers whose vacation requests we can approve
 
@@ -149,20 +157,29 @@ template Worker --Relationship
           requests <- mapA (\r  -> exercise r Request_RemoveObserver with ob = boss) requests
           create this with bosses = filter (/= boss) bosses; requests
 
-
     nonconsuming choice Worker_GetMinionRequests : [ContractId Request]
       controller worker
         do
           ws <- mapA (fmap snd . fetchByKey @Worker) minions
           return $ concatMap (.requests) ws
 
-    nonconsuming choice Worker_AllocateHoliday : Hols
+    nonconsuming choice Worker_ApproveMinionRequest : ContractId Vacation
+      with
+        req : ContractId Request
+      controller worker
+        do
+          minionRequests <- exercise self Worker_GetMinionRequests
+          assert (req `elem` minionRequests)
+          Request{vac} <- fetch req
+          exercise req Request_Approve
+
+    nonconsuming choice Worker_AllocateHoliday : [ContractId Holiday]
       with
         nDays : Int
       controller company
         do
           assert (nDays > 0)
-          newHols <- mapA create (replicate nDays (Holiday with worker; company))
+          newHols <- mapA create (replicate nDays (Holiday with worker; company; obs = []))
           exerciseByKey @Allocation worker Allocation_Add with newHols
           return newHols
 
@@ -179,7 +196,6 @@ template Worker --Relationship
       controller company
         do
           create this with minions = filter (/= minion) minions
-
 
     choice Worker_RequestVacation : ContractId Request
       with
@@ -200,24 +216,41 @@ template Worker --Relationship
           return ()
 
 
-type Hols = [ContractId Holiday]
-
 template Allocation -- Store of Holiday per Worker
   with
     worker : Party
     company : Party
-    hols : Hols
+    obs : [Party]
+    hols : [ContractId Holiday]
   where
     signatory worker, company
+    observer obs
+
     key worker : Party
     maintainer key
 
+    choice Allocation_AddObserver : ContractId Allocation
+      with
+        ob : Party
+      controller company
+        do
+          hols <- mapA (\r  -> exercise r Holiday_AddObserver with ob) hols
+          create this with obs = ob::obs; hols
+
+    choice Allocation_RemoveObserver : ContractId Allocation
+      with
+        ob : Party
+      controller company
+        do
+          hols <- mapA (\r  -> exercise r Holiday_RemoveObserver with ob) hols
+          create this with obs = filter (/=ob) obs; hols
+
     choice Allocation_Add : ContractId Allocation
       with
-        newHols : Hols
+        newHols : [ContractId Holiday]
       controller worker
         do
-          create Allocation with worker; company; hols = hols ++ newHols
+          create this with hols = hols ++ newHols
 
     choice Allocation_Spend : ContractId Vacation
       with
@@ -228,9 +261,8 @@ template Allocation -- Store of Holiday per Worker
           let (spentHols,remainingHols) = List.splitAt n hols
           assert (length spentHols == n)
           mapA archive spentHols
-          create Allocation with worker; company; hols = remainingHols
+          create this with hols = remainingHols
           create vac
-
 
 
 template Request -- aka Propose_Vacation
@@ -255,13 +287,33 @@ template Request -- aka Propose_Vacation
         do
           create this with obs = filter (/=ob) obs
 
+    choice Request_Approve : ContractId Vacation
+      controller vac.company
+        do
+          exerciseByKey @Allocation vac.worker Allocation_Spend with vac
+
 
 template Holiday
   with
     worker : Party
     company : Party
+    obs : [Party]
   where
     signatory worker, company
+
+    choice Holiday_AddObserver : ContractId Holiday
+      with
+        ob : Party
+      controller company
+        do
+          create this with obs = ob::obs
+
+    choice Holiday_RemoveObserver : ContractId Holiday
+      with
+        ob : Party
+      controller company
+        do
+          create this with obs = filter (/=ob) obs
 
 
 template Vacation
@@ -272,3 +324,6 @@ template Vacation
   where
     signatory worker, company
 
+    -- TODO: allow visability to everyone (authorized by the company)
+    -- either by adding/removing observers, as we do in other places
+    -- or by using the ValidatedCopy idiom.

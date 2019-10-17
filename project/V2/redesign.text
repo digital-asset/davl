@@ -24,13 +24,14 @@ Worker
 - count unspent holiday allocation
 - count unspent holiday allocation - days for pending request
 - view denials
-- view open requests
++ view open(pending) requests
 - view booked vacations of everyone
 
 Worker (in Boss role)
 - who works for me now?
 + see pending vacations requests from my team
-- approve/deny a team member's pending request
++ approve a team member's pending request
+- deny a team member's pending request
 - see denials I made
 
 
