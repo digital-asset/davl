@@ -25,18 +25,26 @@ basic_flow = scenario do
   -- Dilbert becomes a worker for the company and gets 3 days holiday allocation
   p1 <- submit company $ exercise ac AsCompany_ProposeWorker with worker = dilbert
   submit dilbert $ exercise ad AsWorker_AcceptProposeWorker with proposal = p1
+  0 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidays
+  0 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidaysWithoutPendingRequests
   [_,_,_] <- submit company $ exercise ac AsCompany_AllocateHoliday with worker = dilbert; nDays = 3
+  3 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidays
+  3 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidaysWithoutPendingRequests
 
   -- Dilbert makes two Holiday requests, each of 2 days
   let xmas : Date = date 2019 Dec 25
   let boxing : Date = date 2019 Dec 26
   submit dilbert $ exercise ad AsWorker_RequestVacation with dates = [xmas,boxing]
   [_] <- submit dilbert $ exercise ad AsWorker_GetPending
+  3 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidays
+  1 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidaysWithoutPendingRequests
 
   let newYearEve : Date = date 2019 Dec 31
   let newYearDay : Date = date 2020 Jan 01
   submit dilbert $ exercise ad AsWorker_RequestVacation with dates = [newYearEve,newYearDay]
   [_,_] <- submit dilbert $ exercise ad AsWorker_GetPending
+  3 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidays
+  (-1) <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidaysWithoutPendingRequests
 
   -- Pointy becomes a worker too, but is not yet the boss of Dilbert
   proposal <- submit company $ exercise ac AsCompany_ProposeWorker with worker = pointy
@@ -56,7 +64,11 @@ basic_flow = scenario do
   -- Alice starts work, and becomes a 2nd boss of Dilbert
   proposal <- submit company $ exercise ac AsCompany_ProposeWorker with worker = alice
   submit alice $ exercise aa AsWorker_AcceptProposeWorker with proposal
+  [] <- submit alice $ exercise aab AsBoss_GetMinions
   submit company $ exercise ac AsCompany_AddManagement with boss = alice; minion = dilbert
+  [_] <- submit alice $ exercise aab AsBoss_GetMinions
+  [_,_] <- submit alice $ exercise aab AsBoss_GetMinionRequests
+  [_] <- submit pointy $ exercise apb AsBoss_GetMinions
   [_,_] <- submit pointy $ exercise apb AsBoss_GetMinionRequests
   [_,_] <- submit dilbert $ exercise ad AsWorker_GetBosses
 
@@ -72,6 +84,8 @@ basic_flow = scenario do
   [rOnly] <- submit dilbert $ exercise ad AsWorker_GetPending
   [rOnly'] <- submit alice $ exercise aab AsBoss_GetMinionRequests
   assertMsg "alice, see Dilbert's only request" (rOnly==rOnly')
+  3 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidays
+  1 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidaysWithoutPendingRequests
 
   -- Pointy is not able to approve Dilbert's request
   submitMustFail pointy $ exercise apb AsBoss_ApproveMinionRequest with req = rOnly
@@ -81,5 +95,9 @@ basic_flow = scenario do
 
   -- Alice can approve Dilbert's request
   submit alice $ exercise aab AsBoss_ApproveMinionRequest with req = rOnly
+  [] <- submit dilbert $ exercise ad AsWorker_GetPending
+  [] <- submit alice $ exercise aab AsBoss_GetMinionRequests
+  1 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidays
+  1 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidaysWithoutPendingRequests
 
   return ()

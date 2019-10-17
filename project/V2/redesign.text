@@ -21,8 +21,8 @@ Worker
 + who are my bosses now?
 + make a vacation request for a list of dates (no holiday allocation needed at this time)
 + cancel a request
-- count unspent holiday allocation
-- count unspent holiday allocation - days for pending request
++ count unspent holiday allocation
++ count unspent holiday allocation - days for pending request
 - view denials
 + view open(pending) requests
 - view booked vacations of everyone

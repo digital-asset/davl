@@ -91,6 +91,20 @@ template AsWorker -- workflow
           (_,w) <- fetchByKey @Worker worker
           return w.bosses
 
+    nonconsuming choice AsWorker_CountUnspentHolidays : Int
+      controller worker
+        do
+          (_,a) <- fetchByKey @Allocation worker
+          return (length a.hols)
+
+    nonconsuming choice AsWorker_CountUnspentHolidaysWithoutPendingRequests : Int
+      controller worker
+        do
+          (_,a) <- fetchByKey @Allocation worker
+          (_,w) <- fetchByKey @Worker worker
+          rs <- mapA fetch w.requests
+          return (length a.hols - length (concatMap (\r -> r.vac.dates) rs))
+
 
 template AsBoss -- workflow -- TODO: don't bother to distinguish from AsWorker
   with
@@ -177,7 +191,17 @@ template Worker --Relationship
           minionRequests <- exercise self Worker_GetMinionRequests
           assert (req `elem` minionRequests)
           Request{vac} <- fetch req
-          exercise req Request_Approve
+          exerciseByKey @Worker vac.worker Worker_ApproveMyRequest with req
+
+    choice Worker_ApproveMyRequest : ContractId Vacation
+      with
+        req : ContractId Request
+      controller company
+        do
+          Request{vac} <- fetch req
+          v <- exercise req Request_Approve
+          create this with requests = filter (/= req) requests
+          return v
 
     nonconsuming choice Worker_AllocateHoliday : [ContractId Holiday]
       with
