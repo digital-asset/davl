@@ -144,19 +144,27 @@ longer_flow = scenario do
   -- Company grants Dilbert 3 more days of holiday allocation
   [_,_,_] <- submit company $ exercise ac AsCompany_AllocateHoliday with worker = dilbert; nDays = 3
   4 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidays
-  (2) <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidaysWithoutPendingRequests
+  2 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidaysWithoutPendingRequests
 
   -- And now alice can approve
   [req] <- submit alice $ exercise aab AsBoss_GetMinionRequests
   submit alice $ exercise aab AsBoss_ApproveMinionRequest with req
+  2 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidays
+  2 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidaysWithoutPendingRequests
 
   -- Another request from Dilbert
   let valentines : Date = date 2020 Feb 14
   submit dilbert $ exercise ad AsWorker_RequestVacation with dates = [valentines]
+  2 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidays
+  1 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidaysWithoutPendingRequests
 
   -- But Alice denies this one
   [req] <- submit alice $ exercise aab AsBoss_GetMinionRequests
+  [] <- submit dilbert $ exercise ad AsWorker_GetDenials
   d1 <- submit alice $ exercise aab AsBoss_DenyMinionRequest with req; reason = "sorry"
+  2 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidays
+  2 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidaysWithoutPendingRequests
+  [_] <- submit dilbert $ exercise ad AsWorker_GetDenials
 
 
   return ()

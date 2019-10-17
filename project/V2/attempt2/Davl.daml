@@ -20,7 +20,8 @@ template AsCompany -- workflow
         worker : Party
       controller company
         do
-          create ProposeWorker with w = Worker with worker; company; bosses = []; minions = []; requests = []
+          create ProposeWorker with
+              w = Worker with worker; company; bosses = []; minions = []; requests = []; denials = []
 
     nonconsuming choice AsCompany_AllocateHoliday : [ContractId Holiday]
       with
@@ -85,6 +86,12 @@ template AsWorker -- workflow
         do
           (_,w) <- fetchByKey @Worker worker
           return w.requests
+
+    nonconsuming choice AsWorker_GetDenials : [ContractId Denial]
+      controller worker
+        do
+          (_,w) <- fetchByKey @Worker worker
+          return w.denials
 
     nonconsuming choice AsWorker_GetBosses : [Party]
       controller worker
@@ -162,6 +169,7 @@ template Worker --Relationship
     requests : [ContractId Request] -- our requests
     bosses : [Party] -- workers who can approve our vacation requests
     minions : [Party] -- workers whose vacation requests we can approve
+    denials : [ContractId Denial] -- requests we made which got denied
 
   where
     signatory worker, company
@@ -175,6 +183,7 @@ template Worker --Relationship
         boss : Party
       controller company
         do
+          -- TODO: nub (dont re-add boss)
           requests <- mapA (\r  -> exercise r Request_AddObserver with ob = boss) requests
           create this with bosses = boss::bosses; requests
 
@@ -232,7 +241,7 @@ template Worker --Relationship
       controller company, boss
         do
           d <- exercise req Request_Deny with reason; boss
-          create this with requests = filter (/= req) requests
+          create this with requests = filter (/= req) requests; denials = d::denials
           return d
 
     nonconsuming choice Worker_AllocateHoliday : [ContractId Holiday]
@@ -250,6 +259,7 @@ template Worker --Relationship
         minion : Party
       controller company
         do
+          -- TODO: nub (dont re-add minion)
           create this with minions = minion::minions
 
     choice Worker_RemoveMinion : ContractId Worker

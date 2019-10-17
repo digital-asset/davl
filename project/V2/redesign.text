@@ -23,7 +23,7 @@ Worker
 + cancel a request
 + count unspent holiday allocation
 + count unspent holiday allocation - days for pending request
-- view denials
++ view denials
 + view open(pending) requests
 - view booked vacations of everyone
 
@@ -32,7 +32,7 @@ Worker (in Boss role)
 + see pending vacations requests from my team
 + approve a team member's pending request
 + deny a team member's pending request
-- see denials I made
+X see denials I made
 
 
 ----------------------------------------------------------------------
