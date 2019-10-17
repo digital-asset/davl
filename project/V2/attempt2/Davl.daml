@@ -98,6 +98,12 @@ template AsBoss -- workflow -- TODO: don't bother to distinguish from AsWorker
   where
     signatory boss
 
+    nonconsuming choice AsBoss_GetMinions : [Party]
+      controller boss
+        do
+          (_,w) <- fetchByKey @Worker boss
+          return w.minions
+
     nonconsuming choice AsBoss_GetMinionRequests : [ContractId Request]
       controller boss
         do

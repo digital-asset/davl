@@ -28,7 +28,7 @@ Worker
 - view booked vacations of everyone
 
 Worker (in Boss role)
-- who works for me now?
++ who works for me now?
 + see pending vacations requests from my team
 + approve a team member's pending request
 - deny a team member's pending request

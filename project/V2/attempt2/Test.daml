@@ -42,12 +42,15 @@ basic_flow = scenario do
   proposal <- submit company $ exercise ac AsCompany_ProposeWorker with worker = pointy
   submit pointy $ exercise ap AsWorker_AcceptProposeWorker with proposal
   [] <- submit dilbert $ exercise ad AsWorker_GetBosses
+  [] <- submit pointy $ exercise apb AsBoss_GetMinions
   [] <- submit pointy $ exercise apb AsBoss_GetMinionRequests
 
   -- Pointy gets Dilbert as a minion, and so can see Dilbert's requests
   submit company $ exercise ac AsCompany_AddManagement with boss = pointy; minion = dilbert
   [b1] <- submit dilbert $ exercise ad AsWorker_GetBosses
   assertMsg "dilbert, bosses, b1" (b1==pointy)
+  [m1] <- submit pointy $ exercise apb AsBoss_GetMinions
+  assertMsg "pointy, minions, b1" (m1==dilbert)
   [_,_] <- submit pointy $ exercise apb AsBoss_GetMinionRequests
 
   -- Alice starts work, and becomes a 2nd boss of Dilbert
