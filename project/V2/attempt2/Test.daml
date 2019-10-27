@@ -5,6 +5,7 @@ module Test where
 import Davl
 import DA.Date
 
+
 simpler_flow = scenario do
 
   company <- getParty "the-company"
@@ -15,6 +16,8 @@ simpler_flow = scenario do
   ad <- submit dilbert $ create AsWorker with worker = dilbert
   aa <- submit alice $ create AsWorker with worker = alice
   aab <- submit alice $ create AsBoss with boss = alice
+
+  submit company $ exercise ac AsCompany_CreateVacationStore
 
   -- Dilbert becomes a worker for the company and gets 1 day holiday allocation
   p1 <- submit company $ exercise ac AsCompany_ProposeWorker with worker = dilbert
@@ -30,9 +33,15 @@ simpler_flow = scenario do
   submit alice $ exercise aa AsWorker_AcceptProposeWorker with proposal
   submit company $ exercise ac AsCompany_AddManagement with boss = alice; minion = dilbert
 
+
+  [] <- submit dilbert $ exercise ad AsWorker_GetEveryonesVacation
+
   -- Alice approves Dilert's request
   [req] <- submit alice $ exercise aab AsBoss_GetMinionRequests
   submit alice $ exercise aab AsBoss_ApproveMinionRequest with req
+
+
+  --[_] <- submit dilbert $ exercise ad AsWorker_GetEveryonesVacation -- TODO
 
   return ()
 
@@ -53,6 +62,8 @@ longer_flow = scenario do
   adb <- submit dilbert $ create AsBoss with boss = dilbert
   apb <- submit pointy $ create AsBoss with boss = pointy
   aab <- submit alice $ create AsBoss with boss = alice
+
+  submit company $ exercise ac AsCompany_CreateVacationStore
 
   -- Dilbert becomes a worker for the company and gets 3 days holiday allocation
   p1 <- submit company $ exercise ac AsCompany_ProposeWorker with worker = dilbert
@@ -166,6 +177,9 @@ longer_flow = scenario do
   2 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidaysWithoutPendingRequests
   [_] <- submit dilbert $ exercise ad AsWorker_GetDenials
 
+
+--  x <- submit dilbert $ exercise ad AsWorker_GetEveryonesVacation
+--  assert (x == [])
 
   return ()
 
