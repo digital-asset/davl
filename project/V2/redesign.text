@@ -1,0 +1,45 @@
+
+Redesign V2, goals:
+
+- Handle the visibility issue.
+- The boss-of relationship is entirely transitory.
+- Any worker can be the boss of another at the behest of the company.
+- Being a boss-of another simply means being able to approve/deny their vacation requests.
+- No constraints on boss-of structure. Allow: self-boss, multi-boss, cyclic-boss, no-boss.
+
+Workflow...
+
+Company:
++ propose worker relationship (allowing company to make any worker a boss of another)
++ allocate N-days holiday to worker
++ allocate a worker as a (no-exclusive) team-member of another worker (boss role)
++ de-allocate a worker to a boss
+X see the org chart: worker->[worker] boss-of links
+
+Worker
++ accept worker relationship
++ who are my bosses now?
++ make a vacation request for a list of dates (no holiday allocation needed at this time)
++ cancel a request
++ count unspent holiday allocation
++ count unspent holiday allocation - days for pending request
++ view denials
++ view open(pending) requests
++ view booked vacations of everyone
+
+Worker (in Boss role)
++ who works for me now?
++ see pending vacations requests from my team
++ approve a team member's pending request
++ deny a team member's pending request
+X see denials I made
+
+
+----------------------------------------------------------------------
+Tue Oct 15 15:54:23 2019
+review with Gary
+- HR instead of company?
+- As* contracts.. Always making choices consuming to force the create/exercise workflow?
+- "subordinate" instead of "team" -- or just use "minion"
+- How does the frontend discover what `workflow' choices are available?
+- should ProposeWorker also have contract key, for discovery by accept choice?
