@@ -50,3 +50,17 @@ One of the hopes for these notes is they might form the basis of future blog pos
 
 - Following the demo and discussions on Friday, we are now considering what features to add in the V2 model
 And how we plan to migrate from V1 to V2.
+
+
+### Mon 28th October
+
+- The rewrite for V2 of the DAML model is now complete (as planned in the redesign.text). And merged into master.
+
+Following discussions during the GetTogether, there are sime changes we might try:
+
+(A) Try (again) to avoid explicit management of observers everywhere, by using a disclosure technique to allow partys to see contracts which they are not an observer of. Previously, Bernhard suggested something similar(identical?), but I didn't manage to get it to work. But with new insight, I want to try again.
+
+(B) Avoid explicit management within the DAML of lists of active contracts, i.e. for `Holiday` allocation and booked `Vacation`, by instead having these passed as extra arguments to the choices where they are needed, moving the burden of tracking active contracts to the user on the other side of the Ledger API.
+
+I think we can try (A) as part of V2. Assuming it works, it only changes(simplifies) the implementation.
+But perhaps we should leave (B) to the next version; following discussion within the DAVL team.
