@@ -148,7 +148,12 @@ longer_flow = scenario do
   -- Everyone can see the booked vacation
   [_] <- submit alice $ exercise aa AsWorker_GetEveryonesVacation
   [_] <- submit dilbert $ exercise ad AsWorker_GetEveryonesVacation
-  [_] <- submit pointy $ exercise ap AsWorker_GetEveryonesVacation
+  [v] <- submit pointy $ exercise ap AsWorker_GetEveryonesVacation
+
+  let Vacation{worker=w,dates=[d1,d2]} = v
+  assert (w == dilbert)
+  assert (d1 == xmas)
+  assert (d2 == boxing)
 
   -- Dilbert, re-requests his new-year's vacation
   submit dilbert $ exercise ad AsWorker_RequestVacation with dates = [newYearEve,newYearDay]
@@ -188,10 +193,6 @@ longer_flow = scenario do
   2 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidays
   2 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidaysWithoutPendingRequests
   [_] <- submit dilbert $ exercise ad AsWorker_GetDenials
-
-
---  x <- submit dilbert $ exercise ad AsWorker_GetEveryonesVacation
---  assert (x == [])
 
   return ()
 
