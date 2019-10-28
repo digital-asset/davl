@@ -56,7 +56,7 @@ And how we plan to migrate from V1 to V2.
 
 - The rewrite for V2 of the DAML model is now complete (as planned in the redesign.text). And merged into master.
 
-Following discussions during the GetTogether, there are sime changes we might try:
+Following discussions during the GetTogether, there are some changes we might try:
 
 (A) Try (again) to avoid explicit management of observers everywhere, by using a disclosure technique to allow partys to see contracts which they are not an observer of. Previously, Bernhard suggested something similar(identical?), but I didn't manage to get it to work. But with new insight, I want to try again.
 
