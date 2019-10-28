@@ -66,7 +66,7 @@ template AsWorker -- workflow
   where
     signatory worker
 
-    nonconsuming choice AsWorker_GetEveryonesVacation : [Vacation]
+    nonconsuming choice AsWorker_GetEveryonesVacation : [ContractId Vacation]
       controller worker
         do
           exerciseByKey @Worker worker Worker_GetEveryonesVacation
@@ -162,7 +162,7 @@ template VacationStore
   with
     company : Party
     obs : [Party]
-    vacs : [Vacation]
+    vacs : [ContractId Vacation]
   where
     signatory company
     observer obs
@@ -175,6 +175,13 @@ template VacationStore
       controller company
         do
           create this with obs = ob::obs
+
+    choice VacationStore_AddVacation : ContractId VacationStore
+      with
+        vac : ContractId Vacation
+      controller company
+        do
+          create this with vacs = vac::vacs
 
 
 template ProposeWorker
@@ -208,11 +215,11 @@ template Worker --Relationship
     key worker : Party
     maintainer key
 
-    nonconsuming choice Worker_GetEveryonesVacation : [Vacation]
+    nonconsuming choice Worker_GetEveryonesVacation : [ContractId Vacation]
       controller worker
         do
-          s <- fetchByKey @VacationStore company
-          return []
+          (_,s) <- fetchByKey @VacationStore company
+          return s.vacs
 
     choice Worker_AddBoss : ContractId Worker
       with
@@ -252,10 +259,10 @@ template Worker --Relationship
         req : ContractId Request
       controller company
         do
-          Request{vac} <- fetch req
-          v <- exercise req Request_Approve
+          vac <- exercise req Request_Approve
           create this with requests = filter (/= req) requests
-          return v
+          exerciseByKey @VacationStore company VacationStore_AddVacation with vac
+          return vac
 
     nonconsuming choice Worker_DenyMinionRequest : ContractId Denial
       with

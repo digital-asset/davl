@@ -33,15 +33,17 @@ simpler_flow = scenario do
   submit alice $ exercise aa AsWorker_AcceptProposeWorker with proposal
   submit company $ exercise ac AsCompany_AddManagement with boss = alice; minion = dilbert
 
-
+  -- No vacations yet
+  [] <- submit alice $ exercise aa AsWorker_GetEveryonesVacation
   [] <- submit dilbert $ exercise ad AsWorker_GetEveryonesVacation
 
   -- Alice approves Dilert's request
   [req] <- submit alice $ exercise aab AsBoss_GetMinionRequests
   submit alice $ exercise aab AsBoss_ApproveMinionRequest with req
 
-
-  --[_] <- submit dilbert $ exercise ad AsWorker_GetEveryonesVacation -- TODO
+  -- Alice and Dilert can see the vacation
+  [_] <- submit alice $ exercise aa AsWorker_GetEveryonesVacation
+  [_] <- submit dilbert $ exercise ad AsWorker_GetEveryonesVacation
 
   return ()
 
@@ -143,6 +145,11 @@ longer_flow = scenario do
   1 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidays
   1 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidaysWithoutPendingRequests
 
+  -- Everyone can see the booked vacation
+  [_] <- submit alice $ exercise aa AsWorker_GetEveryonesVacation
+  [_] <- submit dilbert $ exercise ad AsWorker_GetEveryonesVacation
+  [_] <- submit pointy $ exercise ap AsWorker_GetEveryonesVacation
+
   -- Dilbert, re-requests his new-year's vacation
   submit dilbert $ exercise ad AsWorker_RequestVacation with dates = [newYearEve,newYearDay]
   1 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidays
@@ -162,6 +169,11 @@ longer_flow = scenario do
   submit alice $ exercise aab AsBoss_ApproveMinionRequest with req
   2 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidays
   2 <- submit dilbert $ exercise ad AsWorker_CountUnspentHolidaysWithoutPendingRequests
+
+  -- And everyone can see the now 2 booked vacations
+  [_,_] <- submit alice $ exercise aa AsWorker_GetEveryonesVacation
+  [_,_] <- submit dilbert $ exercise ad AsWorker_GetEveryonesVacation
+  [_,_] <- submit pointy $ exercise ap AsWorker_GetEveryonesVacation
 
   -- Another request from Dilbert
   let valentines : Date = date 2020 Feb 14
