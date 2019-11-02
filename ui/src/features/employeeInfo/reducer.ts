@@ -21,9 +21,9 @@ const slice = createSlice({
 
 export const { set, reset } = slice.actions;
 
-export default slice.reducer;
+export const reducer = slice.reducer;
 
-export const load = (ledger: Ledger): AppThunk => async dispatch => {
+export const load = (ledger: Ledger): AppThunk => async (dispatch) => {
   try {
     const key = {employeeRole: {employee: ledger.party()}};
     const {data: {employeeRole: {employee, boss}, remainingDays}} =

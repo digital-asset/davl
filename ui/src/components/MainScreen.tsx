@@ -10,12 +10,13 @@ import MyApprovedVacations from '../features/myApprovedVacations/MyApprovedVacat
 type Props = {
   ledger: Ledger;
   onLogout: () => void;
+  onReload: () => void;
 }
 
 /**
  * React component for the main screen of the `App`.
  */
-const MainScreen: React.FC<Props> = ({ledger, onLogout}) => {
+const MainScreen: React.FC<Props> = ({ledger, onLogout, onReload}) => {
   return (
     <>
       <Menu icon borderless>
@@ -33,6 +34,12 @@ const MainScreen: React.FC<Props> = ({ledger, onLogout}) => {
           <Menu.Item position='right'>
             You are logged in as {ledger.party()}.
           </Menu.Item>
+          <Menu.Item
+            position='right'
+            active={false}
+            onClick={onReload}
+            icon='refresh'
+          />
           <Menu.Item
             position='right'
             active={false}
