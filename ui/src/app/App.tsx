@@ -1,6 +1,6 @@
 import React from 'react';
-import LoginScreen from './LoginScreen';
-import MainScreen from './MainScreen';
+import LoginScreen from '../components/LoginScreen';
+import MainScreen from '../components/MainScreen';
 import Ledger from '../ledger/Ledger';
 
 /**

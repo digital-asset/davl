@@ -1,30 +1,29 @@
 import React from 'react';
-import Ledger from "../ledger/Ledger";
+import { useDispatch, useSelector } from 'react-redux';
+import Ledger from '../../ledger/Ledger';
 import { Segment, Header } from 'semantic-ui-react';
-import VacationList, { Item as VacationListItem } from './VacationList';
-import { Vacation } from '../daml/DAVL';
+import VacationList, { Item as VacationListItem, makeItem } from '../../components/VacationList';
+import { Vacation } from '../../daml/DAVL';
+import { RootState } from '../../app/rootReducer';
+import { set as setMyApprovedVacations } from './reducer';
 
 type Props = {
   ledger: Ledger;
 }
 
-const ApprovedVacations: React.FC<Props> = ({ledger}) => {
-  const [items, setItems] = React.useState<VacationListItem[]>([]);
+const MyApprovedVacations: React.FC<Props> = ({ledger}) => {
+  const dispatch = useDispatch();
+  const items = useSelector((state: RootState) => state.approvedVacations);
 
   const loadVacations = React.useCallback(async () => {
     try {
       const vacations = await ledger.query(Vacation, {employeeRole: {employee: ledger.party()}});
-      const items: VacationListItem[] = vacations.map((vacation) => {
-        return {
-          contractId: vacation.contractId.contractId,
-          vacation: vacation.data,
-        };
-      });
-      setItems(items);
+      const items: VacationListItem[] = vacations.map((vacation) => makeItem(vacation.contractId, vacation.data));
+      dispatch(setMyApprovedVacations(items));
     } catch (error) {
       alert(`Unknown error:\n${error}`);
     }
-  }, [ledger]);
+  }, [ledger, dispatch]);
 
   React.useEffect(() => {
     loadVacations();
@@ -48,4 +47,4 @@ const ApprovedVacations: React.FC<Props> = ({ledger}) => {
   );
 }
 
-export default ApprovedVacations;
+export default MyApprovedVacations;

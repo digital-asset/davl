@@ -1,6 +1,6 @@
 import React from 'react';
 import { Header, Segment, Form } from 'semantic-ui-react';
-import { EmployeeRole_RequestVacation } from '../daml/DAVL';
+import { EmployeeRole_RequestVacation } from '../../daml/DAVL';
 
 export type Props = {
   loading: boolean;

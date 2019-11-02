@@ -1,7 +1,7 @@
 import React from 'react';
-import Ledger from '../ledger/Ledger';
+import Ledger from '../../ledger/Ledger';
 import RequestVacationView from './RequestVacationView';
-import { EmployeeRole_RequestVacation, EmployeeRole } from '../daml/DAVL';
+import { EmployeeRole_RequestVacation, EmployeeRole } from '../../daml/DAVL';
 
 type Props = {
   ledger: Ledger;

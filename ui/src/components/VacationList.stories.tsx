@@ -1,17 +1,15 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { EmployeeRole } from '../daml/DAVL';
 import VacationList, { Item, Props } from './VacationList';
 
-const employeeRole: EmployeeRole = {
+const employeeRole = {
   employee: 'Bob',
-  company: 'Acme',
   boss: 'Alice',
 }
 
 const items: Item[] = [
-  {contractId: '1', vacation: {employeeRole, fromDate: '2019-12-24', toDate: '2019-12-26'}},
-  {contractId: '2', vacation: {employeeRole, fromDate: '2019-12-30', toDate: '2020-01-02'}},
+  {...employeeRole, contractId: '1', fromDate: '2019-12-24', toDate: '2019-12-26'},
+  {...employeeRole, contractId: '2', fromDate: '2019-12-30', toDate: '2020-01-02'},
 ]
 
 const props: Props = {

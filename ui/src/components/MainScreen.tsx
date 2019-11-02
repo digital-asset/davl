@@ -1,11 +1,11 @@
 import React from 'react'
 import { Image, Menu, Container } from 'semantic-ui-react'
 import Ledger from '../ledger/Ledger';
-import EmployeeInfoController from './EmployeeInfoController';
-import RequestVacationController from './RequestVacationController';
-import PendingRequests from './PendingRequests';
-import PendingApprovals from './PendingApprovals';
-import ApprovedVacations from './ApprovedVacations';
+import EmployeeInfoController from '../features/employeeInfo/EmployeeInfoController';
+import RequestVacationController from '../features/requestVacation/RequestVacationController';
+import PendingRequests from '../features/pendingRequests/PendingRequests';
+import PendingApprovals from '../features/pendingApprovals/PendingApprovals';
+import MyApprovedVacations from '../features/myApprovedVacations/MyApprovedVacations';
 
 type Props = {
   ledger: Ledger;
@@ -45,7 +45,7 @@ const MainScreen: React.FC<Props> = ({ledger, onLogout}) => {
       <Container>
         <EmployeeInfoController ledger={ledger} />
         <RequestVacationController ledger={ledger} />
-        <ApprovedVacations ledger={ledger} />
+        <MyApprovedVacations ledger={ledger} />
         <PendingRequests ledger={ledger} />
         <PendingApprovals ledger={ledger} />
       </Container>

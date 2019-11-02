@@ -1,9 +1,9 @@
 import React from 'react';
-import Ledger from "../ledger/Ledger";
+import Ledger from "../../ledger/Ledger";
 import { Segment, Header } from 'semantic-ui-react';
-import VacationList, { Item as VacationListItem } from './VacationList';
-import { VacationRequest } from '../daml/DAVL';
-import { ContractId } from '../ledger/Types';
+import VacationList, { Item as VacationListItem, makeItem } from '../../components/VacationList';
+import { VacationRequest } from '../../daml/DAVL';
+import { ContractId } from '../../ledger/Types';
 
 type Props = {
   ledger: Ledger;
@@ -15,12 +15,7 @@ const PendingApprovals: React.FC<Props> = ({ledger}) => {
   const loadRequests = React.useCallback(async () => {
     try {
       const requests = await ledger.query(VacationRequest, {vacation: {employeeRole: {boss: ledger.party()}}});
-      const items: VacationListItem[] = requests.map((request) => {
-        return {
-          contractId: request.contractId.contractId,
-          vacation: request.data.vacation,
-        };
-      });
+      const items: VacationListItem[] = requests.map((request) => makeItem(request.contractId, request.data.vacation));
       setItems(items);
     } catch (error) {
       alert(`Unknown error:\n${error}`);
