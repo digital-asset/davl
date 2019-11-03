@@ -10,7 +10,7 @@ type Props = EmployeeSummary;
 const SummaryView: React.FC<Props> = ({employee, boss, remainingVacationDays}) => {
   return (
     <Segment>
-      <Header as='h2'>
+      <Header as='h1'>
         {employee}
       </Header>
       <p><strong>Boss:</strong> {boss}</p>

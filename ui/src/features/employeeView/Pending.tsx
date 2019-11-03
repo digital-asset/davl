@@ -17,7 +17,7 @@ const Pending: React.FC<Props> = () => {
   return (
     <Segment>
       <Header as='h2'>
-        Pending Requests
+        Vacation Requests
       </Header>
       <VacationList
         vacations={vacations}
