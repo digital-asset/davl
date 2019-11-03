@@ -9,6 +9,7 @@ export type State = {
   summary: EmployeeSummary | null;
   pending: Vacation[];
   approved: Vacation[];
+  currentRequest: string;
   addingRequest: boolean;
 }
 
@@ -16,6 +17,7 @@ const initialState: State = {
   summary: null,
   approved: [],
   pending: [],
+  currentRequest: '',
   addingRequest: false,
 }
 
@@ -26,12 +28,20 @@ const slice = createSlice({
     setSummary: (state: State, action: PayloadAction<EmployeeSummary>) => ({...state, summary: action.payload}),
     setApproved: (state: State, action: PayloadAction<Vacation[]>) => ({...state, approved: action.payload}),
     setPending: (state: State, action: PayloadAction<Vacation[]>) => ({...state, pending: action.payload}),
+    setCurrentRequest: (state: State, action: PayloadAction<string>) => ({...state, currentRequest: action.payload}),
     startAddRequest: (state: State, action: PayloadAction) => ({...state, addingRequest: true}),
-    endAddRequest: (state: State, action: PayloadAction) => ({...state, addingRequest: false}),
+    endAddRequest: (state: State, action: PayloadAction) => ({...state, currentRequest: '', addingRequest: false}),
   },
 });
 
-export const { setSummary, setApproved, setPending, startAddRequest, endAddRequest } = slice.actions;
+export const {
+  setSummary,
+  setApproved,
+  setPending,
+  setCurrentRequest,
+  startAddRequest,
+  endAddRequest,
+} = slice.actions;
 
 export const reducer = slice.reducer;
 

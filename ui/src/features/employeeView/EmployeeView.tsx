@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import Ledger from '../../ledger/Ledger';
-import RequestVacationController from './RequestContainer';
+import RequestView from './RequestView';
 import Approved from './Approved';
 import Pending from './Pending';
 import { useDispatch, useSelector } from 'react-redux';
@@ -22,7 +22,7 @@ const EmployeeView: React.FC<Props> = ({ledger}) => {
   return (
     <Segment.Group>
       {summary ? <SummaryView {...summary} /> : <p>Loading summary...</p>}
-      <RequestVacationController ledger={ledger} />
+      <RequestView ledger={ledger} />
       <Pending ledger={ledger} />
       <Approved ledger={ledger} />
     </Segment.Group>
