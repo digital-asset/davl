@@ -73,7 +73,7 @@ export const loadApproved = (ledger: Ledger): AppThunk<Promise<void>> => async (
   }
 }
 
-export const loadPending = (ledger: Ledger): AppThunk<Promise<void>> => async (dispatch) => {
+export const loadRequests = (ledger: Ledger): AppThunk<Promise<void>> => async (dispatch) => {
   try {
     const requests =
       await ledger.query(davl.VacationRequest, {vacation: {employeeRole: {employee: ledger.party()}}});
@@ -89,7 +89,7 @@ export const loadAll = (ledger: Ledger): AppThunk<Promise<void>> => async (dispa
   await Promise.all([
     dispatch(loadSummary(ledger)),
     dispatch(loadApproved(ledger)),
-    dispatch(loadPending(ledger)),
+    dispatch(loadRequests(ledger)),
   ]);
 }
 
@@ -99,8 +99,7 @@ export const addRequest = (ledger: Ledger, fromDate: string, toDate: string): Ap
     const key = {employee: ledger.party()};
     await ledger.pseudoExerciseByKey(davl.EmployeeRole.RequestVacation, key, {fromDate, toDate});
     dispatch(endAddRequest());
-    alert('Request successfully submitted.');
-    await dispatch(loadPending(ledger));
+    await dispatch(loadRequests(ledger));
   } catch (error) {
     alert(`Unknown error:\n${error}`);
   }

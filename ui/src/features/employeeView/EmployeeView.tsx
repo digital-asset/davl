@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
 import Ledger from '../../ledger/Ledger';
-import RequestView from './RequestView';
 import Approved from './Approved';
-import Pending from './Pending';
+import Requests from './Requests';
 import { useDispatch, useSelector } from 'react-redux';
 import { loadAll } from './reducer';
 import { RootState } from '../../app/rootReducer';
@@ -22,8 +21,7 @@ const EmployeeView: React.FC<Props> = ({ledger}) => {
   return (
     <Segment.Group>
       {summary ? <SummaryView {...summary} /> : <p>Loading summary...</p>}
-      <RequestView ledger={ledger} />
-      <Pending ledger={ledger} />
+      <Requests ledger={ledger} />
       <Approved ledger={ledger} />
     </Segment.Group>
   );
