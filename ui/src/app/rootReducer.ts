@@ -19,8 +19,10 @@ export type RootState = ReturnType<typeof rootReducer>
 export default rootReducer
 
 export const reload = (ledger: Ledger): ThunkAction<void, RootState, null, Action<string>> => async (dispatch) => {
-    dispatch(employeeInfo.load(ledger));
-    dispatch(myApprovedVacations.load(ledger));
-    dispatch(pendingApprovals.load(ledger));
-    dispatch(pendingRequests.load(ledger));
+  await Promise.all([
+    dispatch(employeeInfo.load(ledger)),
+    dispatch(myApprovedVacations.load(ledger)),
+    dispatch(pendingApprovals.load(ledger)),
+    dispatch(pendingRequests.load(ledger)),
+  ]);
 }

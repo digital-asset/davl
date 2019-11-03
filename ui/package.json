@@ -28,7 +28,16 @@
     "storybook": "start-storybook -p 9001 -c .storybook"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": "react-app",
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "project": "./tsconfig.json"
+    },
+    "rules": {
+      "require-await": "off",
+      "@typescript-eslint/require-await": "error",
+      "@typescript-eslint/no-floating-promises": "error"
+    }
   },
   "browserslist": {
     "production": [
@@ -49,6 +58,7 @@
     "@types/jwt-simple": "^0.5.33",
     "@types/react-redux": "^7.1.5",
     "@types/storybook__react": "^4.0.2",
+    "@typescript-eslint/parser": "^2.6.0",
     "awesome-typescript-loader": "^5.2.1",
     "babel-loader": "^8.0.6",
     "json2typescript": "^1.2.3",

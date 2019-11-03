@@ -16,6 +16,6 @@ if (process.env.NODE_ENV === 'development' && module.hot) {
 
 export type AppDispatch = typeof store.dispatch
 
-export type AppThunk = ThunkAction<void, RootState, null, Action<string>>
+export type AppThunk<R> = ThunkAction<R, RootState, null, Action<string>>
 
 export default store
