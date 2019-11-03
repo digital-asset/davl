@@ -15,7 +15,9 @@ type Props = {
 const EmployeeView: React.FC<Props> = ({ledger}) => {
   const dispatch = useDispatch();
   useEffect(() => { dispatch(loadAll(ledger)); }, [dispatch, ledger]);
-  const vacations = useSelector((state: RootState) => state.employeeView.approved);
+
+  const upcomingVacations = useSelector((state: RootState) => state.employeeView.upcomingVacations);
+  const pastVacations = useSelector((state: RootState) => state.employeeView.pastVacations);
 
   const summary = useSelector((state: RootState) => state.employeeView.summary);
 
@@ -26,8 +28,14 @@ const EmployeeView: React.FC<Props> = ({ledger}) => {
       {summary ? <SummaryView {...summary} /> : <p>Loading summary...</p>}
       <Requests ledger={ledger} />
       <VacationListSegment
-        header='Approved Vacations'
-        vacations={vacations}
+        header='Upcoming Vacations'
+        vacations={upcomingVacations}
+        onClickVacation={handleCancelVacation}
+        icon='cancel'
+      />
+      <VacationListSegment
+        header='Past Vacations'
+        vacations={pastVacations}
         onClickVacation={handleCancelVacation}
         icon='cancel'
       />

@@ -4,18 +4,23 @@ import { AppThunk } from '../../app/store';
 import * as davl from '../../daml/DAVL';
 import { Vacation, makeVacation, ordVacationOnFromDate } from '../../utils/vacation';
 import { EmployeeSummary } from './types';
+import moment from 'moment';
+import { partition } from 'fp-ts/lib/Array';
+import { getDualOrd } from 'fp-ts/lib/Ord';
 
 export type State = {
   summary: EmployeeSummary | null;
   pending: Vacation[];
-  approved: Vacation[];
+  upcomingVacations: Vacation[];
+  pastVacations: Vacation[];
   currentRequest: string;
   addingRequest: boolean;
 }
 
 const initialState: State = {
   summary: null,
-  approved: [],
+  upcomingVacations: [],
+  pastVacations: [],
   pending: [],
   currentRequest: '',
   addingRequest: false,
@@ -26,26 +31,32 @@ const slice = createSlice({
   initialState,
   reducers: {
     setSummary: (state: State, action: PayloadAction<EmployeeSummary>) => ({...state, summary: action.payload}),
-    setApproved: (state: State, action: PayloadAction<Vacation[]>) => ({...state, approved: action.payload}),
     setPending: (state: State, action: PayloadAction<Vacation[]>) => ({...state, pending: action.payload}),
+    setUpcomingVacations: (state: State, action: PayloadAction<Vacation[]>) => ({...state, upcomingVacations: action.payload}),
+    setPastVacations: (state: State, action: PayloadAction<Vacation[]>) => ({...state, pastVacations: action.payload}),
     setCurrentRequest: (state: State, action: PayloadAction<string>) => ({...state, currentRequest: action.payload}),
     startAddRequest: (state: State, action: PayloadAction) => ({...state, addingRequest: true}),
     endAddRequest: (state: State, action: PayloadAction) => ({...state, currentRequest: '', addingRequest: false}),
   },
 });
 
-export const {
+const {
   setSummary,
-  setApproved,
   setPending,
-  setCurrentRequest,
+  setUpcomingVacations,
+  setPastVacations,
   startAddRequest,
   endAddRequest,
 } = slice.actions;
 
+export const {
+  setCurrentRequest,
+} = slice.actions;
+
+
 export const reducer = slice.reducer;
 
-export const loadSummary = (ledger: Ledger): AppThunk<Promise<void>> => async (dispatch) => {
+const loadSummary = (ledger: Ledger): AppThunk<Promise<void>> => async (dispatch) => {
   try {
     const key = {employeeRole: {employee: ledger.party()}};
     const {data: {employeeRole: {employee, boss}, remainingDays}} =
@@ -61,19 +72,25 @@ export const loadSummary = (ledger: Ledger): AppThunk<Promise<void>> => async (d
   }
 }
 
-export const loadApproved = (ledger: Ledger): AppThunk<Promise<void>> => async (dispatch) => {
+const loadVacations = (ledger: Ledger): AppThunk<Promise<void>> => async (dispatch) => {
   try {
     const vacationContracts =
       await ledger.query(davl.Vacation, {employeeRole: {employee: ledger.party()}});
     const vacations: Vacation[] =
       vacationContracts.map((vacation) => makeVacation(vacation.contractId, vacation.data));
-    dispatch(setApproved(vacations));
+    const today = moment().format('YYYY-MM-DD');
+    const {left: upcomingVacations, right: pastVacations} =
+      partition((vacation: Vacation) => vacation.fromDate <= today)(vacations);
+    upcomingVacations.sort(ordVacationOnFromDate.compare);
+    pastVacations.sort(getDualOrd(ordVacationOnFromDate).compare);
+    dispatch(setUpcomingVacations(upcomingVacations));
+    dispatch(setPastVacations(pastVacations));
   } catch (error) {
     alert(`Unknown error:\n${error}`);
   }
 }
 
-export const loadRequests = (ledger: Ledger): AppThunk<Promise<void>> => async (dispatch) => {
+const loadRequests = (ledger: Ledger): AppThunk<Promise<void>> => async (dispatch) => {
   try {
     const requests =
       await ledger.query(davl.VacationRequest, {vacation: {employeeRole: {employee: ledger.party()}}});
@@ -89,7 +106,7 @@ export const loadRequests = (ledger: Ledger): AppThunk<Promise<void>> => async (
 export const loadAll = (ledger: Ledger): AppThunk<Promise<void>> => async (dispatch) => {
   await Promise.all([
     dispatch(loadSummary(ledger)),
-    dispatch(loadApproved(ledger)),
+    dispatch(loadVacations(ledger)),
     dispatch(loadRequests(ledger)),
   ]);
 }
