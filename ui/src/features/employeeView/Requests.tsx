@@ -6,6 +6,7 @@ import { RootState } from '../../app/rootReducer';
 import ListActionItem from '../../components/ListActionItem';
 import { DatesRangeInput } from 'semantic-ui-calendar-react';
 import * as reducer from './reducer';
+import { VacationListItem } from '../../components/VacationListItem';
 
 type Props = {
   ledger: Ledger;
@@ -42,22 +43,14 @@ const Requests: React.FC<Props> = ({ledger}) => {
         Pending Vacation Requests
       </Header>
       <List relaxed>
-        {vacations.map((vacation) => {
-          const {boss, fromDate, toDate} = vacation;
-          return (
-            <ListActionItem
+        {vacations.map((vacation) =>
+            <VacationListItem
               key={vacation.contractId}
-              icon='calendar'
-              action={{
-                icon: 'cancel',
-                onClick: () => handleCancelRequest(),
-              }}
-            >
-              <List.Header>{}{fromDate} - {toDate}</List.Header>
-              <List.Content>Approver: {boss}</List.Content>
-            </ListActionItem>
-          );
-          }
+              vacation={vacation}
+              viewer='employee'
+              icon='cancel'
+              onClickIcon={() => handleCancelRequest}
+            />
         )}
         <ListActionItem
           icon='calendar'

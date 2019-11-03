@@ -29,12 +29,14 @@ const EmployeeView: React.FC<Props> = ({ledger}) => {
       <Requests ledger={ledger} />
       <VacationListSegment
         header='Upcoming Vacations'
+        viewer='employee'
         vacations={upcomingVacations}
         onClickVacation={handleCancelVacation}
         icon='cancel'
       />
       <VacationListSegment
         header='Past Vacations'
+        viewer='employee'
         vacations={pastVacations}
         onClickVacation={handleCancelVacation}
         icon='cancel'

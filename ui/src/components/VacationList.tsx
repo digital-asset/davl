@@ -1,11 +1,12 @@
 import React from 'react'
 import { List } from 'semantic-ui-react';
-import ListActionItem from './ListActionItem';
 import { SemanticICONS } from 'semantic-ui-react/dist/commonjs/generic';
 import { Vacation } from '../utils/vacation';
+import { VacationListItem } from './VacationListItem';
 
 export type Props = {
   vacations: Vacation[];
+  viewer: 'employee' | 'boss';
   onClickVacation: (vacation: Vacation) => void;
   icon: SemanticICONS;
 }
@@ -13,26 +14,19 @@ export type Props = {
 /**
  * React component to display a list of `Vacation`s.
  */
-const VacationList: React.FC<Props> = ({vacations, onClickVacation, icon}) => {
+const VacationList: React.FC<Props> = ({vacations, viewer, onClickVacation, icon}) => {
   return (
     <List relaxed>
-      {vacations.map((vacation) => {
-        const {employee, boss, fromDate, toDate} = vacation;
-        return (
-          <ListActionItem
-            key={vacation.contractId}
-            icon='calendar'
-            action={{
-              icon,
-              onClick: () => onClickVacation(vacation),
-            }}
-          >
-            <List.Header>{}{fromDate} - {toDate}</List.Header>
-            <List.Content>Employee: {employee}, Boss: {boss}</List.Content>
-          </ListActionItem>
-        );
-        }
+      {vacations.map((vacation) =>
+        <VacationListItem
+          key={vacation.contractId}
+          vacation={vacation}
+          viewer={viewer}
+          onClickIcon={onClickVacation}
+          icon={icon}
+        />
       )}
+
     </List>
   );
 };

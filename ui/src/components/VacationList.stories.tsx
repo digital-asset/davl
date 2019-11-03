@@ -15,6 +15,7 @@ const vacations: Vacation[] = [
 
 const props: Props = {
   vacations,
+  viewer: 'employee',
   onClickVacation: (vacation) => alert(JSON.stringify(vacation)),
   icon: 'check',
 }

@@ -24,6 +24,7 @@ const BossView: React.FC<Props> = ({ledger}) => {
   return (
     <VacationListSegment
       header='Pending Approvals'
+      viewer='boss'
       vacations={vacations}
       onClickVacation={handleApproveRequest}
       icon='check'
