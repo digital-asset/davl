@@ -1,11 +1,8 @@
 import React from 'react'
-import { Image, Menu, Container } from 'semantic-ui-react'
+import { Image, Menu, Container, Grid } from 'semantic-ui-react'
 import Ledger from '../ledger/Ledger';
-import SummaryContainer from '../features/employeeView/SummaryContainer';
-import RequestVacationController from '../features/employeeView/RequestContainer';
-import EmployeePending from '../features/employeeView/Pending';
-import BossPending from '../features/bossView/Pending';
-import Approved from '../features/employeeView/Approved';
+import EmployeeView from '../features/employeeView/EmployeeView';
+import BossView from '../features/bossView/BossView';
 
 type Props = {
   ledger: Ledger;
@@ -50,11 +47,14 @@ const MainScreen: React.FC<Props> = ({ledger, onLogout, onReload}) => {
       </Menu>
 
       <Container>
-        <SummaryContainer ledger={ledger} />
-        <RequestVacationController ledger={ledger} />
-        <Approved ledger={ledger} />
-        <EmployeePending ledger={ledger} />
-        <BossPending ledger={ledger} />
+        <Grid columns={2}>
+          <Grid.Column>
+            <EmployeeView ledger={ledger} />
+          </Grid.Column>
+          <Grid.Column>
+            <BossView ledger={ledger} />
+          </Grid.Column>
+        </Grid>
       </Container>
     </>
   );

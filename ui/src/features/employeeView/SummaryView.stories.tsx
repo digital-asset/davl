@@ -1,9 +1,9 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import SummaryView from './SummaryView';
-import { Summary } from './types';
+import { EmployeeSummary } from './types';
 
-const summary: Summary = {
+const summary: EmployeeSummary = {
   employee: 'Bob',
   boss: 'Alice',
   remainingVacationDays: '25',

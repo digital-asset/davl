@@ -3,10 +3,10 @@ import Ledger from '../../ledger/Ledger';
 import { AppThunk } from '../../app/store';
 import * as davl from '../../daml/DAVL';
 import { Vacation, makeVacation } from '../../utils/vacation';
-import { Summary } from './types';
+import { EmployeeSummary } from './types';
 
 export type State = {
-  summary: Summary | null;
+  summary: EmployeeSummary | null;
   pending: Vacation[];
   approved: Vacation[];
   addingRequest: boolean;
@@ -23,7 +23,7 @@ const slice = createSlice({
   name: 'employeeView',
   initialState,
   reducers: {
-    setSummary: (state: State, action: PayloadAction<Summary>) => ({...state, summary: action.payload}),
+    setSummary: (state: State, action: PayloadAction<EmployeeSummary>) => ({...state, summary: action.payload}),
     setApproved: (state: State, action: PayloadAction<Vacation[]>) => ({...state, approved: action.payload}),
     setPending: (state: State, action: PayloadAction<Vacation[]>) => ({...state, pending: action.payload}),
     startAddRequest: (state: State, action: PayloadAction) => ({...state, addingRequest: true}),
@@ -40,7 +40,7 @@ export const loadSummary = (ledger: Ledger): AppThunk<Promise<void>> => async (d
     const key = {employeeRole: {employee: ledger.party()}};
     const {data: {employeeRole: {employee, boss}, remainingDays}} =
       await ledger.pseudoFetchByKey(davl.EmployeeVacationAllocation, key);
-    const summary: Summary = {
+    const summary: EmployeeSummary = {
       employee,
       boss,
       remainingVacationDays: remainingDays,

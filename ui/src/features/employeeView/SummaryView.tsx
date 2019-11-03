@@ -1,8 +1,8 @@
 import React from 'react';
 import { Header, Segment } from 'semantic-ui-react';
-import { Summary } from './types';
+import { EmployeeSummary } from './types';
 
-type Props = Summary;
+type Props = EmployeeSummary;
 
 /**
  * React component for the view of the `MainScreen`.
