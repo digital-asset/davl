@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import React from 'react';
 import Ledger from '../../ledger/Ledger';
-import RequestVacationView from './RequestVacationView';
+import RequestView from './RequestView';
 import { EmployeeRole_RequestVacation, EmployeeRole } from '../../daml/DAVL';
 
 type Props = {
@@ -26,7 +26,7 @@ const RequestVacationController: React.FC<Props> = ({ledger}) => {
     }
   }
 
-  return <RequestVacationView onSubmit={handleSubmit} loading={loading} />
+  return <RequestView onSubmit={handleSubmit} loading={loading} />
 }
 
 export default RequestVacationController;

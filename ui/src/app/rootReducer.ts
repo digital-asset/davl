@@ -1,17 +1,13 @@
 import { combineReducers, Action } from 'redux-starter-kit'
 
-import * as employeeInfo from '../features/employeeInfo/reducer';
-import * as myApprovedVacations from '../features/myApprovedVacations/reducer';
-import * as pendingApprovals from '../features/pendingApprovals/reducer';
-import * as pendingRequests from '../features/pendingRequests/reducer'
+import * as bossView from '../features/bossView/reducer';
+import * as employeeView from '../features/employeeView/reducer';
 import { ThunkAction } from 'redux-thunk';
 import Ledger from '../ledger/Ledger';
 
 const rootReducer = combineReducers({
-  employeeInfo: employeeInfo.reducer,
-  approvedVacations: myApprovedVacations.reducer,
-  pendingApprovals: pendingApprovals.reducer,
-  pendingRquests: pendingRequests.reducer,
+  employeeView: employeeView.reducer,
+  pendingApprovals: bossView.reducer,
 })
 
 export type RootState = ReturnType<typeof rootReducer>
@@ -20,9 +16,7 @@ export default rootReducer
 
 export const reload = (ledger: Ledger): ThunkAction<void, RootState, null, Action<string>> => async (dispatch) => {
   await Promise.all([
-    dispatch(employeeInfo.load(ledger)),
-    dispatch(myApprovedVacations.load(ledger)),
-    dispatch(pendingApprovals.load(ledger)),
-    dispatch(pendingRequests.load(ledger)),
+    dispatch(employeeView.loadAll(ledger)),
+    dispatch(bossView.load(ledger)),
   ]);
 }

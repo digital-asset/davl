@@ -1,13 +1,13 @@
 import React from 'react';
 import { Header, Segment } from 'semantic-ui-react';
-import { EmployeeInfo } from './reducer';
+import { Summary } from './types';
 
-type Props = EmployeeInfo;
+type Props = Summary;
 
 /**
  * React component for the view of the `MainScreen`.
  */
-const EmployeeInfoView: React.FC<Props> = ({employee, boss, remainingVacationDays}) => {
+const SummaryView: React.FC<Props> = ({employee, boss, remainingVacationDays}) => {
   return (
     <Segment>
       <Header as='h2'>
@@ -19,4 +19,4 @@ const EmployeeInfoView: React.FC<Props> = ({employee, boss, remainingVacationDay
   );
 }
 
-export default EmployeeInfoView;
+export default SummaryView;

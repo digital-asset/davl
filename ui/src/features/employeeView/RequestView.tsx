@@ -11,7 +11,7 @@ export type Props = {
 /**
  * React component for the view of the `MainScreen`.
  */
-const RequestVacationView: React.FC<Props> = ({onSubmit, loading}) => {
+const RequestView: React.FC<Props> = ({onSubmit, loading}) => {
   const [firstDay, setFirstDay] = React.useState<string>('');
   const [lastDay, setLastDay] = React.useState<string>('');
 
@@ -56,4 +56,4 @@ const RequestVacationView: React.FC<Props> = ({onSubmit, loading}) => {
   );
 }
 
-export default RequestVacationView;
+export default RequestView;

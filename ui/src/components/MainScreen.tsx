@@ -1,11 +1,11 @@
 import React from 'react'
 import { Image, Menu, Container } from 'semantic-ui-react'
 import Ledger from '../ledger/Ledger';
-import EmployeeInfoController from '../features/employeeInfo/EmployeeInfoController';
-import RequestVacationController from '../features/requestVacation/RequestVacationController';
-import PendingRequests from '../features/pendingRequests/PendingRequests';
-import PendingApprovals from '../features/pendingApprovals/PendingApprovals';
-import MyApprovedVacations from '../features/myApprovedVacations/MyApprovedVacations';
+import SummaryContainer from '../features/employeeView/SummaryContainer';
+import RequestVacationController from '../features/employeeView/RequestContainer';
+import EmployeePending from '../features/employeeView/Pending';
+import BossPending from '../features/bossView/Pending';
+import Approved from '../features/employeeView/Approved';
 
 type Props = {
   ledger: Ledger;
@@ -50,11 +50,11 @@ const MainScreen: React.FC<Props> = ({ledger, onLogout, onReload}) => {
       </Menu>
 
       <Container>
-        <EmployeeInfoController ledger={ledger} />
+        <SummaryContainer ledger={ledger} />
         <RequestVacationController ledger={ledger} />
-        <MyApprovedVacations ledger={ledger} />
-        <PendingRequests ledger={ledger} />
-        <PendingApprovals ledger={ledger} />
+        <Approved ledger={ledger} />
+        <EmployeePending ledger={ledger} />
+        <BossPending ledger={ledger} />
       </Container>
     </>
   );

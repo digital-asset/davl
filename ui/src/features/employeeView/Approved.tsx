@@ -4,17 +4,17 @@ import Ledger from '../../ledger/Ledger';
 import { Segment, Header } from 'semantic-ui-react';
 import VacationList from '../../components/VacationList';
 import { RootState } from '../../app/rootReducer';
-import { load as loadMyApprovedVacations } from './reducer';
+import { loadApproved } from './reducer';
 
 type Props = {
   ledger: Ledger;
 }
 
-const MyApprovedVacations: React.FC<Props> = ({ledger}) => {
+const Approved: React.FC<Props> = ({ledger}) => {
   const dispatch = useDispatch();
-  const vacations = useSelector((state: RootState) => state.approvedVacations);
+  const vacations = useSelector((state: RootState) => state.employeeView.approved);
 
-  React.useEffect(() => { dispatch(loadMyApprovedVacations(ledger)); }, [dispatch, ledger]);
+  React.useEffect(() => { dispatch(loadApproved(ledger)); }, [dispatch, ledger]);
 
   const handleVacationInfo = () => {};
 
@@ -32,4 +32,4 @@ const MyApprovedVacations: React.FC<Props> = ({ledger}) => {
   );
 }
 
-export default MyApprovedVacations;
+export default Approved;

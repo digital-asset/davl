@@ -10,11 +10,11 @@ type Props = {
   ledger: Ledger;
 }
 
-const PendingRequests: React.FC<Props> = ({ledger}) => {
+const Pending: React.FC<Props> = ({ledger}) => {
   const dispatch = useDispatch();
-  const vacations = useSelector((state: RootState) => state.pendingRquests);
+  const vacations = useSelector((state: RootState) => state.employeeView.pending);
 
-  React.useEffect(() => { dispatch(reducer.load(ledger)); }, [dispatch, ledger]);
+  React.useEffect(() => { dispatch(reducer.loadPending(ledger)); }, [dispatch, ledger]);
 
   const handleCancelRequest = () => alert('Canceling vacation requests is not yet implemented.');
 
@@ -32,4 +32,4 @@ const PendingRequests: React.FC<Props> = ({ledger}) => {
   );
 }
 
-export default PendingRequests;
+export default Pending;

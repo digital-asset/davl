@@ -13,7 +13,7 @@ type Props = {
   ledger: Ledger;
 }
 
-const PendingApprovals: React.FC<Props> = ({ledger}) => {
+const Pending: React.FC<Props> = ({ledger}) => {
   const dispatch = useDispatch();
   const vacations = useSelector((state: RootState) => state.pendingApprovals);
 
@@ -36,4 +36,4 @@ const PendingApprovals: React.FC<Props> = ({ledger}) => {
   );
 }
 
-export default PendingApprovals;
+export default Pending;
