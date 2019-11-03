@@ -27,22 +27,14 @@ const { setRequests } = slice.actions;
 export const reducer = slice.reducer;
 
 export const loadRequests = (ledger: Ledger): AppThunk<Promise<void>> => async (dispatch) => {
-  try {
-    const requests = await ledger.query(VacationRequest, {vacation: {employeeRole: {boss: ledger.party()}}});
-    const vacations: Vacation[] = requests.map((request) => makeVacation(request.contractId, request.data.vacation));
-    vacations.sort(ordVacationOnFromDate.compare);
-    dispatch(setRequests(vacations));
-  } catch (error) {
-    alert(`Unknown error:\n${error}`);
-  }
+  const requests = await ledger.query(VacationRequest, {vacation: {employeeRole: {boss: ledger.party()}}});
+  const vacations: Vacation[] = requests.map((request) => makeVacation(request.contractId, request.data.vacation));
+  vacations.sort(ordVacationOnFromDate.compare);
+  dispatch(setRequests(vacations));
 }
 
 export const approveRequest = (ledger: Ledger, contractId: ContractId<VacationRequest>): AppThunk<Promise<void>> => async (dispatch) => {
-  try {
-    await ledger.exercise(VacationRequest.Accept, contractId, {});
-    alert('Request successfully approved.');
-    await dispatch(loadRequests(ledger));
-  } catch (error) {
-    alert(`Unknown error:\n${error}`);
-  }
+  await ledger.exercise(VacationRequest.Accept, contractId, {});
+  alert('Request successfully approved.');
+  await dispatch(loadRequests(ledger));
 }

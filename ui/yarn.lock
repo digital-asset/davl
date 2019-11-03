@@ -10145,6 +10145,18 @@ redux-starter-kit@^1.0.0:
     redux-thunk "^2.3.0"
     reselect "^4.0.0"
 
+redux-thunk-error-handler@^1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/redux-thunk-error-handler/-/redux-thunk-error-handler-1.1.3.tgz#ca1452dc418c4daa577f5bf5e3b32093e5b1607a"
+  integrity sha512-14+oUwPSITS6uImKfD/G9jQ+Ju2fGXtUdKj3hRgyhzAx4wRSuh0/juraL/8IPX2vVsz/3j8fW7pnS4oqjEnOsg==
+  dependencies:
+    redux-thunk-recursion-detect "1.1.1"
+
+redux-thunk-recursion-detect@1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/redux-thunk-recursion-detect/-/redux-thunk-recursion-detect-1.1.1.tgz#7f1b13d0442bc287f37bb46e2d6943dab13d0f00"
+  integrity sha512-s50xHim5GJJQ1s5ZFXx43ZxP1L7041Fa/ZkDn+MKvmsWd0oP7wCjQPjX3LUu6fUrlyKdY1hS60cQcMV53nvC3g==
+
 redux-thunk@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/redux-thunk/-/redux-thunk-2.3.0.tgz#51c2c19a185ed5187aaa9a2d08b666d0d6467622"
