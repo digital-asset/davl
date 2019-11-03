@@ -4,7 +4,7 @@ import Ledger from '../../ledger/Ledger';
 import { AppThunk } from '../../app/store';
 import { VacationRequest } from '../../daml/DAVL';
 
-let initialState: VacationListItem[] = []
+const initialState: VacationListItem[] = []
 
 const slice = createSlice({
   name: 'pendingRequests',

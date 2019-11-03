@@ -5,7 +5,7 @@ import { AppThunk } from '../../app/store';
 import { VacationRequest } from '../../daml/DAVL';
 import { ContractId } from '../../ledger/Types';
 
-let initialState: VacationListItem[] = []
+const initialState: VacationListItem[] = []
 
 const slice = createSlice({
   name: 'pendingApprovals',

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/class-name-casing */
+/* eslint-disable @typescript-eslint/camelcase */
 import {JsonObject, JsonProperty, JsonConvert, ValueCheckingMode, OperationMode} from "json2typescript";
 import { Party, Template, TemplateId, Choice } from "../ledger/Types";
 

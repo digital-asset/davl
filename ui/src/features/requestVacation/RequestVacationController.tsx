@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import React from 'react';
 import Ledger from '../../ledger/Ledger';
 import RequestVacationView from './RequestVacationView';

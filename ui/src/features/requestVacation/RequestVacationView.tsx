@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import React from 'react';
 import { Header, Segment, Form } from 'semantic-ui-react';
 import { EmployeeRole_RequestVacation } from '../../daml/DAVL';

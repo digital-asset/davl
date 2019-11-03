@@ -6,7 +6,7 @@ import { SemanticICONS } from 'semantic-ui-react/dist/commonjs/generic';
 import { Vacation } from '../daml/DAVL';
 
 export type Item = {
-  contractId: AnyContractId,
+  contractId: AnyContractId;
   employee: Party;
   boss: Party;
   fromDate: string;
