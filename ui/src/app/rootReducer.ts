@@ -7,7 +7,7 @@ import Ledger from '../ledger/Ledger';
 
 const rootReducer = combineReducers({
   employeeView: employeeView.reducer,
-  pendingApprovals: bossView.reducer,
+  bossView: bossView.reducer,
 })
 
 export type RootState = ReturnType<typeof rootReducer>

@@ -16,7 +16,7 @@ const BossView: React.FC<Props> = ({ledger}) => {
   const dispatch = useDispatch();
   React.useEffect(() => { dispatch(reducer.loadRequests(ledger)); }, [dispatch, ledger])
 
-  const vacations = useSelector((state: RootState) => state.pendingApprovals.requests);
+  const vacations = useSelector((state: RootState) => state.bossView.requests);
 
   const handleApproveRequest = (vacation: Vacation) =>
     dispatch(reducer.approveRequest(ledger, new ContractId<VacationRequest>(vacation.contractId)));
