@@ -17,6 +17,6 @@ export default rootReducer
 export const reload = (ledger: Ledger): ThunkAction<void, RootState, null, Action<string>> => async (dispatch) => {
   await Promise.all([
     dispatch(employeeView.loadAll(ledger)),
-    dispatch(bossView.load(ledger)),
+    dispatch(bossView.loadRequests(ledger)),
   ]);
 }
