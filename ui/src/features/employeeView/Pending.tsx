@@ -2,19 +2,15 @@ import React from 'react';
 import Ledger from "../../ledger/Ledger";
 import { Segment, Header } from 'semantic-ui-react';
 import VacationList from '../../components/VacationList';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../../app/rootReducer';
-import * as reducer from './reducer';
 
 type Props = {
   ledger: Ledger;
 }
 
-const Pending: React.FC<Props> = ({ledger}) => {
-  const dispatch = useDispatch();
+const Pending: React.FC<Props> = () => {
   const vacations = useSelector((state: RootState) => state.employeeView.pending);
-
-  React.useEffect(() => { dispatch(reducer.loadPending(ledger)); }, [dispatch, ledger]);
 
   const handleCancelRequest = () => alert('Canceling vacation requests is not yet implemented.');
 
