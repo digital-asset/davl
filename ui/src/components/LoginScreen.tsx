@@ -12,7 +12,7 @@ type Props = {
  * React component for the login screen of the `App`.
  */
 const LoginScreen: React.FC<Props> = ({onLogin}) => {
-  const [username, setUsername] = React.useState('');
+  const [username, setUsername] = React.useState('Martin');
 
   const handleLogin = async (event?: React.FormEvent) => {
     try {

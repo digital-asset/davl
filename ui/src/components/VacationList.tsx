@@ -21,7 +21,7 @@ const VacationList: React.FC<Props> = ({vacations, onClickVacation, icon}) => {
         return (
           <ListActionItem
             key={vacation.contractId}
-            icon='plane'
+            icon='calendar'
             action={{
               icon,
               onClick: () => onClickVacation(vacation),
