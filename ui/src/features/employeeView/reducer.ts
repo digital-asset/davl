@@ -9,12 +9,14 @@ export type State = {
   summary: Summary | null;
   pending: Vacation[];
   approved: Vacation[];
+  addingRequest: boolean;
 }
 
 const initialState: State = {
   summary: null,
   approved: [],
   pending: [],
+  addingRequest: false,
 }
 
 const slice = createSlice({
@@ -24,10 +26,12 @@ const slice = createSlice({
     setSummary: (state: State, action: PayloadAction<Summary>) => ({...state, summary: action.payload}),
     setApproved: (state: State, action: PayloadAction<Vacation[]>) => ({...state, approved: action.payload}),
     setPending: (state: State, action: PayloadAction<Vacation[]>) => ({...state, pending: action.payload}),
+    startAddRequest: (state: State, action: PayloadAction) => ({...state, addingRequest: true}),
+    endAddRequest: (state: State, action: PayloadAction) => ({...state, addingRequest: false}),
   },
 });
 
-export const { setSummary, setApproved, setPending } = slice.actions;
+export const { setSummary, setApproved, setPending, startAddRequest, endAddRequest } = slice.actions;
 
 export const reducer = slice.reducer;
 
@@ -77,4 +81,17 @@ export const loadAll = (ledger: Ledger): AppThunk<Promise<void>> => async (dispa
     dispatch(loadApproved(ledger)),
     dispatch(loadPending(ledger)),
   ]);
+}
+
+export const addRequest = (ledger: Ledger, fromDate: string, toDate: string): AppThunk<Promise<void>> => async (dispatch) => {
+  try {
+    dispatch(startAddRequest());
+    const key = {employee: ledger.party()};
+    await ledger.pseudoExerciseByKey(davl.EmployeeRole.RequestVacation, key, {fromDate, toDate});
+    dispatch(endAddRequest());
+    alert('Request successfully submitted.');
+    await dispatch(loadPending(ledger));
+  } catch (error) {
+    alert(`Unknown error:\n${error}`);
+  }
 }

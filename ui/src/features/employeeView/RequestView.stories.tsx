@@ -2,9 +2,8 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import RequestView from './RequestView';
-import { EmployeeRole_RequestVacation } from '../../daml/DAVL';
 
-const onSubmit = ({fromDate, toDate}: EmployeeRole_RequestVacation) => {
+const onSubmit = (fromDate: string, toDate: string) => {
   alert(`first day: ${fromDate}\nlast day: ${toDate}`);
 }
 

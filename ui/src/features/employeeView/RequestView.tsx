@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import React from 'react';
 import { Header, Segment, Form } from 'semantic-ui-react';
-import { EmployeeRole_RequestVacation } from '../../daml/DAVL';
 
 export type Props = {
   loading: boolean;
-  onSubmit: (requestVacation: EmployeeRole_RequestVacation) => void;
+  onSubmit: (fromDate: string, toDate: string) => void;
 }
 
 /**
@@ -22,7 +21,7 @@ const RequestView: React.FC<Props> = ({onSubmit, loading}) => {
       alert('Both dates need be set and the first day needs to come before the last day.');
       return;
     }
-    onSubmit({fromDate: firstDay, toDate: lastDay});
+    onSubmit(firstDay, lastDay);
   }
 
   return (
