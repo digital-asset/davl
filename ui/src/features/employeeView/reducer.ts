@@ -9,7 +9,7 @@ import { partition } from 'fp-ts/lib/Array';
 import { getDualOrd } from 'fp-ts/lib/Ord';
 
 export type State = {
-  summary: EmployeeSummary | null;
+  summary: EmployeeSummary | undefined;
   pending: Vacation[];
   upcomingVacations: Vacation[];
   pastVacations: Vacation[];
@@ -18,7 +18,7 @@ export type State = {
 }
 
 const initialState: State = {
-  summary: null,
+  summary: undefined,
   upcomingVacations: [],
   pastVacations: [],
   pending: [],
