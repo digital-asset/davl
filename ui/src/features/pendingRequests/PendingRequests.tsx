@@ -1,31 +1,20 @@
 import React from 'react';
 import Ledger from "../../ledger/Ledger";
 import { Segment, Header } from 'semantic-ui-react';
-import VacationList, { Item as VacationListItem, makeItem } from '../../components/VacationList';
-import { VacationRequest } from '../../daml/DAVL';
+import VacationList from '../../components/VacationList';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../app/rootReducer';
+import * as reducer from './reducer';
 
 type Props = {
   ledger: Ledger;
 }
 
 const PendingRequests: React.FC<Props> = ({ledger}) => {
-  const [items, setItems] = React.useState<VacationListItem[]>([]);
+  const dispatch = useDispatch();
+  const items = useSelector((state: RootState) => state.pendingRquests);
 
-  const loadRequests = React.useCallback(async () => {
-    try {
-      const requests = await ledger.query(VacationRequest, {vacation: {employeeRole: {employee: ledger.party()}}});
-      const items: VacationListItem[] = requests.map((request) => makeItem(request.contractId, request.data.vacation));
-      setItems(items);
-    } catch (error) {
-      alert(`Unknown error:\n${error}`);
-    }
-  }, [ledger]);
-
-  React.useEffect(() => {
-    loadRequests();
-    const interval = setInterval(loadRequests, 1000);
-    return () => clearInterval(interval);
-  }, [loadRequests]);
+  React.useEffect(() => { dispatch(reducer.load(ledger)); }, [dispatch, ledger]);
 
   const handleCancelRequest = () => alert('Canceling vacation requests is not yet implemented.');
 

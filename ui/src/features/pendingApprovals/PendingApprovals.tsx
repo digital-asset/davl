@@ -1,41 +1,25 @@
 import React from 'react';
 import Ledger from "../../ledger/Ledger";
 import { Segment, Header } from 'semantic-ui-react';
-import VacationList, { Item as VacationListItem, makeItem } from '../../components/VacationList';
+import VacationList, { Item as VacationListItem } from '../../components/VacationList';
 import { VacationRequest } from '../../daml/DAVL';
 import { ContractId } from '../../ledger/Types';
+import { useDispatch, useSelector } from 'react-redux';
+import * as reducer from './reducer';
+import { RootState } from '../../app/rootReducer';
 
 type Props = {
   ledger: Ledger;
 }
 
 const PendingApprovals: React.FC<Props> = ({ledger}) => {
-  const [items, setItems] = React.useState<VacationListItem[]>([]);
+  const dispatch = useDispatch();
+  const items = useSelector((state: RootState) => state.pendingApprovals);
 
-  const loadRequests = React.useCallback(async () => {
-    try {
-      const requests = await ledger.query(VacationRequest, {vacation: {employeeRole: {boss: ledger.party()}}});
-      const items: VacationListItem[] = requests.map((request) => makeItem(request.contractId, request.data.vacation));
-      setItems(items);
-    } catch (error) {
-      alert(`Unknown error:\n${error}`);
-    }
-  }, [ledger]);
+  React.useEffect(() => { dispatch(reducer.load(ledger)); }, [dispatch, ledger])
 
-  React.useEffect(() => {
-    loadRequests();
-    const interval = setInterval(loadRequests, 1000);
-    return () => clearInterval(interval);
-  }, [loadRequests]);
-
-  const handleApproveRequest = async ({contractId}: VacationListItem) => {
-    try {
-      await ledger.exercise(VacationRequest.Accept, new ContractId<VacationRequest>(contractId), {});
-      alert('Request successfully approved.');
-    } catch (error) {
-      alert(`Unknown error:\n${error}`);
-    }
-  }
+  const handleApproveRequest = (item: VacationListItem) =>
+    dispatch(reducer.approveRequest(ledger, new ContractId<VacationRequest>(item.contractId)));
 
   return (
     <Segment>
