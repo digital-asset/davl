@@ -12,7 +12,7 @@ type Props = {
 
 const MyApprovedVacations: React.FC<Props> = ({ledger}) => {
   const dispatch = useDispatch();
-  const items = useSelector((state: RootState) => state.approvedVacations);
+  const vacations = useSelector((state: RootState) => state.approvedVacations);
 
   React.useEffect(() => { dispatch(loadMyApprovedVacations(ledger)); }, [dispatch, ledger]);
 
@@ -24,7 +24,7 @@ const MyApprovedVacations: React.FC<Props> = ({ledger}) => {
         Approved Vacations
       </Header>
       <VacationList
-        items={items}
+        vacations={vacations}
         onClickVacation={handleVacationInfo}
         icon='info'
       />

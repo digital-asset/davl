@@ -1,16 +1,16 @@
 import { createSlice, PayloadAction } from 'redux-starter-kit';
-import { Item as VacationListItem, makeItem } from '../../components/VacationList';
 import Ledger from '../../ledger/Ledger';
 import { AppThunk } from '../../app/store';
-import { Vacation } from '../../daml/DAVL';
+import * as davl from '../../daml/DAVL';
+import { Vacation, makeVacation } from '../../utils/vacation';
 
-const initialState: VacationListItem[] = []
+const initialState: Vacation[] = []
 
 const slice = createSlice({
   name: 'myApprovedVacations',
   initialState,
   reducers: {
-    set: (state, action: PayloadAction<VacationListItem[]>) => action.payload,
+    set: (state, action: PayloadAction<Vacation[]>) => action.payload,
   },
 });
 
@@ -20,9 +20,9 @@ export const reducer = slice.reducer;
 
 export const load = (ledger: Ledger): AppThunk<Promise<void>> => async (dispatch) => {
   try {
-    const vacations = await ledger.query(Vacation, {employeeRole: {employee: ledger.party()}});
-    const items: VacationListItem[] = vacations.map((vacation) => makeItem(vacation.contractId, vacation.data));
-    dispatch(set(items));
+    const vacationContracts = await ledger.query(davl.Vacation, {employeeRole: {employee: ledger.party()}});
+    const vacations: Vacation[] = vacationContracts.map((vacation) => makeVacation(vacation.contractId, vacation.data));
+    dispatch(set(vacations));
   } catch (error) {
     alert(`Unknown error:\n${error}`);
   }

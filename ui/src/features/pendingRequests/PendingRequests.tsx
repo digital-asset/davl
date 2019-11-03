@@ -12,7 +12,7 @@ type Props = {
 
 const PendingRequests: React.FC<Props> = ({ledger}) => {
   const dispatch = useDispatch();
-  const items = useSelector((state: RootState) => state.pendingRquests);
+  const vacations = useSelector((state: RootState) => state.pendingRquests);
 
   React.useEffect(() => { dispatch(reducer.load(ledger)); }, [dispatch, ledger]);
 
@@ -24,7 +24,7 @@ const PendingRequests: React.FC<Props> = ({ledger}) => {
         Pending Requests
       </Header>
       <VacationList
-        items={items}
+        vacations={vacations}
         onClickVacation={handleCancelRequest}
         icon='cancel'
       />
