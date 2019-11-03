@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from 'redux-starter-kit';
 import Ledger from '../../ledger/Ledger';
 import { AppThunk } from '../../app/store';
 import * as davl from '../../daml/DAVL';
-import { Vacation, makeVacation } from '../../utils/vacation';
+import { Vacation, makeVacation, ordVacationOnFromDate } from '../../utils/vacation';
 import { EmployeeSummary } from './types';
 
 export type State = {
@@ -79,6 +79,7 @@ export const loadRequests = (ledger: Ledger): AppThunk<Promise<void>> => async (
       await ledger.query(davl.VacationRequest, {vacation: {employeeRole: {employee: ledger.party()}}});
     const vacations: Vacation[] =
       requests.map((request) => makeVacation(request.contractId, request.data.vacation));
+    vacations.sort(ordVacationOnFromDate.compare);
     dispatch(setPending(vacations));
   } catch (error) {
     alert(`Unknown error:\n${error}`);
