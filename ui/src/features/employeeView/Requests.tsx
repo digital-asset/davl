@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../app/rootReducer';
 import ListActionItem from '../../components/ListActionItem';
 import { DatesRangeInput } from 'semantic-ui-calendar-react';
-import * as reducer from './reducer';
+import { addRequest, setCurrentRequest } from './employeeViewReducer';
 import { VacationListItem } from '../../components/VacationListItem';
 import { vacationLength } from '../../utils/vacation';
 
@@ -32,11 +32,11 @@ const Requests: React.FC<Props> = ({ledger}) => {
     }
     const fromDate = currentRequest.slice(0, 10);
     const toDate = currentRequest.slice(-10);
-    dispatch(reducer.addRequest(ledger, fromDate, toDate));
+    dispatch(addRequest(ledger, fromDate, toDate));
   }
 
   const handleCurrentRequestChange = (event: React.SyntheticEvent, data: {value: string}) =>
-    dispatch(reducer.setCurrentRequest(data.value));
+    dispatch(setCurrentRequest(data.value));
 
   let days = '';
   if (currentRequest.length === 23) {

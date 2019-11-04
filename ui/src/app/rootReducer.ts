@@ -1,8 +1,8 @@
 import { combineReducers, Action } from 'redux-starter-kit'
 import { ThunkAction } from 'redux-thunk';
 
-import * as bossView from '../features/bossView/reducer';
-import * as employeeView from '../features/employeeView/reducer';
+import * as bossView from '../features/bossView/bossViewReducer';
+import * as employeeView from '../features/employeeView/employeeViewReducer';
 import Ledger from '../ledger/Ledger';
 
 const rootReducer = combineReducers({

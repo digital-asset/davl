@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import Ledger from '../../ledger/Ledger';
 import Requests from './Requests';
 import { useDispatch, useSelector } from 'react-redux';
-import { loadAll } from './reducer';
+import { loadAll } from './employeeViewReducer';
 import { RootState } from '../../app/rootReducer';
 import SummaryView from './SummaryView';
 import { Segment } from 'semantic-ui-react';
