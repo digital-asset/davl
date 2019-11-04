@@ -17,7 +17,7 @@ const store = configureStore({
     createThunkErrorHandlerMiddleware({ onError: defaultErrorHandler }),
     thunkMiddleware,
     ...getDefaultMiddleware().slice(1),
-  ]
+  ],
 });
 
 if (process.env.NODE_ENV === 'development' && module.hot) {

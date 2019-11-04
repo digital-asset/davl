@@ -9,7 +9,7 @@ const rootReducer = combineReducers({
   employeeView: employeeView.reducer,
   bossView: bossView.reducer,
   auth: auth.reducer,
-})
+});
 
 export type RootState = ReturnType<typeof rootReducer>;
 
