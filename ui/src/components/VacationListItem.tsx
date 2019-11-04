@@ -26,7 +26,7 @@ export const VacationListItem: React.FC<Props> = ({vacation, viewer, onClickIcon
   return (
     <ListActionItem
       key={vacation.contractId}
-      icon='calendar'
+      icon='calendar outline'
       action={{
         icon,
         onClick: () => onClickIcon(vacation),

@@ -7,6 +7,7 @@ import ListActionItem from '../../components/ListActionItem';
 import { DatesRangeInput } from 'semantic-ui-calendar-react';
 import * as reducer from './reducer';
 import { VacationListItem } from '../../components/VacationListItem';
+import { vacationLength } from '../../utils/vacation';
 
 type Props = {
   ledger: Ledger;
@@ -29,13 +30,20 @@ const Requests: React.FC<Props> = ({ledger}) => {
       alert('No date range set for the vacation request.');
       return;
     }
-    const fromDate = currentRequest.substr(0, 10);
-    const toDate = currentRequest.substr(13, 10);
+    const fromDate = currentRequest.slice(0, 10);
+    const toDate = currentRequest.slice(-10);
     dispatch(reducer.addRequest(ledger, fromDate, toDate));
   }
 
   const handleCurrentRequestChange = (event: React.SyntheticEvent, data: {value: string}) =>
     dispatch(reducer.setCurrentRequest(data.value));
+
+  let days = '';
+  if (currentRequest.length === 23) {
+    const fromDate = currentRequest.slice(0, 10);
+    const toDate = currentRequest.slice(-10);
+    days = `, Days: ${vacationLength({fromDate, toDate})}`
+  }
 
   return (
     <Segment>
@@ -53,7 +61,7 @@ const Requests: React.FC<Props> = ({ledger}) => {
             />
         )}
         <ListActionItem
-          icon='calendar'
+          icon='calendar plus outline'
           action={{
             icon: 'add',
             onClick: handleAddRequest,
@@ -62,11 +70,11 @@ const Requests: React.FC<Props> = ({ledger}) => {
           <List.Header>
           <Form onSubmit={handleAddRequest}>
             <DatesRangeInput
-              placeholder='Request New Vacation'
+              id='date-range-picker'
+              placeholder='Add Vacation Request'
               value={currentRequest}
               onChange={handleCurrentRequestChange}
               animation={'none' as SemanticTRANSITIONS}
-              size='small'
               dateFormat='YYYY-MM-DD'
               transparent
               closable
@@ -76,7 +84,7 @@ const Requests: React.FC<Props> = ({ledger}) => {
             />
           </Form>
           </List.Header>
-          <List.Content>Approver: {boss}</List.Content>
+          <List.Content>Approver: {boss}{days}</List.Content>
         </ListActionItem>
       </List>
     </Segment>

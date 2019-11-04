@@ -11,3 +11,9 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+#date-range-picker {
+  border: 0px;
+  line-height: 1.14285714em;
+  font-weight: 700;
+}
