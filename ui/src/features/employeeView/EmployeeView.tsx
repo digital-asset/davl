@@ -12,8 +12,7 @@ const EmployeeView: React.FC = () => {
   const dispatch = useDispatch();
   useEffect(() => { dispatch(loadAll()); }, [dispatch]);
 
-  const upcomingVacations = useSelector((state: RootState) => state.employeeView.upcomingVacations);
-  const pastVacations = useSelector((state: RootState) => state.employeeView.pastVacations);
+  const vacations = useSelector((state: RootState) => state.employeeView.vacations);
 
   const summary = useSelector((state: RootState) => state.employeeView.summary);
 
@@ -31,14 +30,14 @@ const EmployeeView: React.FC = () => {
       <VacationListSegment
         header='Upcoming Vacations'
         viewer='employee'
-        vacations={upcomingVacations}
+        vacations={vacations.upcoming}
         onClickVacation={handleCancelVacation}
         icon='cancel'
       />
       <VacationListSegment
         header='Past Vacations'
         viewer='employee'
-        vacations={pastVacations}
+        vacations={vacations.past}
         onClickVacation={handleCancelVacation}
         icon='cancel'
       />

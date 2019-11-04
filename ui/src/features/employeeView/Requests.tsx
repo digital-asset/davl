@@ -11,7 +11,7 @@ import { vacationLength } from '../../utils/vacation';
 const Requests: React.FC = () => {
   const dispatch = useDispatch();
   const boss = useSelector((state: RootState) => (state.employeeView.summary || {boss: ''}).boss);
-  const vacations = useSelector((state: RootState) => state.employeeView.pending);
+  const vacations = useSelector((state: RootState) => state.employeeView.requests);
   const currentRequest = useSelector((state: RootState) => state.employeeView.currentRequest);
   const addingRequest = useSelector((state: RootState) => state.employeeView.addingRequest);
 

@@ -8,19 +8,22 @@ import { partition } from 'fp-ts/lib/Array';
 import { getDualOrd } from 'fp-ts/lib/Ord';
 import { toast } from 'react-semantic-toasts';
 
+type Vacations = {
+  upcoming: Vacation[];
+  past: Vacation[];
+}
+
 export type State = {
   summary?: EmployeeSummary;
-  pending: Vacation[];
-  upcomingVacations: Vacation[];
-  pastVacations: Vacation[];
+  requests: Vacation[];
+  vacations: Vacations;
   currentRequest: string;
   addingRequest: boolean;
 }
 
 const initialState: State = {
-  upcomingVacations: [],
-  pastVacations: [],
-  pending: [],
+  requests: [],
+  vacations: {upcoming: [], past: []},
   currentRequest: '',
   addingRequest: false,
 }
@@ -31,9 +34,8 @@ const slice = createSlice({
   reducers: {
     clearAll: (state: State, action: PayloadAction) => initialState,
     setSummary: (state: State, action: PayloadAction<EmployeeSummary>) => ({...state, summary: action.payload}),
-    setPending: (state: State, action: PayloadAction<Vacation[]>) => ({...state, pending: action.payload}),
-    setUpcomingVacations: (state: State, action: PayloadAction<Vacation[]>) => ({...state, upcomingVacations: action.payload}),
-    setPastVacations: (state: State, action: PayloadAction<Vacation[]>) => ({...state, pastVacations: action.payload}),
+    setRequests: (state: State, action: PayloadAction<Vacation[]>) => ({...state, requests: action.payload}),
+    setVacations: (state: State, action: PayloadAction<Vacations>) => ({...state, vacations: action.payload}),
     setCurrentRequest: (state: State, action: PayloadAction<string>) => ({...state, currentRequest: action.payload}),
     startAddRequest: (state: State, action: PayloadAction) => ({...state, addingRequest: true}),
     endAddRequest: (state: State, action: PayloadAction) => ({...state, currentRequest: '', addingRequest: false}),
@@ -42,9 +44,8 @@ const slice = createSlice({
 
 const {
   setSummary,
-  setPending,
-  setUpcomingVacations,
-  setPastVacations,
+  setRequests,
+  setVacations,
   startAddRequest,
   endAddRequest,
 } = slice.actions;
@@ -77,12 +78,11 @@ const loadVacations = (): AppThunk => async (dispatch, getState) => {
   const vacations: Vacation[] =
     vacationContracts.map((vacation) => makeVacation(vacation.contractId, vacation.data));
   const today = moment().format('YYYY-MM-DD');
-  const {left: upcomingVacations, right: pastVacations} =
+  const {left: upcoming, right: past} =
     partition((vacation: Vacation) => vacation.fromDate <= today)(vacations);
-  upcomingVacations.sort(ordVacationOnFromDate.compare);
-  pastVacations.sort(getDualOrd(ordVacationOnFromDate).compare);
-  dispatch(setUpcomingVacations(upcomingVacations));
-  dispatch(setPastVacations(pastVacations));
+  upcoming.sort(ordVacationOnFromDate.compare);
+  past.sort(getDualOrd(ordVacationOnFromDate).compare);
+  dispatch(setVacations({upcoming, past}));
 }
 
 const loadRequests = (): AppThunk => async (dispatch, getState) => {
@@ -92,7 +92,7 @@ const loadRequests = (): AppThunk => async (dispatch, getState) => {
   const requests: Vacation[] =
     requestsContracts.map(({contractId, data}) => makeVacation(contractId, data.vacation));
   requests.sort(ordVacationOnFromDate.compare);
-  dispatch(setPending(requests));
+  dispatch(setRequests(requests));
 }
 
 export const loadAll = (): AppThunk => async (dispatch) => {
