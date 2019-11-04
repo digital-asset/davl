@@ -2,28 +2,26 @@ import React from 'react';
 import LoginScreen from '../components/LoginScreen';
 import MainScreen from '../components/MainScreen';
 import Ledger from '../ledger/Ledger';
-import { useDispatch } from 'react-redux';
-import { reload } from './rootReducer';
+import { useDispatch, useSelector } from 'react-redux';
+import { reload, RootState } from './rootReducer';
 
 /**
  * React component for the entry point into the application.
  */
 const App: React.FC = () => {
   const dispatch = useDispatch();
-  const [ledger, setLedger] = React.useState<Ledger | undefined>(undefined);
+  const credentials = useSelector((state: RootState) => state.auth.credentials);
 
-  if (ledger === undefined) {
+  if (credentials === undefined) {
     return (
-      <LoginScreen
-        onLogin={(ledger) => setLedger(ledger)}
-      />
+      <LoginScreen />
     );
   } else {
+    const ledger = new Ledger(credentials);
     return (
       <MainScreen
         ledger={ledger}
-        onLogout={() => setLedger(undefined)}
-        onReload={() => {dispatch(reload(ledger))}}
+        onReload={() => dispatch(reload(ledger))}
       />
     );
   }

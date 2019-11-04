@@ -3,17 +3,20 @@ import { Image, Menu, Container, Grid } from 'semantic-ui-react'
 import Ledger from '../ledger/Ledger';
 import EmployeeView from '../features/employeeView/EmployeeView';
 import BossView from '../features/bossView/BossView';
+import { useDispatch } from 'react-redux';
+import { logOut } from '../app/authReducer';
 
 type Props = {
   ledger: Ledger;
-  onLogout: () => void;
   onReload: () => void;
 }
 
 /**
  * React component for the main screen of the `App`.
  */
-const MainScreen: React.FC<Props> = ({ledger, onLogout, onReload}) => {
+const MainScreen: React.FC<Props> = ({ledger, onReload}) => {
+  const dispatch = useDispatch();
+
   return (
     <>
       <Menu icon borderless>
@@ -40,7 +43,7 @@ const MainScreen: React.FC<Props> = ({ledger, onLogout, onReload}) => {
           <Menu.Item
             position='right'
             active={false}
-            onClick={onLogout}
+            onClick={() => dispatch(logOut())}
             icon='log out'
           />
         </Menu.Menu>

@@ -29,6 +29,7 @@ const slice = createSlice({
   name: 'employeeView',
   initialState,
   reducers: {
+    clearAll: (state: State, action: PayloadAction) => initialState,
     setSummary: (state: State, action: PayloadAction<EmployeeSummary>) => ({...state, summary: action.payload}),
     setPending: (state: State, action: PayloadAction<Vacation[]>) => ({...state, pending: action.payload}),
     setUpcomingVacations: (state: State, action: PayloadAction<Vacation[]>) => ({...state, upcomingVacations: action.payload}),
@@ -49,6 +50,7 @@ const {
 } = slice.actions;
 
 export const {
+  clearAll,
   setCurrentRequest,
 } = slice.actions;
 

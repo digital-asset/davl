@@ -17,21 +17,30 @@ const slice = createSlice({
   name: 'bossView',
   initialState,
   reducers: {
+    clearAll: (state: State, action: PayloadAction) => initialState,
     setRequests: (state: State, action: PayloadAction<Vacation[]>) => ({...state, requests: action.payload}),
   },
 });
 
 const { setRequests } = slice.actions;
 
+export const {
+  clearAll,
+} = slice.actions;
+
 export const reducer = slice.reducer;
 
-export const loadRequests = (ledger: Ledger): AppThunk => async (dispatch) => {
+const loadRequests = (ledger: Ledger): AppThunk => async (dispatch) => {
   const requestsContracts =
     await ledger.query(VacationRequest, {vacation: {employeeRole: {boss: ledger.party()}}});
   const reqeuests: Vacation[] =
     requestsContracts.map(({contractId, data}) => makeVacation(contractId, data.vacation));
   reqeuests.sort(ordVacationOnFromDate.compare);
   dispatch(setRequests(reqeuests));
+}
+
+export const loadAll = (ledger: Ledger): AppThunk => async (dispatch) => {
+  await dispatch(loadRequests(ledger));
 }
 
 export const approveRequest = (ledger: Ledger, contractId: ContractId<VacationRequest>): AppThunk => async (dispatch) => {
