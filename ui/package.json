@@ -14,6 +14,7 @@
     "react-dom": "^16.10.2",
     "react-redux": "^7.1.1",
     "react-scripts": "3.2.0",
+    "react-semantic-toasts": "https://github.com/hurryabit/react-semantic-toasts.git#c606bdee68a21b939c5509e6882810431a50222f",
     "redux": "^4.0.4",
     "redux-starter-kit": "^1.0.0",
     "redux-thunk-error-handler": "^1.1.3",

@@ -9989,6 +9989,12 @@ react-scripts@3.2.0:
   optionalDependencies:
     fsevents "2.0.7"
 
+"react-semantic-toasts@https://github.com/hurryabit/react-semantic-toasts.git#c606bdee68a21b939c5509e6882810431a50222f":
+  version "0.6.3"
+  resolved "https://github.com/hurryabit/react-semantic-toasts.git#c606bdee68a21b939c5509e6882810431a50222f"
+  dependencies:
+    prop-types "^15.7.2"
+
 react-sizeme@^2.6.7:
   version "2.6.10"
   resolved "https://registry.yarnpkg.com/react-sizeme/-/react-sizeme-2.6.10.tgz#9993dcb5e67fab94a8e5d078a0d3820609010f17"
