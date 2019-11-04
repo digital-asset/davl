@@ -1,5 +1,4 @@
 import React from 'react';
-import Ledger from '../../ledger/Ledger';
 import VacationListSegment from '../../components/VacationListSegment';
 import { useDispatch, useSelector } from 'react-redux';
 import { loadAll, approveRequest } from './bossViewReducer';
@@ -8,18 +7,14 @@ import { Vacation } from '../../utils/vacation';
 import { ContractId } from '../../ledger/Types';
 import { VacationRequest } from '../../daml/DAVL';
 
-type Props = {
-  ledger: Ledger;
-}
-
-const BossView: React.FC<Props> = ({ledger}) => {
+const BossView: React.FC = () => {
   const dispatch = useDispatch();
-  React.useEffect(() => { dispatch(loadAll(ledger)); }, [dispatch, ledger])
+  React.useEffect(() => { dispatch(loadAll()); }, [dispatch]);
 
   const vacations = useSelector((state: RootState) => state.bossView.requests);
 
   const handleApproveRequest = (vacation: Vacation) =>
-    dispatch(approveRequest(ledger, new ContractId<VacationRequest>(vacation.contractId)));
+    dispatch(approveRequest(new ContractId<VacationRequest>(vacation.contractId)));
 
   return (
     <VacationListSegment

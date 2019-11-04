@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from 'redux-starter-kit';
-import Ledger from '../../ledger/Ledger';
-import { AppThunk } from '../../app/store';
+import { AppThunk, getLedger } from '../../app/store';
 import { VacationRequest } from '../../daml/DAVL';
 import { ContractId } from '../../ledger/Types';
 import { Vacation, makeVacation, ordVacationOnFromDate } from '../../utils/vacation';
@@ -30,21 +29,23 @@ export const {
 
 export const reducer = slice.reducer;
 
-const loadRequests = (ledger: Ledger): AppThunk => async (dispatch) => {
+const loadRequests = (): AppThunk => async (dispatch, getState) => {
+  const ledger = getLedger(getState);
   const requestsContracts =
     await ledger.query(VacationRequest, {vacation: {employeeRole: {boss: ledger.party()}}});
-  const reqeuests: Vacation[] =
+  const requests: Vacation[] =
     requestsContracts.map(({contractId, data}) => makeVacation(contractId, data.vacation));
-  reqeuests.sort(ordVacationOnFromDate.compare);
-  dispatch(setRequests(reqeuests));
+  requests.sort(ordVacationOnFromDate.compare);
+  dispatch(setRequests(requests));
 }
 
-export const loadAll = (ledger: Ledger): AppThunk => async (dispatch) => {
-  await dispatch(loadRequests(ledger));
+export const loadAll = (): AppThunk => async (dispatch) => {
+  await dispatch(loadRequests());
 }
 
-export const approveRequest = (ledger: Ledger, contractId: ContractId<VacationRequest>): AppThunk => async (dispatch) => {
+export const approveRequest = (contractId: ContractId<VacationRequest>): AppThunk => async (dispatch, getState) => {
+  const ledger = getLedger(getState);
   await ledger.exercise(VacationRequest.Accept, contractId, {});
   alert('Request successfully approved.');
-  await dispatch(loadRequests(ledger));
+  await dispatch(loadRequests());
 }

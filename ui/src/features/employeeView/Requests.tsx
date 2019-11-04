@@ -1,5 +1,4 @@
 import React from 'react';
-import Ledger from "../../ledger/Ledger";
 import { Segment, Header, List, Form, SemanticTRANSITIONS } from 'semantic-ui-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../app/rootReducer';
@@ -9,11 +8,7 @@ import { addRequest, setCurrentRequest } from './employeeViewReducer';
 import { VacationListItem } from '../../components/VacationListItem';
 import { vacationLength } from '../../utils/vacation';
 
-type Props = {
-  ledger: Ledger;
-}
-
-const Requests: React.FC<Props> = ({ledger}) => {
+const Requests: React.FC = () => {
   const dispatch = useDispatch();
   const boss = useSelector((state: RootState) => (state.employeeView.summary || {boss: ''}).boss);
   const vacations = useSelector((state: RootState) => state.employeeView.pending);
@@ -32,7 +27,7 @@ const Requests: React.FC<Props> = ({ledger}) => {
     }
     const fromDate = currentRequest.slice(0, 10);
     const toDate = currentRequest.slice(-10);
-    dispatch(addRequest(ledger, fromDate, toDate));
+    dispatch(addRequest(fromDate, toDate));
   }
 
   const handleCurrentRequestChange = (event: React.SyntheticEvent, data: {value: string}) =>

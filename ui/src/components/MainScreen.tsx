@@ -1,21 +1,17 @@
 import React from 'react'
 import { Image, Menu, Container, Grid } from 'semantic-ui-react'
-import Ledger from '../ledger/Ledger';
 import EmployeeView from '../features/employeeView/EmployeeView';
 import BossView from '../features/bossView/BossView';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logOut } from '../app/authReducer';
-
-type Props = {
-  ledger: Ledger;
-  onReload: () => void;
-}
+import { RootState, reload } from '../app/rootReducer';
 
 /**
  * React component for the main screen of the `App`.
  */
-const MainScreen: React.FC<Props> = ({ledger, onReload}) => {
+const MainScreen: React.FC = () => {
   const dispatch = useDispatch();
+  const credentials = useSelector((state: RootState) => state.auth.credentials);
 
   return (
     <>
@@ -32,12 +28,12 @@ const MainScreen: React.FC<Props> = ({ledger, onReload}) => {
         </Menu.Item>
         <Menu.Menu position='right'>
           <Menu.Item position='right'>
-            You are logged in as {ledger.party()}.
+            You are logged in as {credentials ? credentials.party : '???'}.
           </Menu.Item>
           <Menu.Item
             position='right'
             active={false}
-            onClick={onReload}
+            onClick={() => dispatch(reload())}
             icon='refresh'
           />
           <Menu.Item
@@ -52,10 +48,10 @@ const MainScreen: React.FC<Props> = ({ledger, onReload}) => {
       <Container>
         <Grid columns={2}>
           <Grid.Column>
-            <EmployeeView ledger={ledger} />
+            <EmployeeView />
           </Grid.Column>
           <Grid.Column>
-            <BossView ledger={ledger} />
+            <BossView />
           </Grid.Column>
         </Grid>
       </Container>

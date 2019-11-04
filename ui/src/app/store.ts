@@ -4,6 +4,7 @@ import createThunkErrorHandlerMiddleware from 'redux-thunk-error-handler';
 import thunkMiddleware from 'redux-thunk-recursion-detect';
 
 import rootReducer, { RootState } from './rootReducer'
+import Ledger from '../ledger/Ledger';
 
 const defaultErrorHandler = (error: unknown) => {
   console.log(error);
@@ -17,7 +18,7 @@ const store = configureStore({
     thunkMiddleware,
     ...getDefaultMiddleware().slice(1),
   ]
-})
+});
 
 if (process.env.NODE_ENV === 'development' && module.hot) {
   module.hot.accept('./rootReducer', () => {
@@ -26,8 +27,17 @@ if (process.env.NODE_ENV === 'development' && module.hot) {
   })
 }
 
-export type AppDispatch = typeof store.dispatch
+export type AppDispatch = typeof store.dispatch;
 
-export type AppThunk<R = void> = ThunkAction<Promise<R>, RootState, null, Action<string>>
+export type AppThunk<R = void> = ThunkAction<Promise<R>, RootState, null, Action<string>>;
 
-export default store
+export default store;
+
+export const getLedger = (getState: () => RootState): Ledger => {
+  const credentials = getState().auth.credentials;
+  if (credentials) {
+    return new Ledger(credentials);
+  } else {
+    throw Error('credentials not initialized')
+  }
+}

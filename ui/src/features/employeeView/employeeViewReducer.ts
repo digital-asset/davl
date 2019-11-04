@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from 'redux-starter-kit';
-import Ledger from '../../ledger/Ledger';
-import { AppThunk } from '../../app/store';
+import { AppThunk, getLedger } from '../../app/store';
 import * as DAVL from '../../daml/DAVL';
 import { Vacation, makeVacation, ordVacationOnFromDate } from '../../utils/vacation';
 import { EmployeeSummary } from './types';
@@ -57,7 +56,8 @@ export const {
 
 export const reducer = slice.reducer;
 
-const loadSummary = (ledger: Ledger): AppThunk => async (dispatch) => {
+const loadSummary = (): AppThunk => async (dispatch, getState) => {
+  const ledger = getLedger(getState);
   const key = {employeeRole: {employee: ledger.party()}};
   const {data: {employeeRole: {employee, boss}, remainingDays}} =
     await ledger.pseudoFetchByKey(DAVL.EmployeeVacationAllocation, key);
@@ -69,7 +69,8 @@ const loadSummary = (ledger: Ledger): AppThunk => async (dispatch) => {
   dispatch(setSummary(summary));
 }
 
-const loadVacations = (ledger: Ledger): AppThunk => async (dispatch) => {
+const loadVacations = (): AppThunk => async (dispatch, getState) => {
+  const ledger = getLedger(getState);
   const vacationContracts =
     await ledger.query(DAVL.Vacation, {employeeRole: {employee: ledger.party()}});
   const vacations: Vacation[] =
@@ -83,7 +84,8 @@ const loadVacations = (ledger: Ledger): AppThunk => async (dispatch) => {
   dispatch(setPastVacations(pastVacations));
 }
 
-const loadRequests = (ledger: Ledger): AppThunk => async (dispatch) => {
+const loadRequests = (): AppThunk => async (dispatch, getState) => {
+  const ledger = getLedger(getState);
   const requestsContracts =
     await ledger.query(DAVL.VacationRequest, {vacation: {employeeRole: {employee: ledger.party()}}});
   const requests: Vacation[] =
@@ -92,18 +94,19 @@ const loadRequests = (ledger: Ledger): AppThunk => async (dispatch) => {
   dispatch(setPending(requests));
 }
 
-export const loadAll = (ledger: Ledger): AppThunk => async (dispatch) => {
+export const loadAll = (): AppThunk => async (dispatch) => {
   await Promise.all([
-    dispatch(loadSummary(ledger)),
-    dispatch(loadVacations(ledger)),
-    dispatch(loadRequests(ledger)),
+    dispatch(loadSummary()),
+    dispatch(loadVacations()),
+    dispatch(loadRequests()),
   ]);
 }
 
-export const addRequest = (ledger: Ledger, fromDate: string, toDate: string): AppThunk => async (dispatch) => {
+export const addRequest = (fromDate: string, toDate: string): AppThunk => async (dispatch, getState) => {
+  const ledger = getLedger(getState);
   dispatch(startAddRequest());
   const key = {employee: ledger.party()};
   await ledger.pseudoExerciseByKey(DAVL.EmployeeRole.RequestVacation, key, {fromDate, toDate});
   dispatch(endAddRequest());
-  await dispatch(loadRequests(ledger));
+  await dispatch(loadRequests());
 }

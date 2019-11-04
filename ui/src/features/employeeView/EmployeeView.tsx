@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import Ledger from '../../ledger/Ledger';
 import Requests from './Requests';
 import { useDispatch, useSelector } from 'react-redux';
 import { loadAll } from './employeeViewReducer';
@@ -8,13 +7,9 @@ import SummaryView from './SummaryView';
 import { Segment } from 'semantic-ui-react';
 import VacationListSegment from '../../components/VacationListSegment';
 
-type Props = {
-  ledger: Ledger;
-}
-
-const EmployeeView: React.FC<Props> = ({ledger}) => {
+const EmployeeView: React.FC = () => {
   const dispatch = useDispatch();
-  useEffect(() => { dispatch(loadAll(ledger)); }, [dispatch, ledger]);
+  useEffect(() => { dispatch(loadAll()); }, [dispatch]);
 
   const upcomingVacations = useSelector((state: RootState) => state.employeeView.upcomingVacations);
   const pastVacations = useSelector((state: RootState) => state.employeeView.pastVacations);
@@ -26,7 +21,7 @@ const EmployeeView: React.FC<Props> = ({ledger}) => {
   return (
     <Segment.Group>
       {summary ? <SummaryView {...summary} /> : <p>Loading summary...</p>}
-      <Requests ledger={ledger} />
+      <Requests />
       <VacationListSegment
         header='Upcoming Vacations'
         viewer='employee'
