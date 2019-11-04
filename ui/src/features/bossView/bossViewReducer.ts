@@ -3,6 +3,7 @@ import { AppThunk, getLedger } from '../../app/store';
 import { VacationRequest } from '../../daml/DAVL';
 import { ContractId } from '../../ledger/Types';
 import { Vacation, makeVacation, ordVacationOnFromDate } from '../../utils/vacation';
+import { toast } from 'react-semantic-toasts';
 
 type State = {
   requests: Vacation[];
@@ -46,6 +47,11 @@ export const loadAll = (): AppThunk => async (dispatch) => {
 export const approveRequest = (contractId: ContractId<VacationRequest>): AppThunk => async (dispatch, getState) => {
   const ledger = getLedger(getState);
   await ledger.exercise(VacationRequest.Accept, contractId, {});
-  alert('Request successfully approved.');
+  toast({
+    title: 'Success',
+    type: 'success',
+    time: 3000,
+    description: 'Request successfully approved.',
+  });
   await dispatch(loadRequests());
 }

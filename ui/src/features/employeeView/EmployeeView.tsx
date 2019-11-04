@@ -6,6 +6,7 @@ import { RootState } from '../../app/rootReducer';
 import SummaryView from './SummaryView';
 import { Segment } from 'semantic-ui-react';
 import VacationListSegment from '../../components/VacationListSegment';
+import { toast } from 'react-semantic-toasts';
 
 const EmployeeView: React.FC = () => {
   const dispatch = useDispatch();
@@ -16,7 +17,12 @@ const EmployeeView: React.FC = () => {
 
   const summary = useSelector((state: RootState) => state.employeeView.summary);
 
-  const handleCancelVacation = () => alert('Canceling vacation is not yet implemented.');
+  const handleCancelVacation = () => toast({
+    title: 'Not yet implemented',
+    type: 'error',
+    description: 'Canceling vacation is not yet implemented.',
+    time: 0,
+  });
 
   return (
     <Segment.Group>

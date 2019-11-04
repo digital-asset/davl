@@ -5,10 +5,22 @@ import thunkMiddleware from 'redux-thunk-recursion-detect';
 
 import rootReducer, { RootState } from './rootReducer'
 import Ledger from '../ledger/Ledger';
+import { toast } from 'react-semantic-toasts';
 
 const defaultErrorHandler = (error: unknown) => {
   console.log(error);
-  alert(`Unhandled error:\n${error}`);
+  const description: string =
+    typeof error === 'string'
+    ? error
+    : error instanceof Error
+    ? error.toString()
+    : JSON.stringify(error);
+  toast({
+    title: 'Unhandled error',
+    type: 'error',
+    description,
+    time: 0,
+  });
 }
 
 const store = configureStore({
@@ -20,12 +32,12 @@ const store = configureStore({
   ],
 });
 
-if (process.env.NODE_ENV === 'development' && module.hot) {
-  module.hot.accept('./rootReducer', () => {
-    const newRootReducer = require('./rootReducer').default
-    store.replaceReducer(newRootReducer)
-  })
-}
+// if (process.env.NODE_ENV === 'development' && module.hot) {
+//   module.hot.accept('./rootReducer', () => {
+//     const newRootReducer = require('./rootReducer').default
+//     store.replaceReducer(newRootReducer)
+//   })
+// }
 
 export type AppDispatch = typeof store.dispatch;
 

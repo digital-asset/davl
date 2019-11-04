@@ -6,6 +6,7 @@ import { EmployeeSummary } from './types';
 import moment from 'moment';
 import { partition } from 'fp-ts/lib/Array';
 import { getDualOrd } from 'fp-ts/lib/Ord';
+import { toast } from 'react-semantic-toasts';
 
 export type State = {
   summary?: EmployeeSummary;
@@ -108,5 +109,11 @@ export const addRequest = (fromDate: string, toDate: string): AppThunk => async 
   const key = {employee: ledger.party()};
   await ledger.pseudoExerciseByKey(DAVL.EmployeeRole.RequestVacation, key, {fromDate, toDate});
   dispatch(endAddRequest());
+  toast({
+    title:' Success',
+    type: 'success',
+    description: 'Request successfully submitted.',
+    time: 3000,
+  });
   await dispatch(loadRequests());
 }
