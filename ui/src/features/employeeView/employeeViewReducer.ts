@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from 'redux-starter-kit';
 import { AppThunk, getLedger } from '../../app/store';
 import * as DAVL from '../../daml/DAVL';
 import { Vacation, makeVacation, ordVacationOnFromDate } from '../../utils/vacation';
-import { EmployeeSummary } from './types';
+import { EmployeeSummary } from '../../utils/employee';
 import moment from 'moment';
 import { partition } from 'fp-ts/lib/Array';
 import { getDualOrd } from 'fp-ts/lib/Ord';

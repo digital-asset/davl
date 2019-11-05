@@ -1,6 +1,6 @@
 import React from 'react';
 import { Header, Segment } from 'semantic-ui-react';
-import { EmployeeSummary } from './types';
+import { EmployeeSummary } from '../../utils/employee';
 
 type Props = EmployeeSummary;
 

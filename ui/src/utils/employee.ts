@@ -1,4 +1,4 @@
-import { Party } from '../../ledger/Types';
+import { Party } from '../ledger/Types';
 
 export type EmployeeSummary = {
   employee: Party;

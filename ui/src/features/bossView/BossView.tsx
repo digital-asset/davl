@@ -6,6 +6,8 @@ import { RootState } from '../../app/rootReducer';
 import { Vacation } from '../../utils/vacation';
 import { ContractId } from '../../ledger/Types';
 import { VacationRequest } from '../../daml/DAVL';
+import { Segment } from 'semantic-ui-react';
+import Staff from './Staff';
 
 const BossView: React.FC = () => {
   const dispatch = useDispatch();
@@ -17,13 +19,16 @@ const BossView: React.FC = () => {
     dispatch(approveRequest(new ContractId<VacationRequest>(vacation.contractId)));
 
   return (
-    <VacationListSegment
-      header='Pending Approvals'
-      viewer='boss'
-      vacations={vacations}
-      onClickVacation={handleApproveRequest}
-      icon='check'
-    />
+    <Segment.Group>
+      <Staff />
+      <VacationListSegment
+        header='Pending Vacation Approvals'
+        viewer='boss'
+        vacations={vacations}
+        onClickVacation={handleApproveRequest}
+        icon='check'
+      />
+    </Segment.Group>
   );
 }
 
