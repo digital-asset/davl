@@ -1,5 +1,5 @@
 import React from 'react';
-import { Segment, Header } from 'semantic-ui-react';
+import { Segment, Header, List } from 'semantic-ui-react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../app/rootReducer';
 
@@ -11,9 +11,17 @@ const Staff: React.FC = () => {
       <Header as='h1'>
         Team
       </Header>
-      {staff.map(({employee, remainingVacationDays}) =>
-        <p key={employee}><strong>{employee}:</strong> {remainingVacationDays}</p>
-      )}
+      <List>
+        {staff.map(({employee, remainingVacationDays}) =>
+          <List.Item key={employee}>
+            <List.Icon name='user outline' />
+            <List.Content>
+              <List.Header>{employee}</List.Header>
+              <List.Description>Remaining vacation days: {remainingVacationDays}</List.Description>
+            </List.Content>
+          </List.Item>
+        )}
+      </List>
     </Segment>
   );
 }

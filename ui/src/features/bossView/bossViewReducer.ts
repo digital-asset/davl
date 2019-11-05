@@ -5,7 +5,7 @@ import * as DAVL from '../../daml/DAVL';
 import { ContractId } from '../../ledger/Types';
 import { Vacation, makeVacation, ordVacationOnFromDate, Vacations, emptyVacations, splitVacations } from '../../utils/vacation';
 import { toast } from 'react-semantic-toasts';
-import { EmployeeSummary } from '../../utils/employee';
+import { EmployeeSummary, ordEmployeeSummaryOnName } from '../../utils/employee';
 
 type State = {
   staff: EmployeeSummary[];
@@ -51,6 +51,7 @@ const loadStaff = (): AppThunk => async (dispatch, getState) => {
     boss: allocation.data.employeeRole.boss,
     remainingVacationDays: allocation.data.remainingDays,
   }));
+  staff.sort(ordEmployeeSummaryOnName.compare);
   dispatch(setStaff(staff));
 }
 
