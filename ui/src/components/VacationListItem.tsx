@@ -12,17 +12,8 @@ export type Props = {
 
 export const VacationListItem: React.FC<Props> = ({vacation, viewer, onClickIcon, icon}) => {
   const {employee, boss, fromDate, toDate} = vacation;
-  let content: string;
-  switch (viewer) {
-    case 'employee':
-      content = `Approver: ${boss}`;
-      break;
-    case 'boss':
-      content = `Requester: ${employee}`;
-      break;
-    default:
-      content = '';
-  }
+  const employeeContent = viewer === 'boss' ? `${employee}: ` : '';
+  const bossContent = viewer === 'employee' ? `Approver: ${boss}, ` : '';
   return (
     <ListActionItem
       key={vacation.contractId}
@@ -32,8 +23,8 @@ export const VacationListItem: React.FC<Props> = ({vacation, viewer, onClickIcon
         onClick: () => onClickIcon(vacation),
       }}
     >
-      <List.Header>{fromDate} - {toDate}</List.Header>
-      <List.Content>{content}, Days: {vacationLength(vacation)}</List.Content>
+      <List.Header>{employeeContent}{fromDate} - {toDate}</List.Header>
+      <List.Content>{bossContent}Days: {vacationLength(vacation)}</List.Content>
     </ListActionItem>
   );
 }
