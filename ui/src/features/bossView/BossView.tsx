@@ -4,8 +4,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { loadAll, approveRequest } from './bossViewReducer';
 import { RootState } from '../../app/rootReducer';
 import { Vacation } from '../../utils/vacation';
-import { ContractId } from '../../ledger/Types';
-import { VacationRequest } from '../../daml/DAVL';
 import { Segment } from 'semantic-ui-react';
 import Staff from './Staff';
 
@@ -17,7 +15,7 @@ const BossView: React.FC = () => {
   const vacations = useSelector((state: RootState) => state.bossView.vacations);
 
   const handleApproveRequest = (vacation: Vacation) =>
-    dispatch(approveRequest(new ContractId<VacationRequest>(vacation.contractId)));
+    dispatch(approveRequest(vacation.contractId));
 
   return (
     <Segment.Group>

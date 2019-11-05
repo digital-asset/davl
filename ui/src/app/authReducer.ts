@@ -76,7 +76,7 @@ export const signUp = (credentials: Credentials): AppThunk => async (dispatch) =
       alert("There are multiple invitations for you.");
     } else {
       const employeeProposalFull = employeeProposals[0];
-      const employeeProposal = employeeProposalFull.data;
+      const employeeProposal = employeeProposalFull.argument;
       const employeeRole = employeeProposal.employeeRole;
       const accept = window.confirm(`You have been invited to work for ${employeeRole.company}.\nBoss: ${employeeRole.boss}\nVacation days: ${employeeProposal.vacationDays}\nDo you accept?`);
       if (accept) {

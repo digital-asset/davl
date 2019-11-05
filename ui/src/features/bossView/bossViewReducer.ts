@@ -47,9 +47,9 @@ const loadStaff = (): AppThunk => async (dispatch, getState) => {
   const key = {employeeRole: {boss: ledger.party()}};
   const allocations = await ledger.query(EmployeeVacationAllocation, key);
   const staff: EmployeeSummary[] = allocations.map((allocation) => ({
-    employee: allocation.data.employeeRole.employee,
-    boss: allocation.data.employeeRole.boss,
-    remainingVacationDays: allocation.data.remainingDays,
+    employee: allocation.argument.employeeRole.employee,
+    boss: allocation.argument.employeeRole.boss,
+    remainingVacationDays: allocation.argument.remainingDays,
   }));
   staff.sort(ordEmployeeSummaryOnName.compare);
   dispatch(setStaff(staff));
@@ -60,7 +60,7 @@ const loadRequests = (): AppThunk => async (dispatch, getState) => {
   const requestsContracts =
     await ledger.query(VacationRequest, {vacation: {employeeRole: {boss: ledger.party()}}});
   const requests: Vacation[] =
-    requestsContracts.map(({contractId, data}) => makeVacation(contractId, data.vacation));
+    requestsContracts.map(({contractId, argument}) => makeVacation(contractId, argument.vacation));
   requests.sort(ordVacationOnFromDate.compare);
   dispatch(setRequests(requests));
 }
@@ -70,7 +70,7 @@ const loadVacations = (): AppThunk => async (dispatch, getState) => {
   const vacationContracts =
     await ledger.query(DAVL.Vacation, {employeeRole: {boss: ledger.party()}});
   const vacations: Vacation[] =
-    vacationContracts.map((vacation) => makeVacation(vacation.contractId, vacation.data));
+    vacationContracts.map((vacation) => makeVacation(vacation.contractId, vacation.argument));
   dispatch(setVacations(splitVacations(vacations)));
 }
 

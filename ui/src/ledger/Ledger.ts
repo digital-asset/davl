@@ -1,22 +1,14 @@
-import { Any, JsonObject, JsonProperty, JsonConvert, ValueCheckingMode } from "json2typescript";
 import Credentials from './Credentials';
 import { Archive, Choice, Contract, ContractId, Party, Template } from './Types';
 
-
-@JsonObject("Ledger.Response")
-class LedgerResponse {
-  @JsonProperty("status", Number)
-  status: number = -1;
-  @JsonProperty("result", Any)
-  result: unknown = undefined;
+type LedgerResponse = {
+  status: number;
+  result: unknown;
 }
 
-@JsonObject("Ledger.Error")
-class LedgerError {
-  @JsonProperty("status", Number)
-  status: number = -1;
-  @JsonProperty("errors", [String])
-  errors: string[] = [];
+type LedgerError = {
+  status: number;
+  errors: string[];
 }
 
 /**
@@ -38,8 +30,6 @@ class Ledger {
    * Internal function to submit a command to the JSON API.
    */
   private async submit(method: string, payload: unknown): Promise<unknown> {
-    const jsonConvert = new JsonConvert();
-    jsonConvert.valueCheckingMode = ValueCheckingMode.DISALLOW_NULL;
     const httpResponse = await fetch(method, {
       body: JSON.stringify(payload),
       headers: {
@@ -51,9 +41,12 @@ class Ledger {
     const json = await httpResponse.json();
     if (!httpResponse.ok) {
       console.log(json);
-      throw jsonConvert.deserialize(json, LedgerError);
+      // TODO(MH): Validate.
+      const ledgerError = json as LedgerError;
+      throw ledgerError;
     }
-    const ledgerResponse = jsonConvert.deserializeObject(json, LedgerResponse);
+    // TODO(MH): Validate.
+    const ledgerResponse = json as LedgerResponse;
     return ledgerResponse.result;
   }
 
@@ -123,7 +116,7 @@ class Ledger {
   async exercise<T, C>(choice: Choice<T, C>, contractId: ContractId<T>, argument: C): Promise<unknown> {
     const payload = {
       templateId: choice.template.templateId,
-      contractId: contractId.toJSON(),
+      contractId: ContractId.toJSON(contractId),
       choice: choice.choiceName,
       argument: choice.toJSON(argument),
     };
@@ -153,8 +146,6 @@ class Ledger {
   async pseudoArchiveByKey<T>(template: Template<T>, key: unknown): Promise<unknown> {
     return this.pseudoExerciseByKey(Archive(template), key, {});
   }
-
-  static Error = LedgerError;
 }
 
 export default Ledger;
