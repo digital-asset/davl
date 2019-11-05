@@ -1,17 +1,9 @@
 import { createSlice, PayloadAction } from 'redux-starter-kit';
 import { AppThunk, getLedger } from '../../app/store';
 import * as DAVL from '../../daml/DAVL';
-import { Vacation, makeVacation, ordVacationOnFromDate } from '../../utils/vacation';
+import { Vacation, Vacations, makeVacation, ordVacationOnFromDate, emptyVacations, splitVacations } from '../../utils/vacation';
 import { EmployeeSummary } from '../../utils/employee';
-import moment from 'moment';
-import { partition } from 'fp-ts/lib/Array';
-import { getDualOrd } from 'fp-ts/lib/Ord';
 import { toast } from 'react-semantic-toasts';
-
-type Vacations = {
-  upcoming: Vacation[];
-  past: Vacation[];
-}
 
 export type State = {
   summary?: EmployeeSummary;
@@ -23,7 +15,7 @@ export type State = {
 
 const initialState: State = {
   requests: [],
-  vacations: {upcoming: [], past: []},
+  vacations: emptyVacations,
   currentRequest: '',
   addingRequest: false,
 }
@@ -32,13 +24,13 @@ const slice = createSlice({
   name: 'employeeView',
   initialState,
   reducers: {
-    clearAll: (state: State, action: PayloadAction) => initialState,
+    clearAll: () => initialState,
     setSummary: (state: State, action: PayloadAction<EmployeeSummary>) => ({...state, summary: action.payload}),
     setRequests: (state: State, action: PayloadAction<Vacation[]>) => ({...state, requests: action.payload}),
     setVacations: (state: State, action: PayloadAction<Vacations>) => ({...state, vacations: action.payload}),
     setCurrentRequest: (state: State, action: PayloadAction<string>) => ({...state, currentRequest: action.payload}),
-    startAddRequest: (state: State, action: PayloadAction) => ({...state, addingRequest: true}),
-    endAddRequest: (state: State, action: PayloadAction) => ({...state, currentRequest: '', addingRequest: false}),
+    startAddRequest: (state: State) => ({...state, addingRequest: true}),
+    endAddRequest: (state: State) => ({...state, currentRequest: '', addingRequest: false}),
   },
 });
 
@@ -77,12 +69,7 @@ const loadVacations = (): AppThunk => async (dispatch, getState) => {
     await ledger.query(DAVL.Vacation, {employeeRole: {employee: ledger.party()}});
   const vacations: Vacation[] =
     vacationContracts.map((vacation) => makeVacation(vacation.contractId, vacation.data));
-  const today = moment().format('YYYY-MM-DD');
-  const {left: upcoming, right: past} =
-    partition((vacation: Vacation) => vacation.fromDate <= today)(vacations);
-  upcoming.sort(ordVacationOnFromDate.compare);
-  past.sort(getDualOrd(ordVacationOnFromDate).compare);
-  dispatch(setVacations({upcoming, past}));
+  dispatch(setVacations(splitVacations(vacations)));
 }
 
 const loadRequests = (): AppThunk => async (dispatch, getState) => {

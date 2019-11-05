@@ -1,19 +1,22 @@
 import { createSlice, PayloadAction } from 'redux-starter-kit';
 import { AppThunk, getLedger } from '../../app/store';
 import { EmployeeVacationAllocation, VacationRequest } from '../../daml/DAVL';
+import * as DAVL from '../../daml/DAVL';
 import { ContractId } from '../../ledger/Types';
-import { Vacation, makeVacation, ordVacationOnFromDate } from '../../utils/vacation';
+import { Vacation, makeVacation, ordVacationOnFromDate, Vacations, emptyVacations, splitVacations } from '../../utils/vacation';
 import { toast } from 'react-semantic-toasts';
 import { EmployeeSummary } from '../../utils/employee';
 
 type State = {
   staff: EmployeeSummary[];
   requests: Vacation[];
+  vacations: Vacations;
 }
 
 const initialState: State = {
   staff: [],
   requests: [],
+  vacations: emptyVacations,
 }
 
 const slice = createSlice({
@@ -23,12 +26,14 @@ const slice = createSlice({
     clearAll: (state: State, action: PayloadAction) => initialState,
     setStaff: (state: State, action: PayloadAction<EmployeeSummary[]>) => ({...state, staff: action.payload}),
     setRequests: (state: State, action: PayloadAction<Vacation[]>) => ({...state, requests: action.payload}),
+    setVacations: (state: State, action: PayloadAction<Vacations>) => ({...state, vacations: action.payload}),
   },
 });
 
 const {
   setStaff,
   setRequests,
+  setVacations,
 } = slice.actions;
 
 export const {
@@ -59,10 +64,20 @@ const loadRequests = (): AppThunk => async (dispatch, getState) => {
   dispatch(setRequests(requests));
 }
 
+const loadVacations = (): AppThunk => async (dispatch, getState) => {
+  const ledger = getLedger(getState);
+  const vacationContracts =
+    await ledger.query(DAVL.Vacation, {employeeRole: {boss: ledger.party()}});
+  const vacations: Vacation[] =
+    vacationContracts.map((vacation) => makeVacation(vacation.contractId, vacation.data));
+  dispatch(setVacations(splitVacations(vacations)));
+}
+
 export const loadAll = (): AppThunk => async (dispatch) => {
   await Promise.all([
     dispatch(loadStaff()),
     dispatch(loadRequests()),
+    dispatch(loadVacations()),
   ]);
 }
 

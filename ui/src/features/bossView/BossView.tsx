@@ -13,7 +13,8 @@ const BossView: React.FC = () => {
   const dispatch = useDispatch();
   React.useEffect(() => { dispatch(loadAll()); }, [dispatch]);
 
-  const vacations = useSelector((state: RootState) => state.bossView.requests);
+  const requests = useSelector((state: RootState) => state.bossView.requests);
+  const vacations = useSelector((state: RootState) => state.bossView.vacations);
 
   const handleApproveRequest = (vacation: Vacation) =>
     dispatch(approveRequest(new ContractId<VacationRequest>(vacation.contractId)));
@@ -24,9 +25,23 @@ const BossView: React.FC = () => {
       <VacationListSegment
         header='Pending Vacation Approvals'
         viewer='boss'
-        vacations={vacations}
+        vacations={requests}
         onClickVacation={handleApproveRequest}
         icon='check'
+      />
+      <VacationListSegment
+        header='Upcoming Vacations'
+        viewer='boss'
+        vacations={vacations.upcoming}
+        onClickVacation={() => {}}
+        icon='info'
+      />
+      <VacationListSegment
+        header='Past Vacations'
+        viewer='boss'
+        vacations={vacations.past}
+        onClickVacation={() => {}}
+        icon='info'
       />
     </Segment.Group>
   );

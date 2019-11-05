@@ -12,9 +12,8 @@ const EmployeeView: React.FC = () => {
   const dispatch = useDispatch();
   useEffect(() => { dispatch(loadAll()); }, [dispatch]);
 
-  const vacations = useSelector((state: RootState) => state.employeeView.vacations);
-
   const summary = useSelector((state: RootState) => state.employeeView.summary);
+  const vacations = useSelector((state: RootState) => state.employeeView.vacations);
 
   const handleCancelVacation = () => toast({
     title: 'Not yet implemented',

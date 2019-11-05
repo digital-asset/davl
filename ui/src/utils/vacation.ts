@@ -1,6 +1,7 @@
 import { AnyContractId, Party, ContractId } from '../ledger/Types';
 import * as DAVL from '../daml/DAVL';
-import { contramap, Ord, ordString } from 'fp-ts/lib/Ord';
+import { contramap, Ord, ordString, getDualOrd } from 'fp-ts/lib/Ord';
+import { partition } from 'fp-ts/lib/Array';
 import moment from 'moment';
 
 export type Vacation = {
@@ -22,3 +23,22 @@ export const vacationLength = (vacation: {fromDate: string; toDate: string}): nu
 
 export const ordVacationOnFromDate: Ord<Vacation> =
   contramap((vacation: Vacation) => vacation.fromDate)(ordString);
+
+export type Vacations = {
+  upcoming: Vacation[];
+  past: Vacation[];
+}
+
+export const emptyVacations: Vacations = {
+  upcoming: [],
+  past: [],
+}
+
+export const splitVacations = (vacations: Vacation[]) => {
+  const today = moment().format('YYYY-MM-DD');
+  const {left: upcoming, right: past} =
+    partition((vacation: Vacation) => vacation.fromDate <= today)(vacations);
+  upcoming.sort(ordVacationOnFromDate.compare);
+  past.sort(getDualOrd(ordVacationOnFromDate).compare);
+  return {upcoming, past};
+}
