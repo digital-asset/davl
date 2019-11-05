@@ -28,9 +28,9 @@ jobs:
       - bash: |
           set -euo pipefail
           echo $(grpc-version) > /tmp/grpc-version
-      - task: CacheBeta@0
+      - task: CacheBeta@1
         inputs:
-          key: /tmp/grpc-version
+          key: /tmp/grpc-version | bust
           path: /tmp/grpc
           cacheHitVar: GRPC_CACHE_HIT
       - bash: |
@@ -80,9 +80,9 @@ jobs:
           set -euo pipefail
           SDK_VERSION=$(cat project/V1/daml.yaml | grep sdk-version | awk '{print $2}')
           echo ${SDK_VERSION}-test > /tmp/daml-version
-      - task: CacheBeta@0
+      - task: CacheBeta@1
         inputs:
-          key: /tmp/daml-version
+          key: /tmp/daml-version | bust
           path: /tmp/daml
           cacheHitVar: DAML_CACHE_HIT
       - bash: |
@@ -124,9 +124,9 @@ jobs:
           set -euo pipefail
           echo $(git log -n1 --pretty=format:%H cli/stack.yaml cli/package.yaml) > /tmp/stack-cache-key
           cat /tmp/stack-cache-key
-      - task: CacheBeta@0
+      - task: CacheBeta@1
         inputs:
-          key: /tmp/stack-cache-key
+          key: /tmp/stack-cache-key | bust
           path: /tmp/stack
           cacheHitVar: STACK_CACHE_HIT
       - bash: |
