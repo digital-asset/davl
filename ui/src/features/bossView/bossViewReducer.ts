@@ -91,5 +91,5 @@ export const approveRequest = (contractId: ContractId<VacationRequest>): AppThun
     time: 3000,
     description: 'Request successfully approved.',
   });
-  await dispatch(loadRequests());
+  await dispatch(loadAll());
 }
