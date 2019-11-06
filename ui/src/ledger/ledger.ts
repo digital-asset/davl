@@ -1,6 +1,6 @@
 import Credentials from './credentials';
 import { Archive, Choice, Contract, ContractId, Party, Template, Query } from './types';
-import { array } from '@mojotech/json-type-validation';
+import { array, Result } from '@mojotech/json-type-validation';
 
 type LedgerResponse = {
   status: number;
@@ -60,11 +60,7 @@ class Ledger {
     const payload = {"%templates": [template.templateId]};
     Object.assign(payload, query);
     const json = await this.submit('contracts/search', payload);
-    const contracts = array(Contract(template).decoder()).run(json);
-    if (!contracts.ok) {
-      throw contracts.error;
-    }
-    return contracts.result;
+    return Result.withException(array(Contract(template).decoder()).run(json));
   }
 
   /**
@@ -81,7 +77,7 @@ class Ledger {
   async pseudoLookupByKey<T>(template: Template<T>, key: Query<T>): Promise<Contract<T> | undefined> {
     const contracts = await this.query(template, key);
     if (contracts.length > 1) {
-      throw new Error("pseudoLookupByKey: query returned multiple contracts");
+      throw Error("pseudoLookupByKey: query returned multiple contracts");
     }
     return contracts[0];
   }
@@ -93,7 +89,7 @@ class Ledger {
   async pseudoFetchByKey<T>(template: Template<T>, key: Query<T>): Promise<Contract<T>> {
     const contract = await this.pseudoLookupByKey(template, key);
     if (contract === undefined) {
-      throw new Error("pseudoFetchByKey: query returned no contract");
+      throw Error("pseudoFetchByKey: query returned no contract");
     }
     return contract;
   }
@@ -107,11 +103,7 @@ class Ledger {
       argument,
     }
     const json = await this.submit('command/create', payload);
-    const contract = Contract(template).decoder().run(json);
-    if (!contract.ok) {
-      throw contract.error;
-    }
-    return contract.result;
+    return Result.withException(Contract(template).decoder().run(json));
   }
 
   /**
