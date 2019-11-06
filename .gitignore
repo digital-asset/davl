@@ -1,7 +1,2 @@
 .daml
-.markdown-preview.html
-*~
 *.log
-.stack-work
-*.cabal
-daml-ledger-0.1.0.0.tar.gz
