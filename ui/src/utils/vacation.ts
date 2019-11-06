@@ -1,4 +1,4 @@
-import { Party, ContractId } from '../ledger/Types';
+import { Party, ContractId } from '../ledger/typesX';
 import * as DAVL from '../daml/DAVL';
 import { contramap, Ord, ordString, getDualOrd } from 'fp-ts/lib/Ord';
 import { partition } from 'fp-ts/lib/Array';

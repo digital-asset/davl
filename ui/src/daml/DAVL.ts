@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/class-name-casing */
 /* eslint-disable @typescript-eslint/camelcase */
-import { Party, Template, Choice, party, int, Int, Date, date } from "../ledger/Types";
-import { object } from "@mojotech/json-type-validation";
+import { Party, Template, Choice, party, int, Int, Date, date } from '../ledger/typesX';
+import { object } from '@mojotech/json-type-validation';
 
 export type EmployeeRole_RequestVacation = {
   fromDate: Date;

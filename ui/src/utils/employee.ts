@@ -1,4 +1,4 @@
-import { Party } from '../ledger/Types';
+import { Party } from '../ledger/typesX';
 import { ordString, Ord, contramap } from 'fp-ts/lib/Ord';
 
 export type EmployeeSummary = {
