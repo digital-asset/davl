@@ -1,0 +1,97 @@
+daml 1.2
+module Main where
+
+import DA.List
+
+template Account
+  with
+    bank : Party
+    accountOwner : Party
+    accountId : Int
+    checkingAmount : Decimal
+    savingsAmount : Decimal
+  where
+    signatory bank, accountOwner
+    observer accountOwner
+
+    ensure savingsAmount >= 0.0 -- checking is allowed be negative, savings isn't
+
+    controller accountOwner can
+      TransactSavings : ContractId Account
+        with value : Decimal
+        do
+          create this with savingsAmount = savingsAmount + value
+
+      DepositChecking : ContractId Account
+        with value : Decimal
+        do
+          assertMsg "Value must be > 0" (value > 0.0)
+          create this with checkingAmount = checkingAmount + value
+
+      Amalgamate : ContractId Account
+        with otherAccountCid : ContractId Account
+        do
+          otherAccount <- fetch otherAccountCid
+          assertMsg "Cannot amalgamate across banks" (bank == otherAccount.bank)
+          assertMsg "Cannot amalgamate across account owners" (accountOwner == otherAccount.accountOwner)
+          let checkingSum = checkingAmount + otherAccount.checkingAmount
+          let savingsSum = savingsAmount + otherAccount.savingsAmount
+          account <- create this with checkingAmount = checkingSum, savingsAmount = savingsSum
+          exercise otherAccountCid Archive
+          return account
+
+      WriteCheck : ContractId Account
+        with amount : Decimal
+        do
+          if amount <= checkingAmount + savingsAmount then
+            create this with checkingAmount = checkingAmount - amount
+          else do
+            let overdraftPenalty = 1.0
+            create this with checkingAmount = checkingAmount - amount - overdraftPenalty
+
+template Template t => Signup t
+  with
+    resource : t
+    user : Party
+  where
+    signatory (signatory resource) \\ [user]
+
+    controller user can
+      Accept : ContractId t
+        do create resource
+
+      Reject : ()
+        do return ()
+
+template instance AccountOffer = Signup Account
+
+e2eExample = scenario do
+  bank <- getParty "Bank"
+  accountOwner <- getParty "Alice"
+
+  account <- submit bank do
+    let accountOffer = Account with bank, accountOwner, accountId = 1, checkingAmount = 10.0, savingsAmount = 10.0
+    create Signup with resource = accountOffer, user = accountOwner
+
+  account <- submit accountOwner do
+    exercise account Accept
+
+  account <- submit accountOwner do
+    exercise account TransactSavings with value = 1.0
+
+  account <- submit accountOwner do
+    exercise account DepositChecking with value = 1.0
+
+  -- account2 <- submit bank do
+  --   create Account with bank, accountOwner, accountId = 2, checkingAmount = 10.0, savingsAmount = 10.0
+
+  -- account <- submit accountOwner do
+  --   exercise account Amalgamate with otherAccountCid = account2
+
+  -- account <- submit accountOwner do
+  --   exercise account WriteCheck with amount = 1.0
+
+  -- submit accountOwner do
+  --   exercise account WriteCheck with amount = 100.0
+
+  return ()

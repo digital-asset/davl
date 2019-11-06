@@ -1,3 +1,9 @@
+import { Decoder, object, string, optional, unknownJson, array } from '@mojotech/json-type-validation';
+
+export interface Serializable<T> {
+  decoder: () => Decoder<T>;
+}
+
 /**
  * Identifier of a DAML template.
  */
@@ -7,11 +13,19 @@ export type TemplateId = {
   entityName: string;
 }
 
+const TemplateId = {
+  decoder: (): Decoder<TemplateId> => object({
+    packageId: optional(string()),
+    moduleName: string(),
+    entityName: string(),
+  })
+}
+
 /**
  * An interface for template types. This is the counterpart of DAML's
  * `Template` type class.
  */
-export interface Template<T> {
+export interface Template<T> extends Serializable<T> {
   templateId: TemplateId;
   fromJSON: (json: unknown) => T;
   toJSON: (t: T) => unknown;
@@ -21,7 +35,7 @@ export interface Template<T> {
  * An interface for choice types. This is the counterpart of DAML's
  * `Choice` type class in DAML.
  */
-export interface Choice<T, C> {
+export interface Choice<T, C> extends Serializable<C> {
   template: Template<T>;
   choiceName: string;
   toJSON: (c: C) => unknown;
@@ -32,6 +46,7 @@ export const Archive = <T>(template: Template<T>): Choice<T, {}> => {
     template,
     choiceName: 'Archive',
     toJSON: (x: {}): {} => x,
+    decoder: () => object({}),
   };
 }
 
@@ -39,6 +54,16 @@ export const Archive = <T>(template: Template<T>): Choice<T, {}> => {
  * The counterpart of DAML's `Party` type.
  */
 export type Party = string;
+export const party: () => Decoder<Party> = string;
+
+export type Text = string;
+export const text: () => Decoder<Text> = string;
+
+export type Int = string;
+export const int: () => Decoder<Int> = string;
+
+export type Date = string;
+export const date: () => Decoder<Date> = string;
 
 /**
  * The counterpart of DAML's `ContractId T` type.
@@ -57,6 +82,8 @@ export const ContractId = {
    * for use by the `Ledger` class only.
    */
   toJSON: <T extends {}>(contractId: ContractId<T>): unknown => contractId,
+
+  decoder: <T extends unknown>(): Decoder<ContractId<T>> => string(),
 }
 
 /**
@@ -82,4 +109,15 @@ export type Contract<T> = {
  */
 export const Contract = {
   fromJSON: <T extends {}>(templateType: Template<T>, json: unknown): Contract<T> => json as Contract<T>,
+  decoder: <T extends unknown>(templateType: Template<T>): Decoder<Contract<T>> => object({
+    templateId: TemplateId.decoder(),
+    contractId: ContractId.decoder(),
+    signatories: array(party()),
+    observers: array(party()),
+    agreementText: string(),
+    key: unknownJson(),
+    argument: templateType.decoder(),
+    witnessParties: array(party()),
+    workflowId: optional(string()),
+  }),
 }
