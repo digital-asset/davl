@@ -1,3 +1,0 @@
-ignore:
-  - {name: "Use camelCase", within: "Test"}
-  - {name: "Reduce duplication", within: Test}

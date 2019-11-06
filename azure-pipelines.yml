@@ -19,68 +19,15 @@ jobs:
     timeoutInMinutes: 120
     pool:
       vmImage: "Ubuntu-16.04"
-    variables:
-      grpc-version: 1.23.0
     steps:
       - checkout: self
 
-      # Install gRPC, possibly from cache
+      # Install DAML SDK, possibly from cache
       - bash: |
           set -euo pipefail
-          echo $(grpc-version) > /tmp/grpc-version
-      - task: CacheBeta@0
-        inputs:
-          key: /tmp/grpc-version
-          path: /tmp/grpc
-          cacheHitVar: GRPC_CACHE_HIT
-      - bash: |
-          set -euo pipefail
-          sudo apt-get install build-essential autoconf libtool pkg-config \
-                               libgflags-dev libgtest-dev clang-5.0 libc++-dev
-          cd $(mktemp -d)
-          git clone -b v$(grpc-version) https://github.com/grpc/grpc
-          cd grpc
-          git submodule update --init
-          # Azure sets the SYSTEM variable to "build", which throws off OS
-          # detection in the Makefile.
-          #
-          # Azure uses gcc for its C/C++ compilers by default, whereas grpc
-          # officially supports clang. The compilation runs with -Werror, and
-          # because gcc and clang apparently disagree on what counts as an
-          # unused variable, that makes the build fail with gcc.
-          make SYSTEM=Linux CC=clang CXX=clang++
-          sudo mkdir -p /usr/local/grpc
-          sudo chown $USER /usr/local/grpc
-          make prefix=/usr/local/grpc install
-          mkdir /tmp/grpc
-          cd /usr/local/grpc
-          tar czf /tmp/grpc/grpc.tar.gz *
-        condition: ne(variables.GRPC_CACHE_HIT, 'true')
-        displayName: grpc-cache-miss
-      - bash: |
-          set -euo pipefail
-          sudo mkdir -p /usr/local/grpc
-          sudo chown $USER /usr/local/grpc
-          cd /usr/local/grpc
-          tar xzf /tmp/grpc/grpc.tar.gz
-        condition: eq(variables.GRPC_CACHE_HIT, 'true')
-        displayName: grpc-cache-hit
-
-      # Install Stack separately as it is needed for both running tests and creating the bbindings
-      - bash: |
-          set -euo pipefail
-          # Install stack (not idempotent and we seem to reuse nodes)
-          if ! which stack >/dev/null 2>&1; then
-              curl -sSL https://get.haskellstack.org/ | sh
-          fi
-        displayName: stack-install
-
-      # Install DAML (SDK + HS bindings), possibly from cache
-      - bash: |
-          set -euo pipefail
-          SDK_VERSION=$(cat project/V1/daml.yaml | grep sdk-version | awk '{print $2}')
-          echo ${SDK_VERSION}-test > /tmp/daml-version
-      - task: CacheBeta@0
+          SDK_VERSION=$(cat daml.yaml | grep sdk-version | awk '{print $2}')
+          echo ${SDK_VERSION} > /tmp/daml-version
+      - task: CacheBeta@1
         inputs:
           key: /tmp/daml-version
           path: /tmp/daml
@@ -90,75 +37,28 @@ jobs:
           DIR=$(pwd)
 
           # Install DAML SDK
-          SDK_VERSION=$(cat project/V1/daml.yaml | grep sdk-version | awk '{print $2}')
+          SDK_VERSION=$(cat daml.yaml | grep sdk-version | awk '{print $2}')
           curl https://get.daml.com | sh -s $SDK_VERSION
 
-          # Install Haskell DAML Ledger Bindings
-          # Done in subshell to limit the reach of dade-assist
-          bash -c "
-            set -euo
-            cd $(mktemp -d)
-            git clone -b v$SDK_VERSION https://github.com/digital-asset/daml.git
-            cd daml
-            ci/dev-env-install.sh
-            eval \"\$(dev-env/bin/dade-assist)\"
-            language-support/hs/bindings/export-package.sh $DIR/cli
-          "
           mkdir -p /tmp/daml
           cd $HOME/.daml
           tar czf /tmp/daml/sdk.tar.gz *
-          cp $DIR/cli/daml-ledger-0.1.0.0.tar.gz /tmp/daml/
         condition: ne(variables.DAML_CACHE_HIT, 'true')
         displayName: daml-cache-miss
       - bash: |
           set -euo pipefail
-          cp /tmp/daml/daml-ledger-0.1.0.0.tar.gz cli/
           mkdir -p $HOME/.daml
           cd $HOME/.daml
           tar xzf /tmp/daml/sdk.tar.gz
         condition: eq(variables.DAML_CACHE_HIT, 'true')
         displayName: daml-cache-hit
 
-      # Warm stack cache
-      - bash: |
-          set -euo pipefail
-          echo $(git log -n1 --pretty=format:%H cli/stack.yaml cli/package.yaml) > /tmp/stack-cache-key
-          cat /tmp/stack-cache-key
-      - task: CacheBeta@0
-        inputs:
-          key: /tmp/stack-cache-key
-          path: /tmp/stack
-          cacheHitVar: STACK_CACHE_HIT
-      - bash: |
-          set -euo pipefail
-          cd cli
-          stack build --only-dependencies
-          mkdir -p /tmp/stack
-          cd $HOME/.stack
-          tar czf /tmp/stack/stack.tar.gz *
-        condition: ne(variables.STACK_CACHE_HIT, 'true')
-        displayName: stack-cache-miss
-      - bash: |
-          set -euo pipefail
-          mkdir -p $HOME/.stack
-          cd $HOME/.stack
-          tar xzf /tmp/stack/stack.tar.gz
-        condition: eq(variables.STACK_CACHE_HIT, 'true')
-        displayName: stack-cache-hit
-
       # Run tests
       - bash: |
           set -euo pipefail
 
           export PATH="$PATH:~/.daml/bin"
-          ( cd project/V1 && daml test )
-          # The process to generate the Haskell bindings tarball ("sdist") is
-          # not reproducible, and Azure doesn't clean as much as one would hope
-          # between builds, so sometimes we get an existing .lock file with the
-          # wrong tarball size/sha.
-          rm -f cli/stack.yaml.lock
-          export LD_LIBRARY_PATH=/usr/local/grpc/lib
-          cli/test.sh
+          daml test
         displayName: run-tests
       - bash: |
           set -euo pipefail
