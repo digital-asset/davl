@@ -1,6 +1,8 @@
 import { Decoder, object, string, optional, unknownJson, array } from '@mojotech/json-type-validation';
 
 export interface Serializable<T> {
+  // NOTE(MH): We need this to be a function to allow for mutually
+  // recursive decoders.
   decoder: () => Decoder<T>;
 }
 
@@ -27,8 +29,6 @@ const TemplateId = {
  */
 export interface Template<T> extends Serializable<T> {
   templateId: TemplateId;
-  fromJSON: (json: unknown) => T;
-  toJSON: (t: T) => unknown;
 }
 
 /**
@@ -38,17 +38,13 @@ export interface Template<T> extends Serializable<T> {
 export interface Choice<T, C> extends Serializable<C> {
   template: Template<T>;
   choiceName: string;
-  toJSON: (c: C) => unknown;
 }
 
-export const Archive = <T>(template: Template<T>): Choice<T, {}> => {
-  return {
-    template,
-    choiceName: 'Archive',
-    toJSON: (x: {}): {} => x,
-    decoder: () => object({}),
-  };
-}
+export const Archive = <T>(template: Template<T>): Choice<T, {}> => ({
+  template,
+  choiceName: 'Archive',
+  decoder: () => object({}),
+});
 
 /**
  * The counterpart of DAML's `Party` type.
@@ -70,21 +66,9 @@ export const date: () => Decoder<Date> = string;
  */
 export type ContractId<T> = string;
 
-export const ContractId = {
-  /**
-   * Create a `ContractId<T>` from its JSON representation. This is intended
-   * for use by the `Ledger` class only.
-   */
-  fromJSON: <T extends {}>(json: unknown): ContractId<T> => json as ContractId<T>,
-
-  /**
-   * Convert a `ContractId<T>` into its JSON representation. This is intended
-   * for use by the `Ledger` class only.
-   */
-  toJSON: <T extends {}>(contractId: ContractId<T>): unknown => contractId,
-
-  decoder: <T extends unknown>(): Decoder<ContractId<T>> => string(),
-}
+export const ContractId = <T extends unknown>(templateType: Template<T>): Serializable<ContractId<T>> => ({
+  decoder: string,
+});
 
 /**
  * A class representing a contract instance of a template type `T`. Besides
@@ -96,7 +80,7 @@ export type Contract<T> = {
   contractId: ContractId<T>;
   signatories: Party[];
   observers: Party[];
-  agreementText: string;
+  agreementText: Text;
   key: unknown;
   argument: T;
   witnessParties: Party[];
@@ -107,17 +91,16 @@ export type Contract<T> = {
  * Create a `Contract<T>` from its JSON representation. This is intended
  * for use by the `Ledger` class only.
  */
-export const Contract = {
-  fromJSON: <T extends {}>(templateType: Template<T>, json: unknown): Contract<T> => json as Contract<T>,
-  decoder: <T extends unknown>(templateType: Template<T>): Decoder<Contract<T>> => object({
+export const Contract = <T extends unknown>(templateType: Template<T>): Serializable<Contract<T>> => ({
+  decoder: () => object({
     templateId: TemplateId.decoder(),
-    contractId: ContractId.decoder(),
+    contractId: ContractId(templateType).decoder(),
     signatories: array(party()),
     observers: array(party()),
-    agreementText: string(),
+    agreementText: text(),
     key: unknownJson(),
     argument: templateType.decoder(),
     witnessParties: array(party()),
     workflowId: optional(string()),
   }),
-}
+});

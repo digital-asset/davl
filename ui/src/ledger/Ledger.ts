@@ -1,5 +1,6 @@
 import Credentials from './Credentials';
 import { Archive, Choice, Contract, ContractId, Party, Template } from './Types';
+import { array } from '@mojotech/json-type-validation';
 
 type LedgerResponse = {
   status: number;
@@ -59,11 +60,11 @@ class Ledger {
     const payload = {"%templates": [template.templateId]};
     Object.assign(payload, query);
     const json = await this.submit('contracts/search', payload);
-    if (!(json instanceof Array)) {
-      throw new Error('query: submit did not return an array');
+    const contracts = array(Contract(template).decoder()).run(json);
+    if (!contracts.ok) {
+      throw contracts.error;
     }
-    const contracts = json.map((jsonContract) => Contract.fromJSON<T>(template, jsonContract));
-    return contracts;
+    return contracts.result;
   }
 
   /**
@@ -103,11 +104,14 @@ class Ledger {
   async create<T>(template: Template<T>, argument: T): Promise<Contract<T>> {
     const payload = {
       templateId: template.templateId,
-      argument: template.toJSON(argument),
+      argument,
     }
     const json = await this.submit('command/create', payload);
-    const contract = Contract.fromJSON<T>(template, json);
-    return contract;
+    const contract = Contract(template).decoder().run(json);
+    if (!contract.ok) {
+      throw contract.error;
+    }
+    return contract.result;
   }
 
   /**
@@ -116,9 +120,9 @@ class Ledger {
   async exercise<T, C>(choice: Choice<T, C>, contractId: ContractId<T>, argument: C): Promise<unknown> {
     const payload = {
       templateId: choice.template.templateId,
-      contractId: ContractId.toJSON(contractId),
+      contractId,
       choice: choice.choiceName,
-      argument: choice.toJSON(argument),
+      argument,
     };
     const json = await this.submit('command/exercise', payload);
     return json;
