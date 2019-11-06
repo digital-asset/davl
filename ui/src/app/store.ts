@@ -45,8 +45,8 @@ export type AppThunk<R = void> = ThunkAction<Promise<R>, RootState, null, Action
 
 export default store;
 
-export const getLedger = (getState: () => RootState): Ledger => {
-  const credentials = getState().auth.credentials;
+export const getLedger = (state: RootState): Ledger => {
+  const credentials = state.auth.credentials;
   if (credentials) {
     return new Ledger(credentials);
   } else {

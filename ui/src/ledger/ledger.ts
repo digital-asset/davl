@@ -16,16 +16,13 @@ type LedgerError = {
  * An object of type `Ledger` represents a handle to a DAML ledger.
  */
 class Ledger {
-  private readonly credentials: Credentials;
+  readonly party: Party;
+  private readonly token: string;
 
   constructor(credentials: Credentials) {
-    this.credentials = credentials;
+    this.party = credentials.party;
+    this.token = credentials.token;
   }
-
-  /**
-   * Party whose authentication is used.
-   */
-  party = (): Party => this.credentials.party;
 
   /**
    * Internal function to submit a command to the JSON API.
@@ -34,7 +31,7 @@ class Ledger {
     const httpResponse = await fetch(method, {
       body: JSON.stringify(payload),
       headers: {
-        'Authorization': 'Bearer ' + this.credentials.token,
+        'Authorization': 'Bearer ' + this.token,
         'Content-type': 'application/json'
       },
       method: 'post',

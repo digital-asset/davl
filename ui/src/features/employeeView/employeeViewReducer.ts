@@ -51,8 +51,8 @@ export const {
 export const reducer = slice.reducer;
 
 const loadSummary = (): AppThunk => async (dispatch, getState) => {
-  const ledger = getLedger(getState);
-  const key = {employeeRole: {employee: ledger.party()}};
+  const ledger = getLedger(getState());
+  const key = {employeeRole: {employee: ledger.party}};
   const {argument: {employeeRole: {employee, boss}, remainingDays}} =
     await ledger.pseudoFetchByKey(DAVL.EmployeeVacationAllocation, key);
   const summary: EmployeeSummary = {
@@ -64,18 +64,18 @@ const loadSummary = (): AppThunk => async (dispatch, getState) => {
 }
 
 const loadVacations = (): AppThunk => async (dispatch, getState) => {
-  const ledger = getLedger(getState);
+  const ledger = getLedger(getState());
   const vacationContracts =
-    await ledger.query(DAVL.Vacation, {employeeRole: {employee: ledger.party()}});
+    await ledger.query(DAVL.Vacation, {employeeRole: {employee: ledger.party}});
   const vacations: Vacation[] =
     vacationContracts.map((vacation) => makeVacation(vacation.contractId, vacation.argument));
   dispatch(setVacations(splitVacations(vacations)));
 }
 
 const loadRequests = (): AppThunk => async (dispatch, getState) => {
-  const ledger = getLedger(getState);
+  const ledger = getLedger(getState());
   const requestsContracts =
-    await ledger.query(DAVL.VacationRequest, {vacation: {employeeRole: {employee: ledger.party()}}});
+    await ledger.query(DAVL.VacationRequest, {vacation: {employeeRole: {employee: ledger.party}}});
   const requests: Vacation[] =
     requestsContracts.map(({contractId, argument}) => makeVacation(contractId, argument.vacation));
   requests.sort(ordVacationOnFromDate.compare);
@@ -93,8 +93,8 @@ export const loadAll = (): AppThunk => async (dispatch) => {
 export const addRequest = (fromDate: string, toDate: string): AppThunk => async (dispatch, getState) => {
   try {
     dispatch(startAddRequest());
-    const ledger = getLedger(getState);
-    const key = {employee: ledger.party()};
+    const ledger = getLedger(getState());
+    const key = {employee: ledger.party};
     await ledger.pseudoExerciseByKey(DAVL.EmployeeRole.RequestVacation, key, {fromDate, toDate});
   } finally {
     dispatch(endAddRequest());

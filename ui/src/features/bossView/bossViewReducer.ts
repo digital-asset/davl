@@ -43,8 +43,8 @@ export const {
 export const reducer = slice.reducer;
 
 const loadStaff = (): AppThunk => async (dispatch, getState) => {
-  const ledger = getLedger(getState);
-  const key = {employeeRole: {boss: ledger.party()}};
+  const ledger = getLedger(getState());
+  const key = {employeeRole: {boss: ledger.party}};
   const allocations = await ledger.query(EmployeeVacationAllocation, key);
   const staff: EmployeeSummary[] = allocations.map((allocation) => ({
     employee: allocation.argument.employeeRole.employee,
@@ -56,9 +56,9 @@ const loadStaff = (): AppThunk => async (dispatch, getState) => {
 }
 
 const loadRequests = (): AppThunk => async (dispatch, getState) => {
-  const ledger = getLedger(getState);
+  const ledger = getLedger(getState());
   const requestsContracts =
-    await ledger.query(VacationRequest, {vacation: {employeeRole: {boss: ledger.party()}}});
+    await ledger.query(VacationRequest, {vacation: {employeeRole: {boss: ledger.party}}});
   const requests: Vacation[] =
     requestsContracts.map(({contractId, argument}) => makeVacation(contractId, argument.vacation));
   requests.sort(ordVacationOnFromDate.compare);
@@ -66,9 +66,9 @@ const loadRequests = (): AppThunk => async (dispatch, getState) => {
 }
 
 const loadVacations = (): AppThunk => async (dispatch, getState) => {
-  const ledger = getLedger(getState);
+  const ledger = getLedger(getState());
   const vacationContracts =
-    await ledger.query(DAVL.Vacation, {employeeRole: {boss: ledger.party()}});
+    await ledger.query(DAVL.Vacation, {employeeRole: {boss: ledger.party}});
   const vacations: Vacation[] =
     vacationContracts.map((vacation) => makeVacation(vacation.contractId, vacation.argument));
   dispatch(setVacations(splitVacations(vacations)));
@@ -83,7 +83,7 @@ export const loadAll = (): AppThunk => async (dispatch) => {
 }
 
 export const approveRequest = (contractId: ContractId<VacationRequest>): AppThunk => async (dispatch, getState) => {
-  const ledger = getLedger(getState);
+  const ledger = getLedger(getState());
   await ledger.exercise(VacationRequest.Accept, contractId, {});
   toast({
     title: 'Success',

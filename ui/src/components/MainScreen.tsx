@@ -5,13 +5,14 @@ import BossView from '../features/bossView/BossView';
 import { useDispatch, useSelector } from 'react-redux';
 import { logOut } from '../app/authReducer';
 import { RootState, reload } from '../app/rootReducer';
+import { getLedger } from '../app/store';
 
 /**
  * React component for the main screen of the `App`.
  */
 const MainScreen: React.FC = () => {
   const dispatch = useDispatch();
-  const credentials = useSelector((state: RootState) => state.auth.credentials);
+  const party = useSelector((state: RootState) => getLedger(state).party);
 
   return (
     <>
@@ -28,7 +29,7 @@ const MainScreen: React.FC = () => {
         </Menu.Item>
         <Menu.Menu position='right'>
           <Menu.Item position='right'>
-            You are logged in as {credentials ? credentials.party : '???'}.
+            You are logged in as {party}.
           </Menu.Item>
           <Menu.Item
             position='right'
