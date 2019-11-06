@@ -13,6 +13,8 @@ const BossView: React.FC = () => {
 
   const requests = useSelector((state: RootState) => state.bossView.requests);
   const vacations = useSelector((state: RootState) => state.bossView.vacations);
+  const loadingRequests = useSelector((state: RootState) => state.bossView.loadingRequests);
+  const loadingVacations = useSelector((state: RootState) => state.bossView.loadingVacations);
 
   const handleApproveRequest = (vacation: Vacation) =>
     dispatch(approveRequest(vacation.contractId));
@@ -22,6 +24,7 @@ const BossView: React.FC = () => {
       <Staff />
       <VacationListSegment
         header='Pending Vacation Approvals'
+        loading={loadingRequests}
         viewer='boss'
         vacations={requests}
         onClickVacation={handleApproveRequest}
@@ -29,6 +32,7 @@ const BossView: React.FC = () => {
       />
       <VacationListSegment
         header='Upcoming Vacations'
+        loading={loadingVacations}
         viewer='boss'
         vacations={vacations.upcoming}
         onClickVacation={() => {}}
@@ -36,6 +40,7 @@ const BossView: React.FC = () => {
       />
       <VacationListSegment
         header='Past Vacations'
+        loading={loadingVacations}
         viewer='boss'
         vacations={vacations.past}
         onClickVacation={() => {}}

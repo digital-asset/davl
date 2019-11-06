@@ -14,6 +14,8 @@ const EmployeeView: React.FC = () => {
 
   const summary = useSelector((state: RootState) => state.employeeView.summary);
   const vacations = useSelector((state: RootState) => state.employeeView.vacations);
+  const loadingSummary = useSelector((state: RootState) => state.employeeView.loadingSummary);
+  const loadingVacations = useSelector((state: RootState) => state.employeeView.loadingVacations);
 
   const handleCancelVacation = () => toast({
     title: 'Not yet implemented',
@@ -24,10 +26,11 @@ const EmployeeView: React.FC = () => {
 
   return (
     <Segment.Group>
-      {summary ? <SummaryView {...summary} /> : <p>Loading summary...</p>}
+      {summary ? <SummaryView {...summary} loading={loadingSummary} /> : <p>Loading summary...</p>}
       <Requests />
       <VacationListSegment
         header='Upcoming Vacations'
+        loading={loadingVacations}
         viewer='employee'
         vacations={vacations.upcoming}
         onClickVacation={handleCancelVacation}
@@ -35,6 +38,7 @@ const EmployeeView: React.FC = () => {
       />
       <VacationListSegment
         header='Past Vacations'
+        loading={loadingVacations}
         viewer='employee'
         vacations={vacations.past}
         onClickVacation={handleCancelVacation}

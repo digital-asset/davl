@@ -5,9 +5,10 @@ import { RootState } from '../../app/rootReducer';
 
 const Staff: React.FC = () => {
   const staff = useSelector((state: RootState) => state.bossView.staff);
+  const loadingStaff = useSelector((state: RootState) => state.bossView.loadingStaff);
 
   return (
-    <Segment>
+    <Segment loading={loadingStaff}>
       <Header as='h1'>
         Team
       </Header>

@@ -2,14 +2,14 @@ import React from 'react';
 import { Header, Segment } from 'semantic-ui-react';
 import { EmployeeSummary } from '../../utils/employee';
 
-type Props = EmployeeSummary;
+type Props = EmployeeSummary & {loading?: boolean};
 
 /**
  * React component for the view of the `MainScreen`.
  */
-const SummaryView: React.FC<Props> = ({employee, boss, remainingVacationDays}) => {
+const SummaryView: React.FC<Props> = ({employee, boss, remainingVacationDays, loading}) => {
   return (
-    <Segment>
+    <Segment loading={loading}>
       <Header as='h1'>
         {employee}
       </Header>

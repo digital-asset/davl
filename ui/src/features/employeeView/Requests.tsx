@@ -11,8 +11,9 @@ import { vacationLength } from '../../utils/vacation';
 const Requests: React.FC = () => {
   const dispatch = useDispatch();
   const boss = useSelector((state: RootState) => (state.employeeView.summary || {boss: ''}).boss);
-  const vacations = useSelector((state: RootState) => state.employeeView.requests);
+  const requests = useSelector((state: RootState) => state.employeeView.requests);
   const currentRequest = useSelector((state: RootState) => state.employeeView.currentRequest);
+  const loadingRequests = useSelector((state: RootState) => state.employeeView.loadingRequests);
   const addingRequest = useSelector((state: RootState) => state.employeeView.addingRequest);
 
   const handleCancelRequest = () => alert('Canceling vacation requests is not yet implemented.');
@@ -41,12 +42,12 @@ const Requests: React.FC = () => {
   }
 
   return (
-    <Segment>
+    <Segment loading={loadingRequests}>
       <Header as='h3'>
         Pending Vacation Requests
       </Header>
       <List relaxed>
-        {vacations.map((vacation) =>
+        {requests.map((vacation) =>
             <VacationListItem
               key={vacation.contractId}
               vacation={vacation}

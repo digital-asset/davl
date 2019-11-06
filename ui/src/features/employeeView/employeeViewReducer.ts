@@ -10,13 +10,20 @@ export type State = {
   requests: Vacation[];
   vacations: Vacations;
   currentRequest: string;
+  loadingSummary: boolean;
+  loadingRequests: boolean;
+  loadingVacations: boolean;
   addingRequest: boolean;
 }
 
 const initialState: State = {
+  summary: undefined,
   requests: [],
   vacations: emptyVacations,
   currentRequest: '',
+  loadingSummary: false,
+  loadingRequests: false,
+  loadingVacations: false,
   addingRequest: false,
 }
 
@@ -31,6 +38,7 @@ const slice = createSlice({
     setCurrentRequest: (state: State, action: PayloadAction<string>) => ({...state, currentRequest: action.payload}),
     startAddRequest: (state: State) => ({...state, addingRequest: true}),
     endAddRequest: (state: State) => ({...state, currentRequest: '', addingRequest: false}),
+    setField: (state: State, action: PayloadAction<Partial<State>>) => ({...state, ...action.payload}),
   },
 });
 
@@ -40,6 +48,7 @@ const {
   setVacations,
   startAddRequest,
   endAddRequest,
+  setField,
 } = slice.actions;
 
 export const {
@@ -51,35 +60,50 @@ export const {
 export const reducer = slice.reducer;
 
 const loadSummary = (): AppThunk => async (dispatch, getState) => {
-  const ledger = getLedger(getState());
-  const key = {employeeRole: {employee: ledger.party}};
-  const {argument: {employeeRole: {employee, boss}, remainingDays}} =
-    await ledger.pseudoFetchByKey(DAVL.EmployeeVacationAllocation, key);
-  const summary: EmployeeSummary = {
-    employee,
-    boss,
-    remainingVacationDays: remainingDays,
+  try {
+    dispatch(setField({loadingSummary: true}));
+    const ledger = getLedger(getState());
+    const key = {employeeRole: {employee: ledger.party}};
+    const {argument: {employeeRole: {employee, boss}, remainingDays}} =
+      await ledger.pseudoFetchByKey(DAVL.EmployeeVacationAllocation, key);
+    const summary: EmployeeSummary = {
+      employee,
+      boss,
+      remainingVacationDays: remainingDays,
+    }
+    dispatch(setSummary(summary));
+  } finally {
+    dispatch(setField({loadingSummary: false}));
   }
-  dispatch(setSummary(summary));
-}
-
-const loadVacations = (): AppThunk => async (dispatch, getState) => {
-  const ledger = getLedger(getState());
-  const vacationContracts =
-    await ledger.query(DAVL.Vacation, {employeeRole: {employee: ledger.party}});
-  const vacations: Vacation[] =
-    vacationContracts.map((vacation) => makeVacation(vacation.contractId, vacation.argument));
-  dispatch(setVacations(splitVacations(vacations)));
 }
 
 const loadRequests = (): AppThunk => async (dispatch, getState) => {
-  const ledger = getLedger(getState());
-  const requestsContracts =
-    await ledger.query(DAVL.VacationRequest, {vacation: {employeeRole: {employee: ledger.party}}});
-  const requests: Vacation[] =
-    requestsContracts.map(({contractId, argument}) => makeVacation(contractId, argument.vacation));
-  requests.sort(ordVacationOnFromDate.compare);
-  dispatch(setRequests(requests));
+  try {
+    dispatch(setField({loadingRequests: true}));
+    const ledger = getLedger(getState());
+    const requestsContracts =
+      await ledger.query(DAVL.VacationRequest, {vacation: {employeeRole: {employee: ledger.party}}});
+    const requests: Vacation[] =
+      requestsContracts.map(({contractId, argument}) => makeVacation(contractId, argument.vacation));
+    requests.sort(ordVacationOnFromDate.compare);
+    dispatch(setRequests(requests));
+  } finally {
+    dispatch(setField({loadingRequests: false}));
+  }
+}
+
+const loadVacations = (): AppThunk => async (dispatch, getState) => {
+  try {
+    dispatch(setField({loadingVacations: true}));
+    const ledger = getLedger(getState());
+    const vacationContracts =
+      await ledger.query(DAVL.Vacation, {employeeRole: {employee: ledger.party}});
+    const vacations: Vacation[] =
+      vacationContracts.map((vacation) => makeVacation(vacation.contractId, vacation.argument));
+    dispatch(setVacations(splitVacations(vacations)));
+  } finally {
+    dispatch(setField({loadingVacations: false}));
+  }
 }
 
 export const loadAll = (): AppThunk => async (dispatch) => {

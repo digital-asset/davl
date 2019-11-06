@@ -4,10 +4,11 @@ import VacationList, { Props as VacationListProps } from './VacationList';
 
 type Props = VacationListProps & {
   header: string;
+  loading?: boolean;
 };
 
 const VacationListSegment: React.FC<Props> = (props) => (
-  <Segment>
+  <Segment loading={props.loading} >
     <Header as='h3' content={props.header} />
     <VacationList {...props} />
   </Segment>
