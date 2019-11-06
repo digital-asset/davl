@@ -50,25 +50,30 @@ export const {
 
 export const reducer = slice.reducer;
 
-const loadStaff = (): AppThunk => async (dispatch, getState) => {
-  try {
-    dispatch(setField({loadingStaff: true}));
-    const ledger = getLedger(getState());
-    const key = {employeeRole: {boss: ledger.party}};
-    const allocations = await ledger.query(EmployeeVacationAllocation, key);
-    const staff: EmployeeSummary[] = allocations.map((allocation) => ({
-      employee: allocation.argument.employeeRole.employee,
-      boss: allocation.argument.employeeRole.boss,
-      remainingVacationDays: allocation.argument.remainingDays,
-    }));
-    staff.sort(ordEmployeeSummaryOnName.compare);
-    dispatch(setStaff(staff));
-  } finally {
-    dispatch(setField({loadingStaff: false}));
+const withLoading = <K extends {[L in keyof State]: State[L] extends boolean ? L : never}[keyof State]>
+  (k: K, thunk: AppThunk) => (): AppThunk => async (dispatch, getState, extraArgument) => {
+    try {
+      dispatch(setField({[k]: true}));
+      await thunk(dispatch, getState, extraArgument);
+    } finally {
+      dispatch(setField({[k]: false}));
+    }
   }
-}
 
-const loadRequests = (): AppThunk => async (dispatch, getState) => {
+const loadStaff = withLoading('loadingStaff', async (dispatch, getState) => {
+  const ledger = getLedger(getState());
+  const key = {employeeRole: {boss: ledger.party}};
+  const allocations = await ledger.query(EmployeeVacationAllocation, key);
+  const staff: EmployeeSummary[] = allocations.map((allocation) => ({
+    employee: allocation.argument.employeeRole.employee,
+    boss: allocation.argument.employeeRole.boss,
+    remainingVacationDays: allocation.argument.remainingDays,
+  }));
+  staff.sort(ordEmployeeSummaryOnName.compare);
+  dispatch(setStaff(staff));
+});
+
+const loadRequests = withLoading('loadingRequests', async (dispatch, getState) => {
   try {
     dispatch(setField({loadingRequests: true}));
     const ledger = getLedger(getState());
@@ -81,9 +86,9 @@ const loadRequests = (): AppThunk => async (dispatch, getState) => {
   } finally {
     dispatch(setField({loadingRequests: false}));
   }
-}
+});
 
-const loadVacations = (): AppThunk => async (dispatch, getState) => {
+const loadVacations = withLoading('loadingVacations', async (dispatch, getState) => {
   try {
     dispatch(setField({loadingVacations: true}));
     const ledger = getLedger(getState());
@@ -95,7 +100,7 @@ const loadVacations = (): AppThunk => async (dispatch, getState) => {
   } finally {
     dispatch(setField({loadingVacations: false}));
   }
-}
+});
 
 export const loadAll = (): AppThunk => async (dispatch) => {
   await Promise.all([
