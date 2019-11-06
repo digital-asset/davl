@@ -27,7 +27,7 @@ const TemplateId = {
  * An interface for template types. This is the counterpart of DAML's
  * `Template` type class.
  */
-export interface Template<T> extends Serializable<T> {
+export interface Template<T extends {}> extends Serializable<T> {
   templateId: TemplateId;
 }
 
@@ -66,7 +66,7 @@ export const date: () => Decoder<Date> = string;
  */
 export type ContractId<T> = string;
 
-export const ContractId = <T extends unknown>(templateType: Template<T>): Serializable<ContractId<T>> => ({
+export const ContractId = <T extends {}>(templateType: Template<T>): Serializable<ContractId<T>> => ({
   decoder: string,
 });
 
@@ -91,7 +91,7 @@ export type Contract<T> = {
  * Create a `Contract<T>` from its JSON representation. This is intended
  * for use by the `Ledger` class only.
  */
-export const Contract = <T extends unknown>(templateType: Template<T>): Serializable<Contract<T>> => ({
+export const Contract = <T extends {}>(templateType: Template<T>): Serializable<Contract<T>> => ({
   decoder: () => object({
     templateId: TemplateId.decoder(),
     contractId: ContractId(templateType).decoder(),
@@ -104,3 +104,5 @@ export const Contract = <T extends unknown>(templateType: Template<T>): Serializ
     workflowId: optional(string()),
   }),
 });
+
+export type Query<T> = T extends object ? {[K in keyof T]?: Query<T[K]>} : T;

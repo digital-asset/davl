@@ -1,5 +1,5 @@
 import Credentials from './Credentials';
-import { Archive, Choice, Contract, ContractId, Party, Template } from './Types';
+import { Archive, Choice, Contract, ContractId, Party, Template, Query } from './Types';
 import { array } from '@mojotech/json-type-validation';
 
 type LedgerResponse = {
@@ -56,7 +56,7 @@ class Ledger {
    * https://github.com/digital-asset/daml/blob/master/docs/source/json-api/search-query-language.rst
    * for a description of the query language.
    */
-  async query<T>(template: Template<T>, query: unknown): Promise<Contract<T>[]> {
+  async query<T>(template: Template<T>, query: Query<T>): Promise<Contract<T>[]> {
     const payload = {"%templates": [template.templateId]};
     Object.assign(payload, query);
     const json = await this.submit('contracts/search', payload);
@@ -71,14 +71,14 @@ class Ledger {
    * Retrieve all contracts for a given template.
    */
   async fetchAll<T>(template: Template<T>): Promise<Contract<T>[]> {
-    return this.query(template, {});
+    return this.query(template, {} as Query<T>);
   }
 
   /**
    * Mimic DAML's `lookupByKey`. The `key` must be a formulation of the
    * contract key as a query.
    */
-  async pseudoLookupByKey<T>(template: Template<T>, key: unknown): Promise<Contract<T> | undefined> {
+  async pseudoLookupByKey<T>(template: Template<T>, key: Query<T>): Promise<Contract<T> | undefined> {
     const contracts = await this.query(template, key);
     if (contracts.length > 1) {
       throw new Error("pseudoLookupByKey: query returned multiple contracts");
@@ -90,7 +90,7 @@ class Ledger {
    * Mimic DAML's `fetchByKey`. The `key` must be a formulation of the
    * contract key as a query.
    */
-  async pseudoFetchByKey<T>(template: Template<T>, key: unknown): Promise<Contract<T>> {
+  async pseudoFetchByKey<T>(template: Template<T>, key: Query<T>): Promise<Contract<T>> {
     const contract = await this.pseudoLookupByKey(template, key);
     if (contract === undefined) {
       throw new Error("pseudoFetchByKey: query returned no contract");
@@ -132,7 +132,7 @@ class Ledger {
    * Mimic DAML's `exerciseByKey`. The `key` must be a formulation of the
    * contract key as a query.
    */
-  async pseudoExerciseByKey<T, C>(choice: Choice<T, C>, key: unknown, argument: C): Promise<unknown> {
+  async pseudoExerciseByKey<T, C>(choice: Choice<T, C>, key: Query<T>, argument: C): Promise<unknown> {
     const contract = await this.pseudoFetchByKey(choice.template, key);
     return this.exercise(choice, contract.contractId, argument);
   }
@@ -147,7 +147,7 @@ class Ledger {
   /**
    * Archive a contract given by its contract id.
    */
-  async pseudoArchiveByKey<T>(template: Template<T>, key: unknown): Promise<unknown> {
+  async pseudoArchiveByKey<T>(template: Template<T>, key: Query<T>): Promise<unknown> {
     return this.pseudoExerciseByKey(Archive(template), key, {});
   }
 }
