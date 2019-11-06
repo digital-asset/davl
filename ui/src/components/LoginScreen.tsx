@@ -1,6 +1,6 @@
 import React from 'react'
 import { Button, Form, Grid, Header, Segment } from 'semantic-ui-react'
-import Credentials, { computeToken } from '../ledger/credentialsX';
+import Credentials, { computeToken } from '../ledger/credentials';
 import { useDispatch, useSelector } from 'react-redux';
 import { logIn, signUp } from '../app/authReducer';
 import { RootState } from '../app/rootReducer';

@@ -1,5 +1,5 @@
-import Credentials from './credentialsX';
-import { Archive, Choice, Contract, ContractId, Party, Template, Query } from './typesX';
+import Credentials from './credentials';
+import { Archive, Choice, Contract, ContractId, Party, Template, Query } from './types';
 import { array } from '@mojotech/json-type-validation';
 
 type LedgerResponse = {

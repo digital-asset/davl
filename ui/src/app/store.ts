@@ -4,7 +4,7 @@ import createThunkErrorHandlerMiddleware from 'redux-thunk-error-handler';
 import thunkMiddleware from 'redux-thunk-recursion-detect';
 
 import rootReducer, { RootState } from './rootReducer'
-import Ledger from '../ledger/ledgerX';
+import Ledger from '../ledger/ledger';
 import { toast } from 'react-semantic-toasts';
 
 const defaultErrorHandler = (error: unknown) => {

@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from 'redux-starter-kit';
 import { AppThunk, getLedger } from '../../app/store';
 import { EmployeeVacationAllocation, VacationRequest } from '../../daml/DAVL';
 import * as DAVL from '../../daml/DAVL';
-import { ContractId } from '../../ledger/typesX';
+import { ContractId } from '../../ledger/types';
 import { Vacation, makeVacation, ordVacationOnFromDate, Vacations, emptyVacations, splitVacations } from '../../utils/vacation';
 import { toast } from 'react-semantic-toasts';
 import { EmployeeSummary, ordEmployeeSummaryOnName } from '../../utils/employee';

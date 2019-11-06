@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction, Action } from 'redux-starter-kit'
-import Credentials from '../ledger/credentialsX'
+import Credentials from '../ledger/credentials'
 import { AppThunk } from './store';
-import Ledger from '../ledger/ledgerX';
+import Ledger from '../ledger/ledger';
 import * as DAVL from '../daml/DAVL';
 import { ThunkAction } from 'redux-thunk';
 import { RootState } from './rootReducer';
