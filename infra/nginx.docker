@@ -1,0 +1,8 @@
+FROM nginx:1.17.5
+
+RUN mkdir /app
+COPY nginx.conf.sh /app/nginx.conf.sh
+RUN chmod +x /app/nginx.conf.sh
+COPY ui /app/ui
+
+CMD /app/nginx.conf.sh && exec nginx -g 'daemon off;'
