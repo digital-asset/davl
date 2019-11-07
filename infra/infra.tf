@@ -5,6 +5,13 @@ terraform {
   }
 }
 
+
+locals {
+  sandbox = "201911072118-6e3b95"
+  json    = "201911072118-6e3b95"
+  ui      = "201911072118-6e3b95"
+}
+
 provider "google" {
   project = "da-dev-pinacolada"
   region  = "us-east4"
@@ -120,12 +127,12 @@ while ! nc -z ${google_compute_instance.db.network_interface.0.network_ip} 5432;
   sleep 1
 done
 
-docker run --name sandbox -d -p 127.0.0.1:6865:6865 gcr.io/da-dev-pinacolada/sandbox:20191107-1954-d7dad6ce96 --sql-backend-jdbcurl 'jdbc:postgresql://${google_compute_instance.db.network_interface.0.network_ip}/davl-db?user=davl&password=s3cr3t'
+docker run --name sandbox -d -p 127.0.0.1:6865:6865 gcr.io/da-dev-pinacolada/sandbox:${local.sandbox} --sql-backend-jdbcurl 'jdbc:postgresql://${google_compute_instance.db.network_interface.0.network_ip}/davl-db?user=davl&password=s3cr3t'
 
 # Wait for ledger to be ready
 docker exec sandbox /bin/sh -c "while ! nc -z localhost:6865; do sleep 1; done"
 
-docker run --name json-api -d --link sandbox -p 7575:7575 gcr.io/da-dev-pinacolada/json-api:20191107-1954-d7dad6ce96 --ledger-host sandbox --ledger-port 6865 --http-port 7575
+docker run --name json-api -d --link sandbox -p 7575:7575 gcr.io/da-dev-pinacolada/json-api:${local.json} --ledger-host sandbox --ledger-port 6865 --http-port 7575
 
 STARTUP
 }
@@ -166,7 +173,7 @@ export PATH="$(pwd)/google-cloud-sdk/bin:$PATH"
 gcloud components install docker-credential-gcr
 gcloud auth configure-docker --quiet
 
-docker run -p 80:80 -e LEDGER_IP_PORT=${google_compute_instance.ledger.network_interface.0.network_ip}:7575 gcr.io/da-dev-pinacolada/ui:20191107-1626-4e3f3cc81e
+docker run -p 80:80 -e LEDGER_IP_PORT=${google_compute_instance.ledger.network_interface.0.network_ip}:7575 gcr.io/da-dev-pinacolada/ui:${local.ui}
 
 STARTUP
 }
