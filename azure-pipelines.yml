@@ -129,7 +129,7 @@ jobs:
         env:
           GOOGLE_APPLICATION_CREDENTIALS_CONTENT: $(GOOGLE_APPLICATION_CREDENTIALS_CONTENT)
         displayName: create-docker-images
-        condition: eq(variables['Build.SourceBranch'], 'master')
+        condition: in(variables['Build.SourceBranch'], 'refs/heads/master', 'master')
       - bash: |
           set -euo pipefail
           MESSAGE=$(git log --pretty=format:%s -n1)
@@ -138,5 +138,5 @@ jobs:
                -H 'Content-type: application/json' \
                --data "{\"text\":\"<!here> *FAILED* $(Agent.JobName): <https://dev.azure.com/digitalasset/davl/_build/results?buildId=$(Build.BuildId)|$MESSAGE>\n\"}" \
                $(Slack.URL)
-        condition: and(failed(), eq(variables['Build.SourceBranchName'], 'master'))
+        condition: and(failed(), in(variables['Build.SourceBranchName'], 'refs/heads/master', 'master'))
         displayName: tell-slack-if-failed
