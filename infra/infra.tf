@@ -9,7 +9,7 @@ terraform {
 locals {
   sandbox = "201911072118-6e3b95"
   json    = "201911072118-6e3b95"
-  ui      = "201911072118-6e3b95"
+  ui      = "201911080149-d538bc"
 }
 
 provider "google" {
