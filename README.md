@@ -74,7 +74,7 @@ frontend server:
 
 ```
 cd ui
-webpack magic thingy FIXME@martin
+yarn start
 ```
 
 ## Production setup
