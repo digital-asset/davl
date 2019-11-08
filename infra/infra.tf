@@ -132,6 +132,14 @@ docker run --name sandbox -d -p 127.0.0.1:6865:6865 gcr.io/da-dev-pinacolada/san
 # Wait for ledger to be ready
 docker exec sandbox /bin/sh -c "while ! nc -z localhost:6865; do sleep 1; done"
 
+# <workaround>
+# sandbox currently ignores the DAR files given to it when it detects it's
+# running against an existing database, so we need to manually deploy the DAR
+# file after it has started. Since uploading a DAR file is idempotent, this
+# should not break if/when the sandbox behaviour changes.
+docker exec sandbox /bin/sh -c "/root/.daml/bin/daml ledger upload-dar --host=127.0.0.1 --port=6865 /app/daml.dar"
+# </workaround>
+
 docker run --name json-api -d --link sandbox -p 7575:7575 gcr.io/da-dev-pinacolada/json-api:${local.json} --ledger-host sandbox --ledger-port 6865 --http-port 7575
 
 STARTUP

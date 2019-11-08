@@ -4,6 +4,15 @@ RUN mkdir /app
 COPY sandbox.jar /app/sandbox.jar
 COPY daml.dar /app/daml.dar
 
+# <workaround>
+# sandbox currently ignores the DAR files given to it when it detects it's
+# running against an existing database, so we need to manually deploy the DAR
+# file after it has started. Since uploading a DAR file is idempotent, this
+# should not break if/when the sandbox behaviour changes.
+RUN apk add curl bash
+RUN curl https://get.daml.com | sh -s 0.13.32
+# </workaround>
+
 WORKDIR /app
 
 ENTRYPOINT ["java", "-jar", "/app/sandbox.jar", "--eager-package-loading", "/app/daml.dar", "--ledgerid", "DAVL"]
