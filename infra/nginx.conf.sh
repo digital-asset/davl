@@ -31,13 +31,13 @@ http {
     listen 80;
     server_name _;
     location /contracts {
-      proxy_pass http://${LEDGER_IP_PORT}/;
+      proxy_pass http://${LEDGER_IP_PORT};
     }
     location /command {
-      proxy_pass http://${LEDGER_IP_PORT}/;
+      proxy_pass http://${LEDGER_IP_PORT};
     }
     location /parties {
-      proxy_pass http://${LEDGER_IP_PORT}/;
+      proxy_pass http://${LEDGER_IP_PORT};
     }
 
     root /app/ui;
