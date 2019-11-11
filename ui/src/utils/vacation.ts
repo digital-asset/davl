@@ -1,5 +1,5 @@
 import { Party, ContractId } from '../ledger/types';
-import * as DAVL from '../daml/DAVL';
+import * as v3 from '../daml/v3/DAVL';
 import { contramap, Ord, ordString, getDualOrd } from 'fp-ts/lib/Ord';
 import { partition } from 'fp-ts/lib/Array';
 import moment from 'moment';
@@ -12,7 +12,7 @@ export type Vacation = {
   toDate: string;
 }
 
-export const makeVacation = <T extends {}>(contractId: ContractId<T>, {employeeRole: {employee, boss}, fromDate, toDate}: DAVL.Vacation) =>
+export const makeVacation = <T extends {}>(contractId: ContractId<T>, {employeeRole: {employee, boss}, fromDate, toDate}: v3.Vacation) =>
   ({contractId, employee, boss, fromDate, toDate})
 
 export const vacationLength = (vacation: {fromDate: string; toDate: string}): number => {

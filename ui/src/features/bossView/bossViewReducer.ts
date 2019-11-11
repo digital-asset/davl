@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from 'redux-starter-kit';
 import { AppThunk, getLedger } from '../../app/store';
-import { EmployeeVacationAllocation, VacationRequest } from '../../daml/DAVL';
-import * as DAVL from '../../daml/DAVL';
+import * as v3 from '../../daml/v3/DAVL';
 import { ContractId } from '../../ledger/types';
 import { Vacation, makeVacation, ordVacationOnFromDate, Vacations, emptyVacations, splitVacations } from '../../utils/vacation';
 import { toast } from 'react-semantic-toasts';
@@ -63,7 +62,7 @@ const withLoading = <K extends {[L in keyof State]: State[L] extends boolean ? L
 const loadStaff = withLoading('loadingStaff', async (dispatch, getState) => {
   const ledger = getLedger(getState());
   const key = {employeeRole: {boss: ledger.party}};
-  const allocations = await ledger.query(EmployeeVacationAllocation, key);
+  const allocations = await ledger.query(v3.EmployeeVacationAllocation, key);
   const staff: EmployeeSummary[] = allocations.map((allocation) => ({
     employee: allocation.argument.employeeRole.employee,
     boss: allocation.argument.employeeRole.boss,
@@ -78,7 +77,7 @@ const loadRequests = withLoading('loadingRequests', async (dispatch, getState) =
     dispatch(setField({loadingRequests: true}));
     const ledger = getLedger(getState());
     const requestsContracts =
-      await ledger.query(VacationRequest, {vacation: {employeeRole: {boss: ledger.party}}});
+      await ledger.query(v3.VacationRequest, {vacation: {employeeRole: {boss: ledger.party}}});
     const requests: Vacation[] =
       requestsContracts.map(({contractId, argument}) => makeVacation(contractId, argument.vacation));
     requests.sort(ordVacationOnFromDate.compare);
@@ -93,7 +92,7 @@ const loadVacations = withLoading('loadingVacations', async (dispatch, getState)
     dispatch(setField({loadingVacations: true}));
     const ledger = getLedger(getState());
     const vacationContracts =
-      await ledger.query(DAVL.Vacation, {employeeRole: {boss: ledger.party}});
+      await ledger.query(v3.Vacation, {employeeRole: {boss: ledger.party}});
     const vacations: Vacation[] =
       vacationContracts.map((vacation) => makeVacation(vacation.contractId, vacation.argument));
     dispatch(setVacations(splitVacations(vacations)));
@@ -110,9 +109,9 @@ export const loadAll = (): AppThunk => async (dispatch) => {
   ]);
 }
 
-export const approveRequest = (contractId: ContractId<VacationRequest>): AppThunk => async (dispatch, getState) => {
+export const approveRequest = (contractId: ContractId<v3.VacationRequest>): AppThunk => async (dispatch, getState) => {
   const ledger = getLedger(getState());
-  await ledger.exercise(VacationRequest.Accept, contractId, {});
+  await ledger.exercise(v3.VacationRequest.Accept, contractId, {});
   toast({
     title: 'Success',
     type: 'success',

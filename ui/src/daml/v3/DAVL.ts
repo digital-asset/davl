@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/class-name-casing */
 /* eslint-disable @typescript-eslint/camelcase */
-import { Party, Template, Choice, party, int, Int, Date, date } from '../ledger/types';
+import { Party, Template, Choice, party, int, Int, Date, date, TemplateId } from '../../ledger/types';
 import { object } from '@mojotech/json-type-validation';
+import packageId from './packageId';
+
+const moduleName = 'DAVL';
+const templateId = (entityName: string): TemplateId => ({packageId, moduleName, entityName});
 
 export type EmployeeRole_RequestVacation = {
   fromDate: Date;
@@ -23,7 +27,7 @@ export type EmployeeRole = {
 export const EmployeeRole: Template<EmployeeRole> & {
   RequestVacation: Choice<EmployeeRole, EmployeeRole_RequestVacation>;
 } = {
-  templateId: {moduleName: "DAVL", entityName: "EmployeeRole"},
+  templateId: templateId("EmployeeRole"),
   decoder: () => object({
     employee: party(),
     company: party(),
@@ -51,7 +55,7 @@ export type EmployeeProposal = {
 export const EmployeeProposal: Template<EmployeeProposal> & {
   Accept: Choice<EmployeeProposal, EmployeeProposal_Accept>;
 } = {
-  templateId: {moduleName: "DAVL", entityName: "EmployeeProposal"},
+  templateId: templateId("EmployeeProposal"),
   decoder: () => object({
     employeeRole: EmployeeRole.decoder(),
     vacationDays: int(),
@@ -68,7 +72,7 @@ export type EmployeeVacationAllocation = {
 }
 
 export const EmployeeVacationAllocation: Template<EmployeeVacationAllocation> = {
-  templateId: {moduleName: "DAVL", entityName: "EmployeeVacationAllocation"},
+  templateId: templateId("EmployeeVacationAllocation"),
   decoder: () => object({
     employeeRole: EmployeeRole.decoder(),
     remainingDays: int(),
@@ -83,7 +87,7 @@ export type Vacation = {
 }
 
 export const Vacation: Template<Vacation> = {
-  templateId: {moduleName: "DAVL", entityName: "Vacation"},
+  templateId: templateId("Vacation"),
   decoder: () => object({
     employeeRole: EmployeeRole.decoder(),
     fromDate: date(),
@@ -107,7 +111,7 @@ export type VacationRequest = {
 export const VacationRequest: Template<VacationRequest> & {
   Accept: Choice<VacationRequest, VacationRequest_Accept>;
 } = {
-  templateId: {moduleName: "DAVL", entityName: "VacationRequest"},
+  templateId: templateId("VacationRequest"),
   decoder: () => object({
     vacation: Vacation.decoder(),
   }),

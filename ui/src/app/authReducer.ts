@@ -2,7 +2,7 @@ import { createSlice, PayloadAction, Action } from 'redux-starter-kit'
 import Credentials from '../ledger/credentials'
 import { AppThunk } from './store';
 import Ledger from '../ledger/ledger';
-import * as DAVL from '../daml/DAVL';
+import * as v3 from '../daml/v3//DAVL';
 import { ThunkAction } from 'redux-thunk';
 import { RootState } from './rootReducer';
 import * as bossView from '../features/bossView/bossViewReducer';
@@ -47,7 +47,7 @@ export const logIn = (credentials: Credentials): AppThunk => async (dispatch) =>
   try {
     dispatch(startLogIn());
     const ledger = new Ledger(credentials);
-    const employeeRole = await ledger.pseudoLookupByKey(DAVL.EmployeeRole, {employee: credentials.party});
+    const employeeRole = await ledger.pseudoLookupByKey(v3.EmployeeRole, {employee: credentials.party});
     if (employeeRole) {
       dispatch(setCredentials(credentials));
     } else {
@@ -69,7 +69,7 @@ export const signUp = (credentials: Credentials): AppThunk => async (dispatch) =
     dispatch(startSignUp());
     const ledger = new Ledger(credentials);
     const employeeProposals =
-      await ledger.query(DAVL.EmployeeProposal, {employeeRole: {employee: credentials.party}});
+      await ledger.query(v3.EmployeeProposal, {employeeRole: {employee: credentials.party}});
     if (employeeProposals.length === 0) {
       alert("There is not invitation for you.");
     } else if(employeeProposals.length > 1) {
@@ -80,7 +80,7 @@ export const signUp = (credentials: Credentials): AppThunk => async (dispatch) =
       const employeeRole = employeeProposal.employeeRole;
       const accept = window.confirm(`You have been invited to work for ${employeeRole.company}.\nBoss: ${employeeRole.boss}\nVacation days: ${employeeProposal.vacationDays}\nDo you accept?`);
       if (accept) {
-        await ledger.exercise(DAVL.EmployeeProposal.Accept, employeeProposalFull.contractId, {});
+        await ledger.exercise(v3.EmployeeProposal.Accept, employeeProposalFull.contractId, {});
         dispatch(endSignUp());
         await dispatch(logIn(credentials));
       } else {
