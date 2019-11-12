@@ -47,28 +47,64 @@ export const Archive = <T>(template: Template<T>): Choice<T, {}> => ({
 });
 
 /**
- * The counterpart of DAML's `Party` type.
+ * The counterpart of DAML's `Party` type. We represent `Party`s as strings
+ * representing valid party identifiers.
  */
 export type Party = string;
-export const party: () => Decoder<Party> = string;
-
-export type Text = string;
-export const text: () => Decoder<Text> = string;
-
-export type Int = string;
-export const int: () => Decoder<Int> = string;
-
-export type Date = string;
-export const date: () => Decoder<Date> = string;
+export const Party: Serializable<Party> = {
+  decoder: string,
+}
 
 /**
- * The counterpart of DAML's `ContractId T` type.
+ * The counterpart of DAML's `Text` type. We represent `Text`s as `string`s.
+ */
+export type Text = string;
+export const Text: Serializable<Text> = {
+  decoder: string,
+}
+
+/**
+ * The counterpart of DAML's `Int` type. We use strings to represent `Int`s
+ * in order to avoid a loss of precision.
+ */
+export type Int = string;
+export const Int: Serializable<Int> = {
+  decoder: string,
+}
+
+/**
+ * The counterpart of DAML's `Date` type. We represent `Date`s as strings of
+ * the format "YYYY-MM-DD".
+ */
+export type Date = string;
+export const Date: Serializable<Date> = {
+  decoder: string,
+}
+
+/**
+ * The counterpart of DAML's `ContractId T` type. We represent `ContractId`s
+ * as strings.
  */
 export type ContractId<T> = string;
-
-export const ContractId = <T extends {}>(templateType: Template<T>): Serializable<ContractId<T>> => ({
+export const ContractId = <T>(t: Serializable<T>): Serializable<ContractId<T>> => ({
   decoder: string,
 });
+
+/**
+ * The counterpart of DAML's `Optional T` type.
+ */
+export type Optional<T> = T | unknown;
+export const Optional = <T>(t: Serializable<T>): Serializable<Optional<T>> => ({
+  decoder: () => optional(t.decoder()),
+})
+
+/**
+ * The counterpart of DAML's `[T]` list type.
+ */
+export type List<T> = T[];
+export const List = <T>(t: Serializable<T>): Serializable<T[]> => ({
+  decoder: () => array(t.decoder()),
+})
 
 /**
  * A class representing a contract instance of a template type `T`. Besides
@@ -95,12 +131,12 @@ export const Contract = <T extends {}>(templateType: Template<T>): Serializable<
   decoder: () => object({
     templateId: TemplateId.decoder(),
     contractId: ContractId(templateType).decoder(),
-    signatories: array(party()),
-    observers: array(party()),
-    agreementText: text(),
+    signatories: array(Party.decoder()),
+    observers: array(Party.decoder()),
+    agreementText: Text.decoder(),
     key: unknownJson(),
     argument: templateType.decoder(),
-    witnessParties: array(party()),
+    witnessParties: array(Party.decoder()),
     workflowId: optional(string()),
   }),
 });
