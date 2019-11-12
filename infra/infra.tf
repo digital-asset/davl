@@ -213,7 +213,7 @@ resource "google_compute_address" "frontend" {
 
 resource "google_compute_target_instance" "frontend" {
   name     = "frontend"
-  instance = "${google_compute_instance.proxy.self_link}"
+  instance = "${google_compute_instance.proxy.name}"
   zone     = "us-east4-a"
 }
 
