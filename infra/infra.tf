@@ -9,7 +9,7 @@ terraform {
 locals {
   sandbox = "201911090036-2cce8b"
   json    = "201911072118-6e3b95"
-  ui      = "201911080149-d538bc"
+  ui      = "201911121635-7ea227"
 }
 
 provider "google" {
@@ -146,7 +146,7 @@ docker run --name json-api -d --link sandbox -p 7575:7575 gcr.io/da-dev-pinacola
 # The UI currently does not support signing up, so we add a running Navigator
 # to our setup. It will be served on 8080, so we also need to expose that port.
 # Note: this relies on the Docker image containing the whole SDK.
-docker run --name navigator --link sandbox -p 8080:4000 --entrypoint /bin/sh -d gcr.io/da-dev-pinacolada/sandbox:201911090036-2cce8b -c "
+docker run --name navigator --link sandbox -p 8080:4000 --entrypoint /bin/sh -d gcr.io/da-dev-pinacolada/sandbox:${local.sandbox} -c "
 cat <<EOF > /app/navigator.conf
 users {
   DA {
