@@ -27,6 +27,18 @@ http {
 
   gzip on;
 
+# <workaround>
+# The UI currently does not support signing up, so we add a running Navigator
+# to our setup. It will be served on 8080, so we also need to expose that port.
+  server {
+    listen 8080;
+    server_name navigator;
+    location / {
+      proxy_pass http://${NAVIGATOR_IP_PORT};
+    }
+  }
+# </workaround>
+
   server {
     listen 80;
     server_name _;

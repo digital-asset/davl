@@ -142,6 +142,20 @@ docker exec sandbox /bin/sh -c "/root/.daml/bin/daml ledger upload-dar --host=12
 
 docker run --name json-api -d --link sandbox -p 7575:7575 gcr.io/da-dev-pinacolada/json-api:${local.json} --ledger-host sandbox --ledger-port 6865 --http-port 7575
 
+# <workaround>
+# The UI currently does not support signing up, so we add a running Navigator
+# to our setup. It will be served on 8080, so we also need to expose that port.
+# Note: this relies on the Docker image containing the whole SDK.
+docker run --name navigator --link sandbox -p 8080:4000 --entrypoint /bin/sh -d gcr.io/da-dev-pinacolada/sandbox:201911090036-2cce8b -c "
+cat <<EOF > /app/navigator.conf
+users {
+  DA {
+    party = \"Digital Asset\"
+  }
+}
+EOF
+/root/.daml/bin/daml navigator server --port 4000 --config-file /app/navigator.conf sandbox 6865"
+# </workaround>
 STARTUP
 }
 
@@ -181,7 +195,42 @@ export PATH="$(pwd)/google-cloud-sdk/bin:$PATH"
 gcloud components install docker-credential-gcr
 gcloud auth configure-docker --quiet
 
-docker run -p 80:80 -e LEDGER_IP_PORT=${google_compute_instance.ledger.network_interface.0.network_ip}:7575 gcr.io/da-dev-pinacolada/ui:${local.ui}
+# <workaround>
+# The UI currently does not support signing up, so we add a running Navigator
+# to our setup. It will be served on 8080, so we also need to expose that port.
+# Added -p 8080:8080 and -e NAVIGATOR_IP_PORT=...
+docker run -p 8080:8080 -e NAVIGATOR_IP_PORT=${google_compute_instance.ledger.network_interface.0.network_ip}:8080 -p 80:80 -e LEDGER_IP_PORT=${google_compute_instance.ledger.network_interface.0.network_ip}:7575 gcr.io/da-dev-pinacolada/ui:${local.ui}
+# </workaround>
+
 
 STARTUP
+}
+
+resource "google_compute_address" "frontend" {
+  name   = "frontend"
+  region = "us-east4"
+}
+
+resource "google_compute_target_instance" "frontend" {
+  name     = "frontend"
+  instance = "${google_compute_instance.proxy.self_link}"
+  zone     = "us-east4-a"
+}
+
+resource "google_compute_forwarding_rule" "frontend-http" {
+  name       = "frontend-http"
+  target     = "${google_compute_target_instance.frontend.self_link}"
+  ip_address = "${google_compute_address.frontend.address}"
+  port_range = "80"
+}
+
+resource "google_compute_forwarding_rule" "navigator" {
+  name       = "navigator"
+  target     = "${google_compute_target_instance.frontend.self_link}"
+  ip_address = "${google_compute_address.frontend.address}"
+  port_range = "8080"
+}
+
+output "frontend-address" {
+  value = "${google_compute_address.frontend.address}"
 }
