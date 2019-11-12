@@ -75,6 +75,7 @@
     "@typescript-eslint/parser": "^2.6.0",
     "awesome-typescript-loader": "^5.2.1",
     "babel-loader": "^8.0.6",
+    "eslint": "^6.6.0",
     "react-docgen-typescript-loader": "^3.3.0",
     "react-docgen-typescript-webpack-plugin": "^1.1.0",
     "redux-mock-store": "^1.5.3"
