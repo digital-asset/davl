@@ -15,4 +15,4 @@ RUN curl https://get.daml.com | sh -s 0.13.32
 
 WORKDIR /app
 
-ENTRYPOINT ["java", "-jar", "/app/sandbox.jar", "--eager-package-loading", "/app/daml.dar", "--ledgerid", "DAVL"]
+ENTRYPOINT ["java", "-jar", "/app/sandbox.jar", "--ledgerid", "DAVL"]
