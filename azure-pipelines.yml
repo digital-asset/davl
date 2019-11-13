@@ -83,15 +83,14 @@ jobs:
           DAVL_VERSION=$(cat v3/daml.yaml | grep '^version:' | awk '{print $2}')
           DAVL_NAME=$(cat v3/daml.yaml | grep '^name:' | awk '{print $2}')
 
-          SANDBOX_TAG=$(get_tag v3/daml.yaml daml infra/sandbox.docker)
+          SANDBOX_TAG=$(get_tag released v3/daml.yaml infra/sandbox.docker)
           if tag_exists sandbox $SANDBOX_TAG; then
               echo "sandbox $SANDBOX_TAG already exists."
           else
               echo "Building sandbox image version $SANDBOX_TAG..."
               SANDBOX_IMAGE=gcr.io/da-dev-pinacolada/sandbox:$SANDBOX_TAG
               DOCKER_DIR=$(mktemp -d)
-              (cd v3 && ~/.daml/bin/daml build)
-              cp v3/.daml/dist/$DAVL_NAME-$DAVL_VERSION.dar $DOCKER_DIR/daml.dar
+              cp -r released $DOCKER_DIR/released
               cp $HOME/.daml/sdk/$SDK_VERSION/sandbox/sandbox.jar $DOCKER_DIR/sandbox.jar
               docker build -t $SANDBOX_IMAGE -f infra/sandbox.docker $DOCKER_DIR
               docker push $SANDBOX_IMAGE
