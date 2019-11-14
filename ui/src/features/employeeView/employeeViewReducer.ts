@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from 'redux-starter-kit';
 import { AppThunk, getLedger } from '../../app/store';
-import * as v3 from '../../daml/v3/DAVL';
+import * as v3 from '../../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 import { Vacation, Vacations, makeVacation, ordVacationOnFromDate, emptyVacations, splitVacations } from '../../utils/vacation';
 import { EmployeeSummary } from '../../utils/employee';
 import { toast } from 'react-semantic-toasts';
@@ -114,7 +114,7 @@ export const addRequest = (fromDate: string, toDate: string): AppThunk => async 
     dispatch(startAddRequest());
     const ledger = getLedger(getState());
     const key = {employee: ledger.party};
-    await ledger.pseudoExerciseByKey(v3.EmployeeRole.RequestVacation, key, {fromDate, toDate});
+    await ledger.pseudoExerciseByKey(v3.EmployeeRole.EmployeeRole_RequestVacation, key, {fromDate, toDate});
   } finally {
     dispatch(endAddRequest());
   }
