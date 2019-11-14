@@ -1,4 +1,4 @@
-import { Decoder, object, string, optional, unknownJson, array } from '@mojotech/json-type-validation';
+import { Decoder, object, string, optional, unknownJson, array, boolean, dict, oneOf, constant } from '@mojotech/json-type-validation';
 
 export interface Serializable<T> {
   // NOTE(MH): We need this to be a function to allow for mutually
@@ -46,6 +46,16 @@ export const Archive = <T>(template: Template<T>): Choice<T, {}> => ({
   decoder: () => object({}),
 });
 
+export type Unit = {};
+export const Unit: Serializable<Unit> = {
+  decoder: () => object({}),
+}
+
+export type Bool = boolean;
+export const Bool: Serializable<Bool> = {
+  decoder: boolean,
+}
+
 /**
  * The counterpart of DAML's `Party` type. We represent `Party`s as strings
  * representing valid party identifiers.
@@ -82,6 +92,15 @@ export const Date: Serializable<Date> = {
 }
 
 /**
+ * The counterpart of DAML's `Time` type. We represent `Times`s as strings of
+ * the format "YYYY-MM-DDThh:mm:ss[.ssssss]Z".
+ */
+export type Time = string;
+export const Time: Serializable<Time> = {
+  decoder: string,
+}
+
+/**
  * The counterpart of DAML's `ContractId T` type. We represent `ContractId`s
  * as strings.
  */
@@ -93,9 +112,9 @@ export const ContractId = <T>(t: Serializable<T>): Serializable<ContractId<T>> =
 /**
  * The counterpart of DAML's `Optional T` type.
  */
-export type Optional<T> = T | unknown;
+export type Optional<T> = T | null;
 export const Optional = <T>(t: Serializable<T>): Serializable<Optional<T>> => ({
-  decoder: () => optional(t.decoder()),
+  decoder: () => oneOf(constant(null), t.decoder()),
 })
 
 /**
@@ -104,6 +123,11 @@ export const Optional = <T>(t: Serializable<T>): Serializable<Optional<T>> => ({
 export type List<T> = T[];
 export const List = <T>(t: Serializable<T>): Serializable<T[]> => ({
   decoder: () => array(t.decoder()),
+})
+
+export type TextMap<T> = { [key: string]: T };
+export const TextMap = <T>(t: Serializable<T>): Serializable<TextMap<T>> => ({
+  decoder: () => dict(t.decoder()),
 })
 
 /**
