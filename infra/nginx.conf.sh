@@ -39,9 +39,11 @@ http {
   }
 # </workaround>
 
+  # This serves https://davl.da-ext.net, with the load balancer doing TLS
+  # termination.
   server {
     listen 80;
-    server_name _;
+    server_name davl.da-ext.net;
     location /contracts {
       proxy_pass http://${LEDGER_IP_PORT};
     }
@@ -57,6 +59,13 @@ http {
     location / {
       try_files \$uri \$uri/ =404;
     }
+  }
+
+  # Load balancer redirects plain HTTP to this port.
+  server {
+    listen 8081;
+    server_name _;
+    return 307 https://davl.da-ext.net\$request_uri;
   }
 }
 NGINX_CONFIG
