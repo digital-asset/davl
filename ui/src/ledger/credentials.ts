@@ -1,6 +1,6 @@
 import { decode } from 'jwt-simple';
 
-const LEDGER_ID: string = 'davl';
+const LEDGER_ID: string = 'DAVL';
 
 export type Credentials = {
   party: string;
