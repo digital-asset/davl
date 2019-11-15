@@ -1,6 +1,6 @@
 import React from 'react'
 import { Button, Form, Grid, Header, Segment } from 'semantic-ui-react'
-import Credentials, { computeToken } from '../ledger/credentials';
+import Credentials, { preCheckCredentials } from '../ledger/credentials';
 import { useDispatch, useSelector } from 'react-redux';
 import { logIn, signUp } from '../app/authReducer';
 import { RootState } from '../app/rootReducer';
@@ -12,20 +12,30 @@ const LoginScreen: React.FC = () => {
   const dispatch = useDispatch();
   const loggingIn = useSelector((state: RootState) => state.auth.loggingIn);
   const signingUp = useSelector((state: RootState) => state.auth.signingUp);
-  const [username, setUsername] = React.useState('Martin');
+  const [username, setUsername] = React.useState('');
+  const [password, setPassword] = React.useState('');
+
+  const withCredentials = (cont: (credentials: Credentials) => void) => {
+    const credentials = {
+      party: username,
+      token: password,
+    }
+    const error = preCheckCredentials(credentials);
+    if (error !== null) {
+      alert(error);
+      return;
+    }
+    cont(credentials);
+  }
 
   const handleLogin = (event: React.FormEvent) => {
     event.preventDefault();
-    const token = computeToken(username);
-    const credentials: Credentials = {party: username, token};
-    dispatch(logIn(credentials));
+    withCredentials((credentials) => dispatch(logIn(credentials)));
   }
 
   const handleSignup = (event: React.FormEvent) => {
     event.preventDefault();
-    const token = computeToken(username);
-    const credentials: Credentials = {party: username, token};
-    dispatch(signUp(credentials));
+    withCredentials((credentials) => dispatch(signUp(credentials)));
   }
 
   return (
@@ -45,6 +55,15 @@ const LoginScreen: React.FC = () => {
               placeholder='Username'
               value={username}
               onChange={e => setUsername(e.currentTarget.value)}
+            />
+            <Form.Input
+              fluid
+              icon='lock'
+              iconPosition='left'
+              placeholder='Password'
+              type='password'
+              value={password}
+              onChange={e => setPassword(e.currentTarget.value)}
             />
             <Button.Group fluid size='large'>
               <Button
