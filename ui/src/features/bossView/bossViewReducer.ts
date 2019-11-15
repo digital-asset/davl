@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from 'redux-starter-kit';
 import { AppThunk, getLedger } from '../../app/store';
-import * as v3 from '../../daml/v3/DAVL';
+import * as v3 from '../../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 import { ContractId } from '../../ledger/types';
 import { Vacation, makeVacation, ordVacationOnFromDate, Vacations, emptyVacations, splitVacations } from '../../utils/vacation';
 import { toast } from 'react-semantic-toasts';
@@ -111,7 +111,7 @@ export const loadAll = (): AppThunk => async (dispatch) => {
 
 export const approveRequest = (contractId: ContractId<v3.VacationRequest>): AppThunk => async (dispatch, getState) => {
   const ledger = getLedger(getState());
-  await ledger.exercise(v3.VacationRequest.Accept, contractId, {});
+  await ledger.exercise(v3.VacationRequest.VacationRequest_Accept, contractId, {});
   toast({
     title: 'Success',
     type: 'success',

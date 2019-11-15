@@ -2,7 +2,7 @@ import { createSlice, PayloadAction, Action } from 'redux-starter-kit'
 import Credentials from '../ledger/credentials'
 import { AppThunk } from './store';
 import Ledger from '../ledger/ledger';
-import * as v3 from '../daml/v3//DAVL';
+import * as v3 from '../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 import { ThunkAction } from 'redux-thunk';
 import { RootState } from './rootReducer';
 import * as bossView from '../features/bossView/bossViewReducer';
@@ -80,7 +80,7 @@ export const signUp = (credentials: Credentials): AppThunk => async (dispatch) =
       const employeeRole = employeeProposal.employeeRole;
       const accept = window.confirm(`You have been invited to work for ${employeeRole.company}.\nBoss: ${employeeRole.boss}\nVacation days: ${employeeProposal.vacationDays}\nDo you accept?`);
       if (accept) {
-        await ledger.exercise(v3.EmployeeProposal.Accept, employeeProposalFull.contractId, {});
+        await ledger.exercise(v3.EmployeeProposal.EmployeeProposal_Accept, employeeProposalFull.contractId, {});
         dispatch(endSignUp());
         await dispatch(logIn(credentials));
       } else {
