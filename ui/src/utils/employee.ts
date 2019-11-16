@@ -1,4 +1,4 @@
-import { Party } from '../ledger/types';
+import { Party } from '@digitalasset/daml-json-types';
 import { ordString, Ord, contramap } from 'fp-ts/lib/Ord';
 
 export type EmployeeSummary = {
