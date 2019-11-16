@@ -105,7 +105,8 @@ export const Time: Serializable<Time> = {
  * as strings.
  */
 export type ContractId<T> = string;
-export const ContractId = <T>(t: Serializable<T>): Serializable<ContractId<T>> => ({
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const ContractId = <T>(_t: Serializable<T>): Serializable<ContractId<T>> => ({
   decoder: string,
 });
 

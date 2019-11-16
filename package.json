@@ -1,0 +1,4 @@
+{
+  "private": true,
+  "workspaces": ["ui", "daml-json-types"]
+}

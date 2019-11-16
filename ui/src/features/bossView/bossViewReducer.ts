@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from 'redux-starter-kit';
 import { AppThunk, getLedger } from '../../app/store';
 import * as v3 from '../../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
-import { ContractId } from '../../ledger/types';
+import { ContractId } from '@digitalasset/daml-json-types';
 import { Vacation, makeVacation, ordVacationOnFromDate, Vacations, emptyVacations, splitVacations } from '../../utils/vacation';
 import { toast } from 'react-semantic-toasts';
 import { EmployeeSummary, ordEmployeeSummaryOnName } from '../../utils/employee';

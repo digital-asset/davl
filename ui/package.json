@@ -3,6 +3,7 @@
   "version": "0.0.3",
   "private": true,
   "dependencies": {
+    "@digitalasset/daml-json-types": "0.0.1",
     "@mojotech/json-type-validation": "^3.1.0",
     "@types/jest": "24.0.18",
     "@types/node": "12.7.12",

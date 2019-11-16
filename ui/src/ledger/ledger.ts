@@ -1,5 +1,5 @@
 import Credentials from './credentials';
-import { Archive, Choice, Contract, ContractId, Party, Template, Query } from './types';
+import { Archive, Choice, Contract, ContractId, Party, Template, Query } from '@digitalasset/daml-json-types';
 import { array, Result } from '@mojotech/json-type-validation';
 
 type LedgerResponse = {
