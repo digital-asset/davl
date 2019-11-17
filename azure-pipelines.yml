@@ -22,6 +22,16 @@ jobs:
     steps:
       - checkout: self
 
+      # Build and test TypeScripts
+      - bash: |
+          set -euo pipefail
+
+          yarn --version
+          yarn install
+          yarn workspaces run build
+          CI=yes yarn workspaces run test --ci --all
+        displayName: build-and-test-ts
+
       # Install DAML SDK, possibly from cache
       - bash: |
           set -euo pipefail
@@ -61,14 +71,6 @@ jobs:
           cd v3 && daml test
         displayName: run-daml-tests
 
-      # Build and test UI
-      - bash: |
-          set -euo pipefail
-
-          yarn install
-          pushd daml-json-types && yarn prepack && popd
-          pushd ui && yarn build && yarn test && popd
-        displayName: build-and-test-ui
       # Deploy
       - bash: |
           set -euo pipefail
