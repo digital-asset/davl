@@ -8,22 +8,18 @@ import { reload } from '../../app/damlReducer';
 
 export type State = {
   summary: EmployeeSummary | undefined;
-  requests: Vacation[];
   vacations: Vacations;
   currentRequest: string;
   loadingSummary: boolean;
-  loadingRequests: boolean;
   loadingVacations: boolean;
   addingRequest: boolean;
 }
 
 const initialState: State = {
   summary: undefined,
-  requests: [],
   vacations: emptyVacations,
   currentRequest: '',
   loadingSummary: false,
-  loadingRequests: false,
   loadingVacations: false,
   addingRequest: false,
 }
@@ -34,7 +30,6 @@ const slice = createSlice({
   reducers: {
     clearAll: () => initialState,
     setSummary: (state: State, action: PayloadAction<EmployeeSummary>) => ({...state, summary: action.payload}),
-    setRequests: (state: State, action: PayloadAction<Vacation[]>) => ({...state, requests: action.payload}),
     setVacations: (state: State, action: PayloadAction<Vacations>) => ({...state, vacations: action.payload}),
     setCurrentRequest: (state: State, action: PayloadAction<string>) => ({...state, currentRequest: action.payload}),
     startAddRequest: (state: State) => ({...state, addingRequest: true}),
