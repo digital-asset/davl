@@ -3,7 +3,7 @@ import { AppThunk, getLedger } from '../../app/store';
 import * as v3 from '../../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 import { EmployeeSummary } from '../../utils/employee';
 import { toast } from 'react-semantic-toasts';
-import { reload } from '../../app/damlReducer';
+import { reloadTemplate } from '../../app/damlReducer';
 
 export type State = {
   summary: EmployeeSummary | undefined;
@@ -85,5 +85,5 @@ export const addRequest = (fromDate: string, toDate: string): AppThunk => async 
     description: 'Request successfully submitted.',
     time: 3000,
   });
-  await dispatch(reload(v3.VacationRequest));
+  await dispatch(reloadTemplate(v3.VacationRequest));
 }

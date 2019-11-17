@@ -14,8 +14,8 @@ export const approveRequest = (contractId: ContractId<v3.VacationRequest>): AppT
     description: 'Request successfully approved.',
   });
   await Promise.all([
-    dispatch(daml.reload(v3.EmployeeVacationAllocation)),
-    dispatch(daml.reload(v3.Vacation)),
-    dispatch(daml.reload(v3.VacationRequest)),
+    dispatch(daml.reloadTemplate(v3.EmployeeVacationAllocation)),
+    dispatch(daml.reloadTemplate(v3.Vacation)),
+    dispatch(daml.reloadTemplate(v3.VacationRequest)),
   ]);
 }

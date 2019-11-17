@@ -76,7 +76,7 @@ const loadQuery = <T>(template: Template<T>, query: Query<T>): AppThunk => async
   dispatch(setQuery(template, query, contracts));
 }
 
-export const reload = <T extends {}>(template: Template<T>): AppThunk => async (dispatch, getState) => {
+export const reloadTemplate = <T extends {}>(template: Template<T>): AppThunk => async (dispatch, getState) => {
   const state = getState();
   const credentials = state.daml.credentials;
   if (!credentials) {
