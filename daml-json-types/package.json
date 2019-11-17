@@ -11,8 +11,9 @@
     "@mojotech/json-type-validation": "^3.1.0"
   },
   "scripts": {
-    "prepack": "tsc --build",
-    "prepack:watch": "tsc --build --watch",
+    "build": "tsc --build",
+    "build:watch": "tsc --build --watch",
+    "test": "true",
     "lint": "eslint --ext .js,.ts src/"
   },
   "eslintConfig": {

@@ -22,6 +22,16 @@ jobs:
     steps:
       - checkout: self
 
+      # Build and test TypeScripts
+      - bash: |
+          set -euo pipefail
+
+          yarn --version
+          yarn install
+          yarn workspaces run build
+          CI=yes yarn workspaces run test --ci --all
+        displayName: build-and-test-ts
+
       # Install DAML SDK, possibly from cache
       - bash: |
           set -euo pipefail
@@ -53,13 +63,14 @@ jobs:
         condition: eq(variables.DAML_CACHE_HIT, 'true')
         displayName: daml-cache-hit
 
-      # Run tests
+      # Run DAML tests
       - bash: |
           set -euo pipefail
 
           export PATH="$PATH:~/.daml/bin"
           cd v3 && daml test
-        displayName: run-tests
+        displayName: run-daml-tests
+
       # Deploy
       - bash: |
           set -euo pipefail
