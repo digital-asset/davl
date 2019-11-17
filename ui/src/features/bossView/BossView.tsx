@@ -1,20 +1,28 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import VacationListSegment from '../../components/VacationListSegment';
 import { useDispatch, useSelector } from 'react-redux';
 import { loadAll, approveRequest } from './bossViewReducer';
 import { RootState } from '../../app/rootReducer';
-import { Vacation } from '../../utils/vacation';
+import { Vacation, makeVacation, ordVacationOnFromDate } from '../../utils/vacation';
 import { Segment } from 'semantic-ui-react';
 import Staff from './Staff';
+import { useQuery } from '../../app/damlReducer';
+import * as v3 from '../../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
+import { getLedger } from '../../app/store';
 
 const BossView: React.FC = () => {
   const dispatch = useDispatch();
   React.useEffect(() => { dispatch(loadAll()); }, [dispatch]);
 
-  const requests = useSelector((state: RootState) => state.bossView.requests);
   const vacations = useSelector((state: RootState) => state.bossView.vacations);
-  const loadingRequests = useSelector((state: RootState) => state.bossView.loadingRequests);
   const loadingVacations = useSelector((state: RootState) => state.bossView.loadingVacations);
+
+  const party = useSelector(getLedger).party;
+  const query = useMemo(() => ({vacation: {employeeRole: {boss: party}}}), [party]);
+  const {loading: loadingRequests, contracts: requestsContracts} = useQuery(v3.VacationRequest, query);
+  const requests: Vacation[] =
+    requestsContracts.map(({contractId, argument}) => makeVacation(contractId, argument.vacation));
+  requests.sort(ordVacationOnFromDate.compare);
 
   const handleApproveRequest = (vacation: Vacation) =>
     dispatch(approveRequest(vacation.contractId));

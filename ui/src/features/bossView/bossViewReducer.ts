@@ -2,25 +2,22 @@ import { createSlice, PayloadAction } from 'redux-starter-kit';
 import { AppThunk, getLedger } from '../../app/store';
 import * as v3 from '../../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 import { ContractId } from '@digitalasset/daml-json-types';
-import { Vacation, makeVacation, ordVacationOnFromDate, Vacations, emptyVacations, splitVacations } from '../../utils/vacation';
+import { Vacation, makeVacation, Vacations, emptyVacations, splitVacations } from '../../utils/vacation';
 import { toast } from 'react-semantic-toasts';
 import { EmployeeSummary, ordEmployeeSummaryOnName } from '../../utils/employee';
+import * as daml from '../../app/damlReducer';
 
 type State = {
   staff: EmployeeSummary[];
-  requests: Vacation[];
   vacations: Vacations;
   loadingStaff: boolean;
-  loadingRequests: boolean;
   loadingVacations: boolean;
 }
 
 const initialState: State = {
   staff: [],
-  requests: [],
   vacations: emptyVacations,
   loadingStaff: false,
-  loadingRequests: false,
   loadingVacations: false,
 }
 
@@ -28,9 +25,8 @@ const slice = createSlice({
   name: 'bossView',
   initialState,
   reducers: {
-    clearAll: (state: State, action: PayloadAction) => initialState,
+    clearAll: () => initialState,
     setStaff: (state: State, action: PayloadAction<EmployeeSummary[]>) => ({...state, staff: action.payload}),
-    setRequests: (state: State, action: PayloadAction<Vacation[]>) => ({...state, requests: action.payload}),
     setVacations: (state: State, action: PayloadAction<Vacations>) => ({...state, vacations: action.payload}),
     setField: (state: State, action: PayloadAction<Partial<State>>) => ({...state, ...action.payload})
   },
@@ -38,7 +34,6 @@ const slice = createSlice({
 
 const {
   setStaff,
-  setRequests,
   setVacations,
   setField,
 } = slice.actions;
@@ -72,21 +67,6 @@ const loadStaff = withLoading('loadingStaff', async (dispatch, getState) => {
   dispatch(setStaff(staff));
 });
 
-const loadRequests = withLoading('loadingRequests', async (dispatch, getState) => {
-  try {
-    dispatch(setField({loadingRequests: true}));
-    const ledger = getLedger(getState());
-    const requestsContracts =
-      await ledger.query(v3.VacationRequest, {vacation: {employeeRole: {boss: ledger.party}}});
-    const requests: Vacation[] =
-      requestsContracts.map(({contractId, argument}) => makeVacation(contractId, argument.vacation));
-    requests.sort(ordVacationOnFromDate.compare);
-    dispatch(setRequests(requests));
-  } finally {
-    dispatch(setField({loadingRequests: false}));
-  }
-});
-
 const loadVacations = withLoading('loadingVacations', async (dispatch, getState) => {
   try {
     dispatch(setField({loadingVacations: true}));
@@ -104,7 +84,6 @@ const loadVacations = withLoading('loadingVacations', async (dispatch, getState)
 export const loadAll = (): AppThunk => async (dispatch) => {
   await Promise.all([
     dispatch(loadStaff()),
-    dispatch(loadRequests()),
     dispatch(loadVacations()),
   ]);
 }
@@ -118,5 +97,8 @@ export const approveRequest = (contractId: ContractId<v3.VacationRequest>): AppT
     time: 3000,
     description: 'Request successfully approved.',
   });
-  await dispatch(loadAll());
+  await Promise.all([
+    dispatch(loadAll()),
+    dispatch(daml.reload(v3.VacationRequest))
+  ]);
 }
