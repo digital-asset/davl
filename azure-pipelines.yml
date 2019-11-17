@@ -53,13 +53,22 @@ jobs:
         condition: eq(variables.DAML_CACHE_HIT, 'true')
         displayName: daml-cache-hit
 
-      # Run tests
+      # Run DAML tests
       - bash: |
           set -euo pipefail
 
           export PATH="$PATH:~/.daml/bin"
           cd v3 && daml test
-        displayName: run-tests
+        displayName: run-daml-tests
+
+      # Build and test UI
+      - bash: |
+          set -euo pipefail
+
+          yarn install
+          pushd daml-json-types && yarn prepack && popd
+          pushd ui && yarn build && yarn test && popd
+        displayName: build-and-test-ui
       # Deploy
       - bash: |
           set -euo pipefail
