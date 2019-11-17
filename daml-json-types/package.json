@@ -12,6 +12,7 @@
   },
   "scripts": {
     "prepack": "tsc --build",
+    "prepack:watch": "tsc --build --watch",
     "lint": "eslint --ext .js,.ts src/"
   },
   "eslintConfig": {

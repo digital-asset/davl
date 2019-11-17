@@ -1,9 +1,12 @@
-import { Decoder, object, string, optional, unknownJson, array, boolean, dict, oneOf, constant } from '@mojotech/json-type-validation';
+import * as jtv from '@mojotech/json-type-validation';
 
+/**
+ * Interface for companion objects of serializable types. Its main purpose is
+ * to describe the JSON encoding of values of the serializable type.
+ */
 export interface Serializable<T> {
-  // NOTE(MH): We need this to be a function to allow for mutually
-  // recursive decoders.
-  decoder: () => Decoder<T>;
+  // NOTE(MH): This must be a function to allow for mutually recursive decoders.
+  decoder: () => jtv.Decoder<T>;
 }
 
 /**
@@ -15,24 +18,27 @@ export type TemplateId = {
   entityName: string;
 }
 
-const TemplateId = {
-  decoder: (): Decoder<TemplateId> => object({
-    packageId: optional(string()),
-    moduleName: string(),
-    entityName: string(),
+/**
+ * Companion object of the `TemplateId` type.
+ */
+const TemplateId: Serializable<TemplateId> = {
+  decoder: () => jtv.object({
+    packageId: jtv.optional(jtv.string()),
+    moduleName: jtv.string(),
+    entityName: jtv.string(),
   })
 }
 
 /**
- * An interface for template types. This is the counterpart of DAML's
- * `Template` type class.
+ * Interface for objects representing DAML templates. It is similar to the
+ * `Template` type class in DAML.
  */
 export interface Template<T extends {}> extends Serializable<T> {
   templateId: TemplateId;
 }
 
 /**
- * An interface for choice types. This is the counterpart of DAML's
+ * Interface for objects representing DAML choices. It is similar to the
  * `Choice` type class in DAML.
  */
 export interface Choice<T, C> extends Serializable<C> {
@@ -40,101 +46,177 @@ export interface Choice<T, C> extends Serializable<C> {
   choiceName: string;
 }
 
-export const Archive = <T>(template: Template<T>): Choice<T, {}> => ({
-  template,
-  choiceName: 'Archive',
-  decoder: () => object({}),
-});
-
-export type Unit = {};
-export const Unit: Serializable<Unit> = {
-  decoder: () => object({}),
+/**
+ * Interface for objects representing DAML templates with an `Archive` choice.
+ */
+export interface ArchivableTemplate<T extends {}> extends Template<T> {
+  Archive: Choice<T, {}>;
 }
 
+/**
+ * The counterpart of DAML's `()` type.
+ */
+export type Unit = {};
+
+/**
+ * Companion obect of the `Unit` type.
+ */
+export const Unit: Serializable<Unit> = {
+  decoder: () => jtv.object({}),
+}
+
+/**
+ * The counterpart of DAML's `Bool` type.
+ */
 export type Bool = boolean;
+
+/**
+ * Companion object of the `Bool` type.
+ */
 export const Bool: Serializable<Bool> = {
-  decoder: boolean,
+  decoder: jtv.boolean,
+}
+
+/**
+ * The counterpart of DAML's `Int` type. We represent `Int`s as string in order
+ * to avoid a loss of precision.
+ */
+export type Int = string;
+
+/**
+ * Companion object of the `Int` type.
+ */
+export const Int: Serializable<Int> = {
+  decoder: jtv.string,
+}
+
+/**
+ * The counterpart of DAML's `Decimal` type. We represent `Decimal`s as string
+ * in order to avoid a loss of precision. The string must match the regular
+ * expression `-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?`.
+ */
+export type Decimal = string;
+
+/**
+ * Companion object of the `Decimal` type.
+ */
+export const Decimal: Serializable<Int> = {
+  decoder: jtv.string,
+}
+
+/**
+ * The counterpart of DAML's `Text` type.
+ */
+export type Text = string;
+
+/**
+ * Companion object of the `Text` type.
+ */
+export const Text: Serializable<Text> = {
+  decoder: jtv.string,
+}
+
+/**
+ * The counterpart of DAML's `Time` type. We represent `Times`s as strings with
+ * format `YYYY-MM-DDThh:mm:ss[.ssssss]Z`.
+ */
+export type Time = string;
+
+/**
+ * Companion object of the `Time` type.
+ */
+export const Time: Serializable<Time> = {
+  decoder: jtv.string,
 }
 
 /**
  * The counterpart of DAML's `Party` type. We represent `Party`s as strings
- * representing valid party identifiers.
+ * matching the regular expression `[A-Za-z0-9:_\- ]+`.
  */
 export type Party = string;
+
+/**
+ * Companion object of the `Party` type.
+ */
 export const Party: Serializable<Party> = {
-  decoder: string,
+  decoder: jtv.string,
 }
 
 /**
- * The counterpart of DAML's `Text` type. We represent `Text`s as `string`s.
+ * The counterpart of DAML's `[T]` list type. We represent lists using arrays.
  */
-export type Text = string;
-export const Text: Serializable<Text> = {
-  decoder: string,
-}
+export type List<T> = T[];
 
 /**
- * The counterpart of DAML's `Int` type. We use strings to represent `Int`s
- * in order to avoid a loss of precision.
+ * Companion object of the `List` type.
  */
-export type Int = string;
-export const Int: Serializable<Int> = {
-  decoder: string,
-}
+export const List = <T>(t: Serializable<T>): Serializable<T[]> => ({
+  decoder: () => jtv.array(t.decoder()),
+});
 
 /**
- * The counterpart of DAML's `Date` type. We represent `Date`s as strings of
- * the format "YYYY-MM-DD".
+ * The counterpart of DAML's `Date` type. We represent `Date`s as strings with
+ * format `YYYY-MM-DD`.
  */
 export type Date = string;
-export const Date: Serializable<Date> = {
-  decoder: string,
-}
 
 /**
- * The counterpart of DAML's `Time` type. We represent `Times`s as strings of
- * the format "YYYY-MM-DDThh:mm:ss[.ssssss]Z".
+ * Companion object of the `Date` type.
  */
-export type Time = string;
-export const Time: Serializable<Time> = {
-  decoder: string,
+export const Date: Serializable<Date> = {
+  decoder: jtv.string,
 }
 
 /**
  * The counterpart of DAML's `ContractId T` type. We represent `ContractId`s
- * as strings.
+ * as strings. Their exact format of these strings depends on the ledger the
+ * DAML application is running on.
  */
 export type ContractId<T> = string;
+
+/**
+ * Companion object of the `ContractId` type.
+ */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const ContractId = <T>(_t: Serializable<T>): Serializable<ContractId<T>> => ({
-  decoder: string,
+  decoder: jtv.string,
 });
 
 /**
- * The counterpart of DAML's `Optional T` type.
+ * The counterpart of DAML's `Optional T` type. Nested optionals are not yet
+ * supported.
  */
 export type Optional<T> = T | null;
-export const Optional = <T>(t: Serializable<T>): Serializable<Optional<T>> => ({
-  decoder: () => oneOf(constant(null), t.decoder()),
-})
 
 /**
- * The counterpart of DAML's `[T]` list type.
+ * Companion object of the `Optional` type.
  */
-export type List<T> = T[];
-export const List = <T>(t: Serializable<T>): Serializable<T[]> => ({
-  decoder: () => array(t.decoder()),
-})
-
-export type TextMap<T> = { [key: string]: T };
-export const TextMap = <T>(t: Serializable<T>): Serializable<TextMap<T>> => ({
-  decoder: () => dict(t.decoder()),
-})
+export const Optional = <T>(t: Serializable<T>): Serializable<Optional<T>> => ({
+  decoder: () => jtv.oneOf(jtv.constant(null), t.decoder()),
+});
 
 /**
- * A class representing a contract instance of a template type `T`. Besides
- * the contract data it also contains meta data like the contract id,
- * signatories, etc.
+ * The counterpart of DAML's `TextMap T` type. We represent `TextMap`s as
+ * dictionaries.
+ */
+export type TextMap<T> = { [key: string]: T };
+
+/**
+ * Companion object of the `TextMap` type.
+ */
+export const TextMap = <T>(t: Serializable<T>): Serializable<TextMap<T>> => ({
+  decoder: () => jtv.dict(t.decoder()),
+});
+
+// TODO(MH): `Numeric` type.
+
+// TODO(MH): `Map` type.
+
+/**
+ * Type for a contract instance of a template type `T`. Besides the contract
+ * payload it also contains meta data like the contract id, signatories, etc.
+ *
+ * Contract keys are not yet properly supported.
  */
 export type Contract<T> = {
   templateId: TemplateId;
@@ -149,21 +231,31 @@ export type Contract<T> = {
 }
 
 /**
- * Create a `Contract<T>` from its JSON representation. This is intended
- * for use by the `Ledger` class only.
+ * Companion object of the `Contract` type.
  */
-export const Contract = <T extends {}>(templateType: Template<T>): Serializable<Contract<T>> => ({
-  decoder: () => object({
+export const Contract = <T extends {}>(t: Template<T>): Serializable<Contract<T>> => ({
+  decoder: () => jtv.object({
     templateId: TemplateId.decoder(),
-    contractId: ContractId(templateType).decoder(),
-    signatories: array(Party.decoder()),
-    observers: array(Party.decoder()),
+    contractId: ContractId(t).decoder(),
+    signatories: jtv.array(Party.decoder()),
+    observers: jtv.array(Party.decoder()),
     agreementText: Text.decoder(),
-    key: unknownJson(),
-    argument: templateType.decoder(),
-    witnessParties: array(Party.decoder()),
-    workflowId: optional(string()),
+    key: jtv.unknownJson(),
+    argument: t.decoder(),
+    witnessParties: jtv.array(Party.decoder()),
+    workflowId: jtv.optional(jtv.string()),
   }),
 });
 
+/**
+ * Type for queries against the `/contract/search` endpoint of the JSON API.
+ * `Query<T>` is the type of queries that are valid when searching for
+ * contracts of template type `T`.
+ *
+ * Comparison queries are not yet supported.
+ *
+ * NB: This type is heavily related to the `DeepPartial` type that can be found
+ * in the TypeScript community.
+ */
 export type Query<T> = T extends object ? {[K in keyof T]?: Query<T[K]>} : T;
+// TODO(MH): Support comparison queries.
