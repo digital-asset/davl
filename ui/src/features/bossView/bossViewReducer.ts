@@ -1,64 +1,8 @@
-import { createSlice, PayloadAction } from 'redux-starter-kit';
 import { AppThunk, getLedger } from '../../app/store';
 import * as v3 from '../../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 import { ContractId } from '@digitalasset/daml-json-types';
 import { toast } from 'react-semantic-toasts';
-import { EmployeeSummary, ordEmployeeSummaryOnName } from '../../utils/employee';
 import * as daml from '../../app/damlReducer';
-
-type State = {
-  staff: EmployeeSummary[];
-  loadingStaff: boolean;
-}
-
-const initialState: State = {
-  staff: [],
-  loadingStaff: false,
-}
-
-const slice = createSlice({
-  name: 'bossView',
-  initialState,
-  reducers: {
-    clearAll: () => initialState,
-    setStaff: (state: State, action: PayloadAction<EmployeeSummary[]>) => ({...state, staff: action.payload}),
-    setField: (state: State, action: PayloadAction<Partial<State>>) => ({...state, ...action.payload})
-  },
-});
-
-const {
-  setStaff,
-  setField,
-} = slice.actions;
-
-export const {
-  clearAll,
-} = slice.actions;
-
-export const reducer = slice.reducer;
-
-const withLoading = <K extends {[L in keyof State]: State[L] extends boolean ? L : never}[keyof State]>
-  (k: K, thunk: AppThunk) => (): AppThunk => async (dispatch, getState, extraArgument) => {
-    try {
-      dispatch(setField({[k]: true}));
-      await thunk(dispatch, getState, extraArgument);
-    } finally {
-      dispatch(setField({[k]: false}));
-    }
-  }
-
-export const loadStaff = withLoading('loadingStaff', async (dispatch, getState) => {
-  const ledger = getLedger(getState());
-  const key = {employeeRole: {boss: ledger.party}};
-  const allocations = await ledger.query(v3.EmployeeVacationAllocation, key);
-  const staff: EmployeeSummary[] = allocations.map((allocation) => ({
-    employee: allocation.argument.employeeRole.employee,
-    boss: allocation.argument.employeeRole.boss,
-    remainingVacationDays: allocation.argument.remainingDays,
-  }));
-  staff.sort(ordEmployeeSummaryOnName.compare);
-  dispatch(setStaff(staff));
-});
 
 export const approveRequest = (contractId: ContractId<v3.VacationRequest>): AppThunk => async (dispatch, getState) => {
   const ledger = getLedger(getState());
@@ -70,7 +14,7 @@ export const approveRequest = (contractId: ContractId<v3.VacationRequest>): AppT
     description: 'Request successfully approved.',
   });
   await Promise.all([
-    dispatch(loadStaff()),
+    dispatch(daml.reload(v3.EmployeeVacationAllocation)),
     dispatch(daml.reload(v3.Vacation)),
     dispatch(daml.reload(v3.VacationRequest)),
   ]);

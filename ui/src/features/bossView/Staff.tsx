@@ -1,14 +1,20 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Segment, Header, List } from 'semantic-ui-react';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../app/rootReducer';
+import { getLedger } from '../../app/store';
+import { useQuery } from '../../app/damlReducer';
+import * as v3 from '../../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
+import { prettyEmployeeSummaries } from '../../utils/employee';
 
 const Staff: React.FC = () => {
-  const staff = useSelector((state: RootState) => state.bossView.staff);
-  const loadingStaff = useSelector((state: RootState) => state.bossView.loadingStaff);
+  const party = useSelector(getLedger).party;
+
+  const query = useMemo(() => ({employeeRole: {boss: party}}), [party]);
+  const {loading, contracts} = useQuery(v3.EmployeeVacationAllocation, query);
+  const staff = prettyEmployeeSummaries(contracts);
 
   return (
-    <Segment loading={loadingStaff}>
+    <Segment loading={loading}>
       <Header as='h1'>
         Team
       </Header>
