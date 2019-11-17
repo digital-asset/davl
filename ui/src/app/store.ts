@@ -28,7 +28,9 @@ const store = configureStore({
   middleware: [
     createThunkErrorHandlerMiddleware({ onError: defaultErrorHandler }),
     thunkMiddleware,
-    ...getDefaultMiddleware().slice(1),
+    ...getDefaultMiddleware({
+      serializableCheck: false,
+    }).slice(1),
   ],
 });
 
