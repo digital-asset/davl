@@ -6,7 +6,7 @@ import ListActionItem from '../../components/ListActionItem';
 import { DatesRangeInput } from 'semantic-ui-calendar-react';
 import { addRequest, setCurrentRequest } from './employeeViewReducer';
 import { VacationListItem } from '../../components/VacationListItem';
-import { vacationLength, Vacation, makeVacation, ordVacationOnFromDate } from '../../utils/vacation';
+import { vacationLength, prettyRequests } from '../../utils/vacation';
 import { useQuery } from '../../app/damlReducer';
 import * as v3 from '../../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 import { getLedger } from '../../app/store';
@@ -19,10 +19,8 @@ const Requests: React.FC = () => {
 
   const party = useSelector(getLedger).party;
   const query = useMemo(() => ({vacation: {employeeRole: {employee: party}}}), [party]);
-  const {loading: loadingRequests, contracts: requestsContracts} = useQuery(v3.VacationRequest, query);
-  const requests: Vacation[] =
-    requestsContracts.map(({contractId, argument}) => makeVacation(contractId, argument.vacation));
-  requests.sort(ordVacationOnFromDate.compare);
+  const {loading: loadingRequests, contracts: requestContracts} = useQuery(v3.VacationRequest, query);
+  const requests = prettyRequests(requestContracts);
 
   const handleCancelRequest = () => alert('Canceling vacation requests is not yet implemented.');
 

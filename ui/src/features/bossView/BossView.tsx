@@ -3,7 +3,7 @@ import VacationListSegment from '../../components/VacationListSegment';
 import { useDispatch, useSelector } from 'react-redux';
 import { loadAll, approveRequest } from './bossViewReducer';
 import { RootState } from '../../app/rootReducer';
-import { Vacation, makeVacation, ordVacationOnFromDate } from '../../utils/vacation';
+import { Vacation, prettyRequests } from '../../utils/vacation';
 import { Segment } from 'semantic-ui-react';
 import Staff from './Staff';
 import { useQuery } from '../../app/damlReducer';
@@ -20,9 +20,7 @@ const BossView: React.FC = () => {
   const party = useSelector(getLedger).party;
   const query = useMemo(() => ({vacation: {employeeRole: {boss: party}}}), [party]);
   const {loading: loadingRequests, contracts: requestsContracts} = useQuery(v3.VacationRequest, query);
-  const requests: Vacation[] =
-    requestsContracts.map(({contractId, argument}) => makeVacation(contractId, argument.vacation));
-  requests.sort(ordVacationOnFromDate.compare);
+  const requests = prettyRequests(requestsContracts);
 
   const handleApproveRequest = (vacation: Vacation) =>
     dispatch(approveRequest(vacation.contractId));
