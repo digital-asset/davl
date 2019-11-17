@@ -1,21 +1,30 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import Requests from './Requests';
 import { useDispatch, useSelector } from 'react-redux';
-import { loadAll } from './employeeViewReducer';
+import { loadSummary } from './employeeViewReducer';
 import { RootState } from '../../app/rootReducer';
 import SummaryView from './SummaryView';
 import { Segment } from 'semantic-ui-react';
 import VacationListSegment from '../../components/VacationListSegment';
 import { toast } from 'react-semantic-toasts';
+import { getLedger } from '../../app/store';
+import { useQuery } from '../../app/damlReducer';
+import * as v3 from '../../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
+import { splitVacations } from '../../utils/vacation';
+
 
 const EmployeeView: React.FC = () => {
   const dispatch = useDispatch();
-  useEffect(() => { dispatch(loadAll()); }, [dispatch]);
+  useEffect(() => { dispatch(loadSummary()); }, [dispatch]);
 
   const summary = useSelector((state: RootState) => state.employeeView.summary);
-  const vacations = useSelector((state: RootState) => state.employeeView.vacations);
   const loadingSummary = useSelector((state: RootState) => state.employeeView.loadingSummary);
-  const loadingVacations = useSelector((state: RootState) => state.employeeView.loadingVacations);
+
+  const party = useSelector(getLedger).party;
+  const query = useMemo(() => ({employeeRole: {employee: party}}), [party]);
+  const {loading: loadingVacations, contracts: vacationContracts} = useQuery(v3.Vacation, query);
+  const vacations = splitVacations(vacationContracts);
+
 
   const handleCancelVacation = () => toast({
     title: 'Not yet implemented',
