@@ -4,6 +4,7 @@ import Credentials, { preCheckCredentials } from '../ledger/credentials';
 import { useDispatch, useSelector } from 'react-redux';
 import { logIn, signUp } from '../app/authReducer';
 import { RootState } from '../app/rootReducer';
+import * as daml from '../app/damlReducer';
 
 /**
  * React component for the login screen of the `App`.
@@ -30,7 +31,10 @@ const LoginScreen: React.FC = () => {
 
   const handleLogin = (event: React.FormEvent) => {
     event.preventDefault();
-    withCredentials((credentials) => dispatch(logIn(credentials)));
+    withCredentials((credentials) => {
+      dispatch(logIn(credentials));
+      dispatch(daml.start(credentials));
+    });
   }
 
   const handleSignup = (event: React.FormEvent) => {
