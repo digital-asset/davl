@@ -41,8 +41,10 @@ export const prettyRequests = (requestContracts: Contract<v3.VacationRequest>[])
   return requests;
 }
 
-export const splitVacations = (vacations: Vacation[]) => {
+
+export const splitVacations = (vacationContracts: Contract<v3.Vacation>[]) => {
   const today = moment().format('YYYY-MM-DD');
+  const vacations = vacationContracts.map((vacation) => makeVacation(vacation.contractId, vacation.argument))
   const {left: upcoming, right: past} =
     partition((vacation: Vacation) => vacation.fromDate <= today)(vacations);
   upcoming.sort(ordVacationOnFromDate.compare);

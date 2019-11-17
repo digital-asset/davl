@@ -1,26 +1,21 @@
 import { createSlice, PayloadAction } from 'redux-starter-kit';
 import { AppThunk, getLedger } from '../../app/store';
 import * as v3 from '../../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
-import { Vacation, Vacations, makeVacation, emptyVacations, splitVacations } from '../../utils/vacation';
 import { EmployeeSummary } from '../../utils/employee';
 import { toast } from 'react-semantic-toasts';
 import { reload } from '../../app/damlReducer';
 
 export type State = {
   summary: EmployeeSummary | undefined;
-  vacations: Vacations;
   currentRequest: string;
   loadingSummary: boolean;
-  loadingVacations: boolean;
   addingRequest: boolean;
 }
 
 const initialState: State = {
   summary: undefined,
-  vacations: emptyVacations,
   currentRequest: '',
   loadingSummary: false,
-  loadingVacations: false,
   addingRequest: false,
 }
 
@@ -30,7 +25,6 @@ const slice = createSlice({
   reducers: {
     clearAll: () => initialState,
     setSummary: (state: State, action: PayloadAction<EmployeeSummary>) => ({...state, summary: action.payload}),
-    setVacations: (state: State, action: PayloadAction<Vacations>) => ({...state, vacations: action.payload}),
     setCurrentRequest: (state: State, action: PayloadAction<string>) => ({...state, currentRequest: action.payload}),
     startAddRequest: (state: State) => ({...state, addingRequest: true}),
     endAddRequest: (state: State) => ({...state, currentRequest: '', addingRequest: false}),
@@ -40,7 +34,6 @@ const slice = createSlice({
 
 const {
   setSummary,
-  setVacations,
   startAddRequest,
   endAddRequest,
   setField,
@@ -64,7 +57,7 @@ const withLoading = <K extends {[L in keyof State]: State[L] extends boolean ? L
     }
   }
 
-const loadSummary = withLoading('loadingSummary', async (dispatch, getState) => {
+export const loadSummary = withLoading('loadingSummary', async (dispatch, getState) => {
   const ledger = getLedger(getState());
   const key = {employeeRole: {employee: ledger.party}};
   const {argument: {employeeRole: {employee, boss}, remainingDays}} =
@@ -76,22 +69,6 @@ const loadSummary = withLoading('loadingSummary', async (dispatch, getState) => 
   }
   dispatch(setSummary(summary));
 });
-
-const loadVacations = withLoading('loadingVacations', async (dispatch, getState) => {
-  const ledger = getLedger(getState());
-  const vacationContracts =
-    await ledger.query(v3.Vacation, {employeeRole: {employee: ledger.party}});
-  const vacations: Vacation[] =
-    vacationContracts.map((vacation) => makeVacation(vacation.contractId, vacation.argument));
-  dispatch(setVacations(splitVacations(vacations)));
-});
-
-export const loadAll = (): AppThunk => async (dispatch) => {
-  await Promise.all([
-    dispatch(loadSummary()),
-    dispatch(loadVacations()),
-  ]);
-}
 
 export const addRequest = (fromDate: string, toDate: string): AppThunk => async (dispatch, getState) => {
   try {

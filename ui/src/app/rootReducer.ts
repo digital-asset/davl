@@ -20,7 +20,7 @@ export default rootReducer;
 
 export const reload = (): ThunkAction<Promise<void>, RootState, null, Action<string>> => async (dispatch) => {
   await Promise.all([
-    dispatch(employeeView.loadAll()),
-    dispatch(bossView.loadAll()),
+    dispatch(employeeView.loadSummary()),
+    dispatch(bossView.loadStaff()),
   ]);
 }

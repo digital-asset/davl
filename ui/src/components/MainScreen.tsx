@@ -23,6 +23,7 @@ const MainScreen: React.FC = () => {
 
   const handleReload = () => {
     dispatch(reload());
+    dispatch(daml.reload(v3.Vacation))
     dispatch(daml.reload(v3.VacationRequest))
   }
 
