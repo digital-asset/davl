@@ -5,7 +5,6 @@ import Ledger from '../ledger/ledger';
 import * as v3 from '../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 import { ThunkAction } from 'redux-thunk';
 import { RootState } from './rootReducer';
-import * as bossView from '../features/bossView/bossViewReducer';
 import * as employeeView from '../features/employeeView/employeeViewReducer';
 
 type State = {
@@ -61,7 +60,6 @@ export const logIn = (credentials: Credentials): AppThunk => async (dispatch) =>
 export const logOut = (): ThunkAction<void, RootState, null, Action<string>> => (dispatch) => {
   dispatch(clearAll());
   dispatch(employeeView.clearAll());
-  dispatch(bossView.clearAll());
 }
 
 export const signUp = (credentials: Credentials): AppThunk => async (dispatch) => {

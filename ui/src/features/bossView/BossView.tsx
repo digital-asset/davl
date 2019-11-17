@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import VacationListSegment from '../../components/VacationListSegment';
 import { useDispatch, useSelector } from 'react-redux';
-import { loadStaff, approveRequest } from './bossViewReducer';
+import { approveRequest } from './bossViewReducer';
 import { Vacation, prettyRequests, splitVacations } from '../../utils/vacation';
 import { Segment } from 'semantic-ui-react';
 import Staff from './Staff';
@@ -12,7 +12,6 @@ import { getLedger } from '../../app/store';
 const BossView: React.FC = () => {
   const dispatch = useDispatch();
   const party = useSelector(getLedger).party;
-  React.useEffect(() => { dispatch(loadStaff()); }, [dispatch]);
 
   const vacationsQuery = useMemo(() => ({employeeRole: {boss: party}}), [party]);
   const {loading: loadingVacations, contracts: vacationContracts} = useQuery(v3.Vacation, vacationsQuery);

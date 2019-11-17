@@ -2,14 +2,12 @@ import { combineReducers } from 'redux';
 import { Action } from 'redux-starter-kit';
 import { ThunkAction } from 'redux-thunk';
 
-import * as bossView from '../features/bossView/bossViewReducer';
 import * as employeeView from '../features/employeeView/employeeViewReducer';
 import * as auth from './authReducer';
 import * as daml from './damlReducer';
 
 const rootReducer = combineReducers({
   employeeView: employeeView.reducer,
-  bossView: bossView.reducer,
   auth: auth.reducer,
   daml: daml.reducer,
 });
@@ -21,6 +19,5 @@ export default rootReducer;
 export const reload = (): ThunkAction<Promise<void>, RootState, null, Action<string>> => async (dispatch) => {
   await Promise.all([
     dispatch(employeeView.loadSummary()),
-    dispatch(bossView.loadStaff()),
   ]);
 }
