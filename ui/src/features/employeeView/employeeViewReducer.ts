@@ -1,9 +1,10 @@
 import { createSlice, PayloadAction } from 'redux-starter-kit';
 import { AppThunk, getLedger } from '../../app/store';
 import * as v3 from '../../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
-import { Vacation, Vacations, makeVacation, ordVacationOnFromDate, emptyVacations, splitVacations } from '../../utils/vacation';
+import { Vacation, Vacations, makeVacation, emptyVacations, splitVacations } from '../../utils/vacation';
 import { EmployeeSummary } from '../../utils/employee';
 import { toast } from 'react-semantic-toasts';
+import { reload } from '../../app/damlReducer';
 
 export type State = {
   summary: EmployeeSummary | undefined;
@@ -44,7 +45,6 @@ const slice = createSlice({
 
 const {
   setSummary,
-  setRequests,
   setVacations,
   startAddRequest,
   endAddRequest,
@@ -82,16 +82,6 @@ const loadSummary = withLoading('loadingSummary', async (dispatch, getState) => 
   dispatch(setSummary(summary));
 });
 
-const loadRequests = withLoading('loadingRequests', async (dispatch, getState) => {
-  const ledger = getLedger(getState());
-  const requestsContracts =
-    await ledger.query(v3.VacationRequest, {vacation: {employeeRole: {employee: ledger.party}}});
-  const requests: Vacation[] =
-    requestsContracts.map(({contractId, argument}) => makeVacation(contractId, argument.vacation));
-  requests.sort(ordVacationOnFromDate.compare);
-  dispatch(setRequests(requests));
-});
-
 const loadVacations = withLoading('loadingVacations', async (dispatch, getState) => {
   const ledger = getLedger(getState());
   const vacationContracts =
@@ -105,7 +95,6 @@ export const loadAll = (): AppThunk => async (dispatch) => {
   await Promise.all([
     dispatch(loadSummary()),
     dispatch(loadVacations()),
-    dispatch(loadRequests()),
   ]);
 }
 
@@ -124,5 +113,5 @@ export const addRequest = (fromDate: string, toDate: string): AppThunk => async 
     description: 'Request successfully submitted.',
     time: 3000,
   });
-  await dispatch(loadRequests());
+  await dispatch(reload(v3.VacationRequest));
 }
