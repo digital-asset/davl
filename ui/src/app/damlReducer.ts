@@ -6,6 +6,7 @@ import { AppThunk } from "./store";
 import Ledger from "../ledger/ledger";
 import Credentials from "../ledger/credentials";
 import * as QueryStore from './query';
+import { useEffect } from "react";
 
 type DamlStore = {
   credentials?: Credentials;
@@ -17,6 +18,7 @@ type State = DamlStore;
 const START = 'daml/START';
 const STOP = 'daml/STOP';
 const SET_QUERY = 'daml/SET_QUERY';
+const SET_ALL_QUERIES = 'daml/SET_ALL_QUERIES';
 
 type StartAction = {
   type: typeof START;
@@ -34,7 +36,13 @@ type SetQueryAction<T> = {
   contracts: Contract<T>[];
 }
 
-type Action = StartAction | StopAction | SetQueryAction<object>;
+type SetAllQueriesAction<T> = {
+  type: typeof SET_ALL_QUERIES;
+  template: Template<T>;
+  entries: QueryStore.Entries<T>;
+}
+
+type Action = StartAction | StopAction | SetQueryAction<object> | SetAllQueriesAction<object>;
 
 export const start = (credentials: Credentials): StartAction => ({
   type: START,
@@ -52,6 +60,12 @@ const setQuery = <T extends {}>(template: Template<T>, query: Query<T>, contract
   contracts,
 });
 
+const setAllQueries = <T extends {}>(template: Template<T>, entries: QueryStore.Entries<T>): SetAllQueriesAction<T> => ({
+  type: SET_ALL_QUERIES,
+  template,
+  entries,
+});
+
 const loadQuery = <T>(template: Template<T>, query: Query<T>): AppThunk => async (dispatch, getState) => {
   const credentials = getState().daml.credentials;
   if (!credentials) {
@@ -60,6 +74,25 @@ const loadQuery = <T>(template: Template<T>, query: Query<T>): AppThunk => async
   const ledger = new Ledger(credentials);
   const contracts = await ledger.query(template, query);
   dispatch(setQuery(template, query, contracts));
+}
+
+export const reload = <T extends {}>(template: Template<T>): AppThunk => async (dispatch, getState) => {
+  const state = getState();
+  const credentials = state.daml.credentials;
+  if (!credentials) {
+    throw Error("loadQuery called before start");
+  }
+  const ledger = new Ledger(credentials);
+  let entries: QueryStore.Entries<T> | undefined = QueryStore.getEntries(state.daml.queryStore, template);
+  if (entries) {
+    entries = entries.map((entry) => ({...entry, loading: true}));
+    dispatch(setAllQueries(template, entries));
+    const queries: Query<T>[] = Array.from(entries.keys());
+    await Promise.all(queries.map(async (query) => {
+      const contracts = await ledger.query(template, query);
+      dispatch(setQuery(template, query, contracts));
+    }));
+  }
 }
 
 
@@ -76,18 +109,23 @@ export const reducer = (state = initialState, action: Action): State => {
         ...state,
         queryStore: QueryStore.set(state.queryStore, action.template, action.query, action.contracts),
       };
+    case SET_ALL_QUERIES:
+      return {
+        ...state,
+        queryStore: QueryStore.setAll(state.queryStore, action.template, action.entries),
+      }
     default:
       return state;
   }
 }
 
-export const useQuery = <T extends {}>(template: Template<T>, query: Query<T>): Contract<T>[] => {
+export const useQuery = <T extends {}>(template: Template<T>, query: Query<T>): QueryStore.Entry<T> => {
   const dispatch = useDispatch();
-  const contracts = useSelector((state: root.RootState) => QueryStore.get(state.daml.queryStore, template, query));
-  if (contracts === undefined) {
-    dispatch(loadQuery(template, query));
-    return [];
-  } else {
-    return contracts;
-  }
+  const contracts = useSelector((state: root.RootState) => QueryStore.getEntry(state.daml.queryStore, template, query));
+  useEffect(() => {
+    if (contracts === undefined) {
+      dispatch(loadQuery(template, query));
+    }
+  }, [dispatch, template, query, contracts]);
+  return contracts || {loading: true, contracts: []};
 }
