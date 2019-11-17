@@ -13,7 +13,7 @@ export interface Serializable<T> {
  * Identifier of a DAML template.
  */
 export type TemplateId = {
-  packageId?: string;
+  packageId: string;
   moduleName: string;
   entityName: string;
 }
@@ -23,7 +23,7 @@ export type TemplateId = {
  */
 const TemplateId: Serializable<TemplateId> = {
   decoder: () => jtv.object({
-    packageId: jtv.optional(jtv.string()),
+    packageId: jtv.string(),
     moduleName: jtv.string(),
     entityName: jtv.string(),
   })
