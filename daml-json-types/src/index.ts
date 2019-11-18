@@ -100,7 +100,7 @@ export type Decimal = string;
 /**
  * Companion object of the `Decimal` type.
  */
-export const Decimal: Serializable<Int> = {
+export const Decimal: Serializable<Decimal> = {
   decoder: jtv.string,
 }
 
