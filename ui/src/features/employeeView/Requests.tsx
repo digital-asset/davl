@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Segment, Header, List, Form, SemanticTRANSITIONS } from 'semantic-ui-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../app/rootReducer';
@@ -18,8 +18,8 @@ const Requests: React.FC = () => {
   const addingRequest = useSelector((state: RootState) => state.employeeView.addingRequest);
 
   const party = useSelector(getLedger).party;
-  const query = useMemo(() => ({vacation: {employeeRole: {employee: party}}}), [party]);
-  const {loading: loadingRequests, contracts: requestContracts} = useQuery(v3.VacationRequest, query);
+  const {loading: loadingRequests, contracts: requestContracts} =
+    useQuery(v3.VacationRequest, () => ({vacation: {employeeRole: {employee: party}}}), [party]);
   const requests = prettyRequests(requestContracts);
 
   const handleCancelRequest = () => alert('Canceling vacation requests is not yet implemented.');

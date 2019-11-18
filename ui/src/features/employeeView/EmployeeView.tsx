@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import Requests from './Requests';
 import { useDispatch, useSelector } from 'react-redux';
 import { loadSummary } from './employeeViewReducer';
@@ -21,8 +21,8 @@ const EmployeeView: React.FC = () => {
   const loadingSummary = useSelector((state: RootState) => state.employeeView.loadingSummary);
 
   const party = useSelector(getLedger).party;
-  const query = useMemo(() => ({employeeRole: {employee: party}}), [party]);
-  const {loading: loadingVacations, contracts: vacationContracts} = useQuery(v3.Vacation, query);
+  const {loading: loadingVacations, contracts: vacationContracts} =
+    useQuery(v3.Vacation, () => ({employeeRole: {employee: party}}), [party]);
   const vacations = splitVacations(vacationContracts);
 
 

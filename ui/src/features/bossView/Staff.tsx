@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Segment, Header, List } from 'semantic-ui-react';
 import { useSelector } from 'react-redux';
 import { getLedger } from '../../app/store';
@@ -9,8 +9,8 @@ import { prettyEmployeeSummaries } from '../../utils/employee';
 const Staff: React.FC = () => {
   const party = useSelector(getLedger).party;
 
-  const query = useMemo(() => ({employeeRole: {boss: party}}), [party]);
-  const {loading, contracts} = useQuery(v3.EmployeeVacationAllocation, query);
+  const {loading, contracts} =
+    useQuery(v3.EmployeeVacationAllocation, () => ({employeeRole: {boss: party}}), [party]);
   const staff = prettyEmployeeSummaries(contracts);
 
   return (

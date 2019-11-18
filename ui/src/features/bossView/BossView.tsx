@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import VacationListSegment from '../../components/VacationListSegment';
 import { useDispatch, useSelector } from 'react-redux';
 import { approveRequest } from './bossViewReducer';
@@ -13,12 +13,12 @@ const BossView: React.FC = () => {
   const dispatch = useDispatch();
   const party = useSelector(getLedger).party;
 
-  const vacationsQuery = useMemo(() => ({employeeRole: {boss: party}}), [party]);
-  const {loading: loadingVacations, contracts: vacationContracts} = useQuery(v3.Vacation, vacationsQuery);
+  const {loading: loadingVacations, contracts: vacationContracts} =
+    useQuery(v3.Vacation, () => ({employeeRole: {boss: party}}), [party]);
   const vacations = splitVacations(vacationContracts);
 
-  const requestsQuery = useMemo(() => ({vacation: {employeeRole: {boss: party}}}), [party]);
-  const {loading: loadingRequests, contracts: requestsContracts} = useQuery(v3.VacationRequest, requestsQuery);
+  const {loading: loadingRequests, contracts: requestsContracts} =
+    useQuery(v3.VacationRequest, () => ({vacation: {employeeRole: {boss: party}}}), [party]);
   const requests = prettyRequests(requestsContracts);
 
   const handleApproveRequest = (vacation: Vacation) =>

@@ -6,7 +6,7 @@ import { AppThunk } from "./store";
 import Ledger from "../ledger/ledger";
 import Credentials from "../ledger/credentials";
 import * as QueryStore from './query';
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 type DamlStore = {
   credentials?: Credentials;
@@ -119,8 +119,10 @@ export const reducer = (state = initialState, action: Action): State => {
   }
 }
 
-export const useQuery = <T extends {}>(template: Template<T>, query: Query<T>): QueryStore.Entry<T> => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useQuery = <T extends {}>(template: Template<T>, queryFactory: () => Query<T>, queryDeps: readonly any[] | undefined): QueryStore.Entry<T> => {
   const dispatch = useDispatch();
+  const query = useMemo(queryFactory, queryDeps)
   const contracts = useSelector((state: root.RootState) => QueryStore.getEntry(state.daml.queryStore, template, query));
   useEffect(() => {
     if (contracts === undefined) {
