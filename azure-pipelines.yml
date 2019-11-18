@@ -129,8 +129,8 @@ jobs:
               echo "Building ui image version $UI_TAG..."
               UI_IMAGE=gcr.io/da-dev-pinacolada/ui:$UI_TAG
               DOCKER_DIR=$(mktemp -d)
-              (cd ui && ./build.sh)
-              cp -r ui/release $DOCKER_DIR/ui
+              (cd ui && yarn build)
+              cp -r ui/build $DOCKER_DIR/ui
               cp infra/nginx.conf.sh $DOCKER_DIR/nginx.conf.sh
               docker build -t $UI_IMAGE -f infra/nginx.docker $DOCKER_DIR
               docker push $UI_IMAGE
