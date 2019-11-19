@@ -1,5 +1,5 @@
 import Credentials from './credentials';
-import { Choice, Contract, ContractId, Party, Template, Query, ArchivableTemplate } from '@digitalasset/daml-json-types';
+import { Choice, Contract, ContractId, Party, Template, Query } from '@digitalasset/daml-json-types';
 import { array, Result } from '@mojotech/json-type-validation';
 
 type LedgerResponse = {
@@ -129,14 +129,14 @@ class Ledger {
   /**
    * Archive a contract given by its contract id.
    */
-  async archive<T>(template: ArchivableTemplate<T>, contractId: ContractId<T>): Promise<unknown> {
+  async archive<T>(template: Template<T>, contractId: ContractId<T>): Promise<unknown> {
     return this.exercise(template.Archive, contractId, {});
   }
 
   /**
    * Archive a contract given by its contract id.
    */
-  async pseudoArchiveByKey<T>(template: ArchivableTemplate<T>, key: Query<T>): Promise<unknown> {
+  async pseudoArchiveByKey<T>(template: Template<T>, key: Query<T>): Promise<unknown> {
     return this.pseudoExerciseByKey(template.Archive, key, {});
   }
 }
