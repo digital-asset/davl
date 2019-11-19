@@ -1,3 +1,5 @@
+// Copyright (c) 2019 The DAML Authors. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 import * as jtv from '@mojotech/json-type-validation';
 
 /**
@@ -35,6 +37,7 @@ const TemplateId: Serializable<TemplateId> = {
  */
 export interface Template<T extends {}> extends Serializable<T> {
   templateId: TemplateId;
+  Archive: Choice<T, {}>;
 }
 
 /**
@@ -44,13 +47,6 @@ export interface Template<T extends {}> extends Serializable<T> {
 export interface Choice<T, C> extends Serializable<C> {
   template: Template<T>;
   choiceName: string;
-}
-
-/**
- * Interface for objects representing DAML templates with an `Archive` choice.
- */
-export interface ArchivableTemplate<T extends {}> extends Template<T> {
-  Archive: Choice<T, {}>;
 }
 
 /**
