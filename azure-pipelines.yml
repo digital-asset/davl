@@ -151,6 +151,39 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS_CONTENT: $(GOOGLE_APPLICATION_CREDENTIALS_CONTENT)
         displayName: create-docker-images
         condition: in(variables['Build.SourceBranch'], 'refs/heads/master', 'master')
+
+      - bash: |
+          set -euo pipefail
+
+          tell_slack () {
+              local MESSAGE=$(git log --pretty=format:%s -n1)
+              curl -XPOST \
+                   -i \
+                   -H 'Content-type: application/json' \
+                   --data "{\"text\":\"<https://dev.azure.com/digitalasset/davl/_build/results?buildId=$(Build.BuildId)|$MESSAGE>: $1\n\"}" \
+                   $(Slack.URL)
+          }
+          export GOOGLE_APPLICATION_CREDENTIALS=$(mktemp)
+          cleanup () {
+              rm -f $GOOGLE_APPLICATION_CREDENTIALS
+          }
+          trap cleanup EXIT
+          echo "$GOOGLE_APPLICATION_CREDENTIALS_CONTENT" > $GOOGLE_APPLICATION_CREDENTIALS
+          gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+
+          cd infra
+          terraform init
+          if terraform apply -auto-approve -var-file=deployed-versions.tfvars; then
+              tell_slack "successfully deployed"
+          else
+              tell_slack "failed to deploy"
+              exit 1
+          fi
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS_CONTENT: $(GOOGLE_APPLICATION_CREDENTIALS_CONTENT)
+        displayName: deploy
+        condition: in(variables['Build.SourceBranch'], 'refs/heads/master', 'master')
+
       - bash: |
           set -euo pipefail
           MESSAGE=$(git log --pretty=format:%s -n1)

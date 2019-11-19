@@ -5,17 +5,15 @@ terraform {
   }
 }
 
-
-locals {
-  sandbox = "201911151440-7d2208"
-  json    = "201911072118-6e3b95"
-  ui      = "201911151331-e9f132"
-}
+variable "sandbox" {}
+variable "ui" {}
+variable "json" {}
 
 provider "google" {
   project = "da-dev-pinacolada"
   region  = "us-east4"
   zone    = "us-east4-a"
+  version = "2.17.0"
 }
 
 # Network created by the security team. Allows all traffic from offices and
@@ -87,6 +85,10 @@ docker run -e POSTGRES_USER=davl \
            postgres:11.5-alpine
 
 STARTUP
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "google_compute_instance" "ledger" {
@@ -128,7 +130,7 @@ while ! nc -z ${google_compute_instance.db.network_interface.0.network_ip} 5432;
   sleep 1
 done
 
-docker run --name sandbox -d -p 127.0.0.1:6865:6865 gcr.io/da-dev-pinacolada/sandbox:${local.sandbox} --sql-backend-jdbcurl 'jdbc:postgresql://${google_compute_instance.db.network_interface.0.network_ip}/davl-db?user=davl&password=s3cr3t'
+docker run --name sandbox -d -p 127.0.0.1:6865:6865 gcr.io/da-dev-pinacolada/sandbox:${var.sandbox} --sql-backend-jdbcurl 'jdbc:postgresql://${google_compute_instance.db.network_interface.0.network_ip}/davl-db?user=davl&password=s3cr3t'
 
 # Wait for ledger to be ready
 docker exec sandbox /bin/sh -c "while ! nc -z localhost:6865; do sleep 1; done"
@@ -141,13 +143,13 @@ docker exec sandbox /bin/sh -c "while ! nc -z localhost:6865; do sleep 1; done"
 docker exec sandbox /bin/sh -c "for f in /app/released/*; do /root/.daml/bin/daml ledger upload-dar --host=127.0.0.1 --port=6865 \$f; done"
 # </workaround>
 
-docker run --name json-api -d --link sandbox -p 7575:7575 gcr.io/da-dev-pinacolada/json-api:${local.json} --ledger-host sandbox --ledger-port 6865 --http-port 7575
+docker run --name json-api -d --link sandbox -p 7575:7575 gcr.io/da-dev-pinacolada/json-api:${var.json} --ledger-host sandbox --ledger-port 6865 --http-port 7575
 
 # <workaround>
 # The UI currently does not support signing up, so we add a running Navigator
 # to our setup. It will be served on 8080, so we also need to expose that port.
 # Note: this relies on the Docker image containing the whole SDK.
-docker run --name navigator --link sandbox -p 8080:4000 --entrypoint /bin/sh -d gcr.io/da-dev-pinacolada/sandbox:${local.sandbox} -c "
+docker run --name navigator --link sandbox -p 8080:4000 --entrypoint /bin/sh -d gcr.io/da-dev-pinacolada/sandbox:${var.sandbox} -c "
 cat <<EOF > /app/navigator.conf
 users {
   DA {
@@ -199,7 +201,7 @@ gcloud auth configure-docker --quiet
 # The UI currently does not support signing up, so we add a running Navigator
 # to our setup. It will be served on 8080, so we also need to expose that port.
 # Added -p 8080:8080 and -e NAVIGATOR_IP_PORT=...
-docker run -p 8081:8081 -p 8080:8080 -e NAVIGATOR_IP_PORT=${google_compute_instance.ledger.network_interface.0.network_ip}:8080 -p 80:80 -e LEDGER_IP_PORT=${google_compute_instance.ledger.network_interface.0.network_ip}:7575 gcr.io/da-dev-pinacolada/ui:${local.ui}
+docker run -p 8081:8081 -p 8080:8080 -e NAVIGATOR_IP_PORT=${google_compute_instance.ledger.network_interface.0.network_ip}:8080 -p 80:80 -e LEDGER_IP_PORT=${google_compute_instance.ledger.network_interface.0.network_ip}:7575 gcr.io/da-dev-pinacolada/ui:${var.ui}
 # </workaround>
 
 
