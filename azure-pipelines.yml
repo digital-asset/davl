@@ -81,6 +81,14 @@ jobs:
           tag_exists () {
               gcloud container images list-tags gcr.io/da-dev-pinacolada/$1 | grep -q $2
           }
+          tell_slack () {
+              local MESSAGE=$(git log --pretty=format:%s -n1)
+              curl -XPOST \
+                   -i \
+                   -H 'Content-type: application/json' \
+                   --data "{\"text\":\"<https://dev.azure.com/digitalasset/davl/_build/results?buildId=$(Build.BuildId)|$MESSAGE>: uploaded $1\n\"}" \
+                   $(Slack.URL)
+          }
 
           GCS_KEY=$(mktemp)
           cleanup () {
@@ -106,6 +114,7 @@ jobs:
               docker build -t $SANDBOX_IMAGE -f infra/sandbox.docker $DOCKER_DIR
               docker push $SANDBOX_IMAGE
               echo "Done building $SANDBOX_IMAGE."
+              tell_slack sandbox:$SANDBOX_TAG
           fi
 
           JSON_API_TAG=$(get_tag v3/daml.yaml infra/json-api.docker)
@@ -120,6 +129,7 @@ jobs:
               docker build -t $JSON_API_IMAGE -f infra/json-api.docker $DOCKER_DIR
               docker push $JSON_API_IMAGE
               echo "Done building $JSON_API_IMAGE."
+              tell_slack json-api:$JSON_API_TAG
           fi
 
           UI_TAG=$(get_tag ui infra/nginx.docker infra/nginx.conf.sh)
@@ -135,6 +145,7 @@ jobs:
               docker build -t $UI_IMAGE -f infra/nginx.docker $DOCKER_DIR
               docker push $UI_IMAGE
               echo "Done building $UI_IMAGE."
+              tell_slack ui:$UI_TAG
           fi
         env:
           GOOGLE_APPLICATION_CREDENTIALS_CONTENT: $(GOOGLE_APPLICATION_CREDENTIALS_CONTENT)
