@@ -1,0 +1,9 @@
+sdk-version: 0.13.32
+name: daml-v3-v4
+source: daml
+version: 0.0.1
+dependencies:
+  - daml-prim
+  - daml-stdlib
+#  - ../released/davl-v3.dar
+  - ../released/davlV4.dar

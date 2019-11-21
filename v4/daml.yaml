@@ -1,5 +1,5 @@
 sdk-version: 0.13.32
-name: davl-v4
+name: davlV4
 version: 0.0.4
 source: daml
 parties:
