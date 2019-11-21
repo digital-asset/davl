@@ -147,6 +147,23 @@ jobs:
               echo "Done building $UI_IMAGE."
               tell_slack ui:$UI_TAG
           fi
+
+          #FIXME
+          TRIGGER_TAG=$(get_tag released v3/daml.yaml infra/trigger.docker)
+          if tag_exists trigger $TRIGGER_TAG; then
+              echo "trigger $TRIGGER_TAG already exists."
+          else
+              echo "Building trigger image version $TRIGGER_TAG..."
+              TRIGGER_IMAGE=gcr.io/da-dev-pinacolada/trigger:$TRIGGER_TAG
+              DOCKER_DIR=$(mktemp -d)
+              #FIXME
+              cp -r released $DOCKER_DIR/released
+              cp $HOME/.daml/sdk/$SDK_VERSION/daml-trigger/daml-trigger.jar $DOCKER_DIR/trigger.jar
+              docker build -t $TRIGGER_IMAGE -f infra/trigger.docker $DOCKER_DIR
+              docker push $TRIGGER_IMAGE
+              echo "Done building $TRIGGER_IMAGE."
+              tell_slack trigger:$TRIGGER_TAG
+          fi
         env:
           GOOGLE_APPLICATION_CREDENTIALS_CONTENT: $(GOOGLE_APPLICATION_CREDENTIALS_CONTENT)
         displayName: create-docker-images

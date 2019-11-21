@@ -7,8 +7,9 @@ terraform {
 
 
 locals {
-  sandbox = "201911151440-7d2208"
   json    = "201911072118-6e3b95"
+  sandbox = "201911151440-7d2208"
+  trigger = "????"
   ui      = "201911151331-e9f132"
 }
 
@@ -133,6 +134,9 @@ docker run --name sandbox -d -p 127.0.0.1:6865:6865 gcr.io/da-dev-pinacolada/san
 # Wait for ledger to be ready
 docker exec sandbox /bin/sh -c "while ! nc -z localhost:6865; do sleep 1; done"
 
+# FIXME
+docker run --name trigger -d --link sandbox gcr.io/da-dev-pinacolada/trigger:${local.trigger} --ledger-host sandbox --ledger-port 6865 --ledger-party "Digital Asset"
+
 # <workaround>
 # sandbox currently ignores the DAR files given to it when it detects it's
 # running against an existing database, so we need to manually deploy the DAR
@@ -147,7 +151,7 @@ docker run --name json-api -d --link sandbox -p 7575:7575 gcr.io/da-dev-pinacola
 # The UI currently does not support signing up, so we add a running Navigator
 # to our setup. It will be served on 8080, so we also need to expose that port.
 # Note: this relies on the Docker image containing the whole SDK.
-docker run --name navigator --link sandbox -p 8080:4000 --entrypoint /bin/sh -d gcr.io/da-dev-pinacolada/sandbox:${local.sandbox} -c "
+docker run -d --name navigator --link sandbox -p 8080:4000 --entrypoint /bin/sh -d gcr.io/da-dev-pinacolada/sandbox:${local.sandbox} -c "
 cat <<EOF > /app/navigator.conf
 users {
   DA {

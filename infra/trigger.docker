@@ -1,0 +1,19 @@
+FROM openjdk:8-alpine
+
+RUN mkdir /app
+COPY trigger.jar /app/trigger.jar
+COPY released /app/released
+
+# <workaround>
+# sandbox currently ignores the DAR files given to it when it detects it's
+# running against an existing database, so we need to manually deploy the DAR
+# file after it has started. Since uploading a DAR file is idempotent, this
+# should not break if/when the sandbox behaviour changes.
+RUN apk add curl bash
+RUN curl https://get.daml.com | sh -s 0.13.32
+# </workaround>
+
+WORKDIR /app
+
+# FIXME
+ENTRYPOINT ["java", "-jar", "/app/trigger.jar", "--dar", "FIXME", "--wall-clock-time", "--trigger-name", "FIXME.Main"]
