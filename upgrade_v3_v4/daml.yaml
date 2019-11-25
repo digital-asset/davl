@@ -1,0 +1,23 @@
+sdk-version: 0.13.32
+name: upgrade_v3_v4
+source: daml
+parties:
+  - Digital Asset
+  - Yuval
+  - Shaul
+  - Bernhard
+  - Martin
+  - Moritz
+  - Rohan
+version: 0.0.1
+dependencies:
+  - daml-prim
+  - daml-stdlib
+  - daml-trigger
+data-dependencies:
+  - /home/drsk/davl/v3/.daml/dist/davl-0.0.3.dar
+  - /home/drsk/davl/v4/.daml/dist/davl-v4-0.0.4.dar
+
+build-options:
+- '--package=("instances-davl-0.0.3",True,[("DAVL","DAVLA")])'
+- '--package=("instances-davl-v4-0.0.4",True,[("DAVL","DAVLB")])'

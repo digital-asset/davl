@@ -13,4 +13,3 @@ parties:
 dependencies:
   - daml-prim
   - daml-stdlib
-  - ../released/davl-v3.dar

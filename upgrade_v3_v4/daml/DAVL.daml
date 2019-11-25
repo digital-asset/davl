@@ -1,0 +1,195 @@
+daml 1.2
+
+module DAVL where
+import DAVLA qualified as A
+import DAVLB qualified as B
+import DA.List hiding (head)
+import DA.List.Total (head)
+import qualified DA.Next.Map as M
+import DA.Action
+import DA.Upgrade (convert, Convertible)
+import Daml.Trigger
+
+-----------------
+-- Upgrade process
+template (Template i, Template o, Convertible i o, UpgradeTokenInstance i o) => Upgrade i o
+  with
+      op : Party
+      authorizers : [Party]
+      obs : [Party]
+  where
+      signatory (op::authorizers)
+      observer obs
+      key authorizers : [Party]
+      maintainer key
+
+      nonconsuming choice GetAuthority : ()
+        with
+          p : Party
+        controller op
+          do
+            exerciseByKey @(UpgradeToken i o) p GiveAuthority with k = authorizers
+            pure ()
+
+      nonconsuming choice AddAuthority : ()
+        with
+          p : Party
+        controller p
+          do
+            create this with authorizers = dedupSort $ p :: authorizers
+            pure ()
+
+      nonconsuming choice CollectAuthority : ()
+        with
+          inC : ContractId i
+        controller op
+          do
+            d <- fetch inC
+            let sigs = signatory d
+            foldlA (\acc sig -> do
+              exerciseByKey @(Upgrade i o) acc GetAuthority with p = sig
+              pure (dedupSort $ sig::acc)
+              ) authorizers sigs
+            pure ()
+
+      nonconsuming choice Go : ContractId o
+        with
+          inC : ContractId i
+        controller op
+          do
+            d <- fetch inC
+            archive inC
+            create $ convert d
+
+      nonconsuming choice DoUpgrade : ()
+        with
+          inC : ContractId i
+        controller op
+          do
+            d <- fetch inC
+            exerciseByKey @(Upgrade i o) authorizers CollectAuthority with inC = inC
+            exerciseByKey @(Upgrade i o) (dedupSort $ signatory d) Go with inC = inC
+            pure ()
+
+
+
+template (Template i, Template o, UpgradeInstance i o) => UpgradeToken i o
+  with
+      p : Party
+      op : Party
+  where
+      signatory p
+      observer op
+      key p : Party
+      maintainer key
+
+      nonconsuming choice GiveAuthority : ()
+        with
+          k : [Party]
+        controller op
+          do
+            exerciseByKey @(Upgrade i o) k AddAuthority with p
+            pure ()
+
+
+
+template instance VacationUpgrade = Upgrade A.Vacation B.Vacation
+template instance VacationUpgradeToken = UpgradeToken A.Vacation B.Vacation
+template instance EmployeeVacationAllocationUpgrade = Upgrade A.EmployeeVacationAllocation B.EmployeeVacationAllocation
+template instance EmployeeVacationAllocationUpgradeToken = UpgradeToken A.EmployeeVacationAllocation B.EmployeeVacationAllocation
+template instance VacationRequestUpgrade = Upgrade A.VacationRequest B.VacationRequest
+template instance VacationRequestUpgradeToken = UpgradeToken A.VacationRequest B.VacationRequest
+template instance EmployeeRoleUpgrade = Upgrade A.EmployeeRole B.EmployeeRole
+template instance EmployeeRoleUpgradeToken = UpgradeToken A.EmployeeRole B.EmployeeRole
+template instance EmployeeProposalUpgrade = Upgrade A.EmployeeProposal B.EmployeeProposal
+template instance EmployeeProposalUpgradeToken = UpgradeToken A.EmployeeProposal B.EmployeeProposal
+
+
+-----------------------
+-- Contract conversions
+
+instance Convertible A.Vacation B.Vacation where
+    convert A.Vacation{..} = B.Vacation {B.employeeRole = convert employeeRole, ..}
+instance Convertible B.Vacation A.Vacation where
+    convert B.Vacation{..} = A.Vacation {A.employeeRole = convert employeeRole, ..}
+instance Convertible A.EmployeeVacationAllocation B.EmployeeVacationAllocation where
+    convert A.EmployeeVacationAllocation{..} = B.EmployeeVacationAllocation {B.employeeRole = convert employeeRole, ..}
+instance Convertible B.EmployeeVacationAllocation A.EmployeeVacationAllocation where
+    convert B.EmployeeVacationAllocation{..} = A.EmployeeVacationAllocation {A.employeeRole = convert employeeRole, ..}
+instance Convertible A.VacationRequest B.VacationRequest where
+    convert A.VacationRequest{..} = B.VacationRequest {B.vacation = convert vacation}
+instance Convertible B.VacationRequest A.VacationRequest where
+    convert B.VacationRequest{..} = A.VacationRequest {A.vacation = convert vacation}
+instance Convertible A.EmployeeRole B.EmployeeRole where
+    convert A.EmployeeRole{..} = B.EmployeeRole {..}
+instance Convertible B.EmployeeRole A.EmployeeRole where
+    convert B.EmployeeRole{..} = A.EmployeeRole {..}
+instance Convertible A.EmployeeProposal B.EmployeeProposal where
+    convert A.EmployeeProposal{..} = B.EmployeeProposal {B.employeeRole = convert employeeRole, ..}
+instance Convertible B.EmployeeProposal A.EmployeeProposal where
+    convert B.EmployeeProposal{..} = A.EmployeeProposal {A.employeeRole = convert employeeRole, ..}
+
+-------------------------
+-- Nano daml trigger bots
+
+-- Upgrade whenever user signaled consent with the creation of a token
+upgradeTrigger : Trigger ()
+upgradeTrigger = Trigger
+  { initialize = \_acs -> ()
+  , updateState = \_acs _message () -> ()
+  , rule = upgradeRule
+  , registeredTemplates =
+      RegisteredTemplates
+        [ registeredTemplate @(UpgradeToken A.EmployeeRole B.EmployeeRole)
+        , registeredTemplate @(Upgrade A.EmployeeRole B.EmployeeRole)
+        , registeredTemplate @(A.EmployeeRole)
+        ]
+  }
+
+upgradeRule : Party -> ACS -> M.Map CommandId [Command] -> () -> TriggerA ()
+upgradeRule party acs commandsInFlight () = do
+  let tokens
+        = getContracts @(UpgradeToken A.EmployeeRole B.EmployeeRole) acs
+  let tokensWithOp op = filter (\(_tId, t) -> t.p == party && t.op == op) tokens
+
+  let upgrades
+        = getContracts @(Upgrade A.EmployeeRole B.EmployeeRole) acs
+
+  let cs = getContracts @(A.EmployeeRole) acs
+  -- let cs0 = filter (\(_cId, A.EmployeeRole{employee}) -> employee == party) cs
+  -- this doesn't work right now because of a data dependency import bug
+  -- so we just fire for every contract ...
+  let cs0 = cs
+
+  unless (null tokens || null upgrades || null cs) $ do
+    -- it would be nice if TriggerA would be an instance of ActionFail for head, guard etc.
+    let (upgradeCoid, upgrade)::_us = upgrades
+    when (not $ null $ tokensWithOp upgrade.op) $ do
+      forA cs $ \(cId, _c)  -> dedupExercise upgradeCoid DoUpgrade with inC = cId
+      pure ()
+
+--------
+-- Tests
+
+-- Currently not possible to compile because of bug in data dependency import
+
+-- test = scenario do
+  -- alice <- getParty "Alice"
+  -- bob <- getParty "Bob"
+  -- company <- getParty "DA"
+  -- let employeeRole = A.EmployeeRole
+                      -- with A.employee = alice
+                           -- A.boss = bob
+                           -- A.company = company
+  -- propCid <- submit company $
+    -- create $ A.EmployeeProposal with A.employeeRole = employeeRole; vacationDays = 30
+  -- submit alice $ exercise propCid $ A.EmployeeProposal_Accept
+  -- upCid <- submit company $
+    -- create $ Upgrade{op = company, authorizers = [], obs = [alice, bob]}
+  -- token <- submit alice $
+    -- create $ UpgradeToken{op = company, p = alice}
+
+  -- submit company $ do
+    -- (cid, _) <- fetchByKey @A.EmployeeRole alice
+    -- exercise upCid $ DoUpgrade with inC = cid
+
