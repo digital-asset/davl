@@ -4,8 +4,11 @@ import EmployeeView from '../features/employeeView/EmployeeView';
 import BossView from '../features/bossView/BossView';
 import { useDispatch, useSelector } from 'react-redux';
 import { logOut } from '../app/authReducer';
-import { RootState, reload } from '../app/rootReducer';
+import { RootState } from '../app/rootReducer';
 import { getLedger } from '../app/store';
+import * as daml from '../app/damlReducer';
+import * as v3 from '../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
+import * as employeeView from '../features/employeeView/employeeViewReducer';
 
 /**
  * React component for the main screen of the `App`.
@@ -13,6 +16,18 @@ import { getLedger } from '../app/store';
 const MainScreen: React.FC = () => {
   const dispatch = useDispatch();
   const party = useSelector((state: RootState) => getLedger(state).party);
+
+  const handleLogout = () => {
+    dispatch(logOut());
+    dispatch(daml.stop());
+  }
+
+  const handleReload = () => {
+    dispatch(employeeView.loadSummary());
+    dispatch(daml.reloadTemplate(v3.Vacation));
+    dispatch(daml.reloadTemplate(v3.VacationRequest));
+    dispatch(daml.reloadTemplate(v3.EmployeeVacationAllocation));
+  }
 
   return (
     <>
@@ -34,13 +49,13 @@ const MainScreen: React.FC = () => {
           <Menu.Item
             position='right'
             active={false}
-            onClick={() => dispatch(reload())}
+            onClick={handleReload}
             icon='refresh'
           />
           <Menu.Item
             position='right'
             active={false}
-            onClick={() => dispatch(logOut())}
+            onClick={handleLogout}
             icon='log out'
           />
         </Menu.Menu>

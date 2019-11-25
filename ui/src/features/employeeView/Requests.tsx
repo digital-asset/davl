@@ -6,15 +6,21 @@ import ListActionItem from '../../components/ListActionItem';
 import { DatesRangeInput } from 'semantic-ui-calendar-react';
 import { addRequest, setCurrentRequest } from './employeeViewReducer';
 import { VacationListItem } from '../../components/VacationListItem';
-import { vacationLength } from '../../utils/vacation';
+import { vacationLength, prettyRequests } from '../../utils/vacation';
+import { useQuery } from '../../app/damlReducer';
+import * as v3 from '../../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
+import { getLedger } from '../../app/store';
 
 const Requests: React.FC = () => {
   const dispatch = useDispatch();
   const boss = useSelector((state: RootState) => (state.employeeView.summary || {boss: ''}).boss);
-  const requests = useSelector((state: RootState) => state.employeeView.requests);
   const currentRequest = useSelector((state: RootState) => state.employeeView.currentRequest);
-  const loadingRequests = useSelector((state: RootState) => state.employeeView.loadingRequests);
   const addingRequest = useSelector((state: RootState) => state.employeeView.addingRequest);
+
+  const party = useSelector(getLedger).party;
+  const {loading: loadingRequests, contracts: requestContracts} =
+    useQuery(v3.VacationRequest, () => ({vacation: {employeeRole: {employee: party}}}), [party]);
+  const requests = prettyRequests(requestContracts);
 
   const handleCancelRequest = () => alert('Canceling vacation requests is not yet implemented.');
 

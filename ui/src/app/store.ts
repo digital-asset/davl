@@ -28,7 +28,9 @@ const store = configureStore({
   middleware: [
     createThunkErrorHandlerMiddleware({ onError: defaultErrorHandler }),
     thunkMiddleware,
-    ...getDefaultMiddleware().slice(1),
+    ...getDefaultMiddleware({
+      serializableCheck: false,
+    }).slice(1),
   ],
 });
 
@@ -46,10 +48,10 @@ export type AppThunk<R = void> = ThunkAction<Promise<R>, RootState, null, Action
 export default store;
 
 export const getLedger = (state: RootState): Ledger => {
-  const credentials = state.auth.credentials;
-  if (credentials) {
-    return new Ledger(credentials);
+  const daml = state.daml;
+  if (daml) {
+    return new Ledger(daml.credentials);
   } else {
-    throw Error('credentials not initialized')
+    throw Error('credentials not initialized');
   }
 }

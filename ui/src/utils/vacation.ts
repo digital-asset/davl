@@ -1,4 +1,4 @@
-import { Party, ContractId } from '@digitalasset/daml-json-types';
+import { Party, ContractId, Contract } from '@digitalasset/daml-json-types';
 import * as v3 from '../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 import { contramap, Ord, ordString, getDualOrd } from 'fp-ts/lib/Ord';
 import { partition } from 'fp-ts/lib/Array';
@@ -34,8 +34,17 @@ export const emptyVacations: Vacations = {
   past: [],
 }
 
-export const splitVacations = (vacations: Vacation[]) => {
+export const prettyRequests = (requestContracts: Contract<v3.VacationRequest>[]): Vacation[] => {
+  const requests: Vacation[] =
+    requestContracts.map(({contractId, argument}) => makeVacation(contractId, argument.vacation));
+  requests.sort(ordVacationOnFromDate.compare);
+  return requests;
+}
+
+
+export const splitVacations = (vacationContracts: Contract<v3.Vacation>[]) => {
   const today = moment().format('YYYY-MM-DD');
+  const vacations = vacationContracts.map((vacation) => makeVacation(vacation.contractId, vacation.argument))
   const {left: upcoming, right: past} =
     partition((vacation: Vacation) => vacation.fromDate <= today)(vacations);
   upcoming.sort(ordVacationOnFromDate.compare);

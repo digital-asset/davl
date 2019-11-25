@@ -30,7 +30,9 @@ const LoginScreen: React.FC = () => {
 
   const handleLogin = (event: React.FormEvent) => {
     event.preventDefault();
-    withCredentials((credentials) => dispatch(logIn(credentials)));
+    withCredentials((credentials) => {
+      dispatch(logIn(credentials));
+    });
   }
 
   const handleSignup = (event: React.FormEvent) => {
