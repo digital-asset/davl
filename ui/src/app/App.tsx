@@ -8,9 +8,9 @@ import { RootState } from './rootReducer';
  * React component for the entry point into the application.
  */
 const App: React.FC = () => {
-  const credentials = useSelector((state: RootState) => state.auth.credentials);
+  const daml = useSelector((state: RootState) => state.daml);
 
-  return credentials ? <MainScreen /> : <LoginScreen />;
+  return daml ? <MainScreen /> : <LoginScreen />;
 }
 
 export default App;
