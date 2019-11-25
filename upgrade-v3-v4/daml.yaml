@@ -1,0 +1,16 @@
+sdk-version: 0.13.32
+name: upgrade-v3-v4
+source: daml
+scenario: Main:setup
+parties:
+  - DA
+  - Shaul
+  - Martin
+  - Robin
+  - Moritz
+version: 0.0.1
+dependencies:
+  - daml-prim
+  - daml-stdlib
+  - ../released/davl-v3.dar
+  - ../released/davl-v4.dar

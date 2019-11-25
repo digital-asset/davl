@@ -1,0 +1,78 @@
+-- Copyright (c) 2019 The DAML Authors. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+daml 1.2
+module Main where
+
+import qualified DAVL as V3
+import qualified DAVL.V4 as V4
+
+template UpgradeAgreement with
+    employee: Party
+    company: Party
+  where
+    -- NOTE(MH): We make the company a signatory as well. This stops the
+    -- employee from opting out of the upgrade again once they've opted in.
+    signatory [employee, company]
+
+    nonconsuming choice UpgradeAgreement_UpgradeVacationRequest: ContractId V4.VacationRequest with
+        requestId: ContractId V3.VacationRequest
+      controller company
+      do
+        request <- fetch requestId
+        archive requestId
+        create (upgradeVacationRequest request)
+
+    -- This is an internal choice intended to be call by the next choice.
+    nonconsuming choice UpgradeAgreement_UpgradeVacationInternal: ContractId V4.Vacation with
+        boss: Party
+        vacationId: ContractId V3.Vacation
+      controller boss
+      do
+        vacation <- fetch vacationId
+        archive vacationId
+        create (upgradeVacation vacation)
+
+    -- This choice is intended to be called on the upgrade agreement of the
+    -- boss of the vacation to be upgraded and to be provided with the
+    -- upgrade agreement of the employee of the vacation.
+    nonconsuming choice UpgradeAgreement_UpgradeVacation: ContractId V4.Vacation with
+        employeeAgreementId: ContractId UpgradeAgreement
+        vacationId: ContractId V3.Vacation
+      controller company
+      do
+        exercise employeeAgreementId UpgradeAgreement_UpgradeVacationInternal with
+          boss = employee
+          vacationId
+
+template UpgradeProposal with
+    employee: Party
+    company: Party
+  where
+    signatory company
+    observer employee
+
+    choice UpgradeProposal_Accept: ContractId UpgradeAgreement
+      controller employee
+      do
+        (employeeRoleId, employeeRole) <- fetchByKey @V3.EmployeeRole employee
+        (allocationId, allocation) <- fetchByKey @V3.EmployeeVacationAllocation employee
+        archive employeeRoleId
+        archive allocationId
+        create (upgradeEmployeeRole employeeRole)
+        create (upgradeEmployeeVacationAllocation allocation)
+        create UpgradeAgreement with ..
+
+upgradeEmployeeRole: V3.EmployeeRole -> V4.EmployeeRole
+upgradeEmployeeRole (V3.EmployeeRole with ..) = V4.EmployeeRole with ..
+
+upgradeEmployeeVacationAllocation: V3.EmployeeVacationAllocation -> V4.EmployeeVacationAllocation
+upgradeEmployeeVacationAllocation (V3.EmployeeVacationAllocation with ..) =
+  V4.EmployeeVacationAllocation with employeeRole = upgradeEmployeeRole employeeRole; ..
+
+upgradeVacationRequest: V3.VacationRequest -> V4.VacationRequest
+upgradeVacationRequest (V3.VacationRequest with ..) =
+  V4.VacationRequest with vacation = upgradeVacation vacation; ..
+
+upgradeVacation: V3.Vacation -> V4.Vacation
+upgradeVacation (V3.Vacation with ..) =
+  V4.Vacation with employeeRole = upgradeEmployeeRole employeeRole; ..

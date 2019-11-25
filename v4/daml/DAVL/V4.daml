@@ -1,0 +1,152 @@
+daml 1.2
+module DAVL.V4 where
+
+import DA.Date qualified as Date
+
+template EmployeeRole with
+    employee: Party
+    company: Party
+    boss: Party
+  where
+    signatory [employee, company]
+
+    key employee: Party
+    maintainer key
+
+    nonconsuming choice EmployeeRole_RequestVacation: ContractId VacationRequest with
+        fromDate: Date
+        toDate: Date
+      controller employee
+      do
+        let vacation = Vacation with
+              employeeRole = this
+              fromDate
+              toDate
+        create VacationRequest with vacation
+
+    nonconsuming choice EmployeeRole_CancelVacationRequest: () with
+        requestId: ContractId VacationRequest
+      controller employee
+      do
+        request <- fetch requestId
+        assertMsg "Canceling bad vacation request" $ and
+          [ employee == request.vacation.employeeRole.employee
+          , company == request.vacation.employeeRole.company
+          ]
+        archive requestId
+
+template EmployeeProposal with
+    employeeRole: EmployeeRole
+    vacationDays: Int
+  where
+    let EmployeeRole{..} = employeeRole
+    signatory company
+    observer employee
+
+    nonconsuming choice EmployeeProposal_Accept: ()
+      controller employee
+      do
+        archive self
+        create employeeRole
+        create EmployeeVacationAllocation with
+          employeeRole = employeeRole
+          remainingDays = vacationDays
+        pure ()
+
+
+template EmployeeVacationAllocation with
+    employeeRole: EmployeeRole
+    remainingDays: Int
+  where
+    let EmployeeRole{..} = employeeRole
+    signatory [employee, company]
+    observer [boss]
+
+    key employee: Party
+    maintainer key
+
+    ensure remainingDays >= 0
+
+    nonconsuming choice EmployeeVacationAllocation_AddDays: () with
+        days: Int
+      controller company
+      do
+        assertMsg "negative additional vacation" $ days >= 0
+        archive self
+        create this with remainingDays = remainingDays + days
+        pure ()
+
+template VacationRequest with
+    vacation: Vacation
+  where
+    let Vacation{..} = vacation
+        EmployeeRole{..} = employeeRole
+    signatory [employee, company]
+    observer boss
+
+    ensure fromDate <= toDate
+
+    nonconsuming choice VacationRequest_Accept: ContractId Vacation
+      controller boss
+      do
+        let days = Date.subDate toDate fromDate + 1
+        (allocationId, allocation) <- fetchByKey @EmployeeVacationAllocation (key employeeRole)
+        assertMsg "mismatching employee in vacation request" $ employeeRole == allocation.employeeRole
+        let remainingDays = allocation.remainingDays - days
+        assertMsg "allocation too small" $ remainingDays >= 0
+        archive allocationId
+        create allocation with remainingDays
+        archive self
+        create vacation
+
+template Vacation with
+    employeeRole: EmployeeRole
+    fromDate: Date
+    toDate: Date
+  where
+    let EmployeeRole{..} = employeeRole
+    signatory [employee, company, boss]
+
+createEmployee: Party -> Text -> Party -> Int -> Scenario Party
+createEmployee company employee boss vacationDays = do
+  employee <- getParty employee
+  let employeeRole = EmployeeRole{..}
+  proposalId <- submit company do
+    create EmployeeProposal{..}
+  submit employee do
+    exercise proposalId EmployeeProposal_Accept
+  pure (key employeeRole)
+
+assertRemainingDays: Party -> Int -> Scenario ()
+assertRemainingDays employee days = do
+  (_, allocation) <- submit employee do
+    fetchByKey @EmployeeVacationAllocation employee
+  assert $ allocation.remainingDays == days
+
+test = scenario do
+  da <- getParty "Digital Asset"
+  yuval <- getParty "Yuval"
+
+  yuval <- createEmployee da "Yuval" da 25
+  shaul <- createEmployee da "Shaul" yuval 25
+
+  let nye2019 = Date.date 2019 Date.Dec 31
+  requestId <- submit shaul do
+    exerciseByKey @EmployeeRole shaul EmployeeRole_RequestVacation with
+      fromDate = Date.addDays nye2019 (-1)
+      toDate = Date.addDays nye2019 3
+  vacationId <- submit yuval do
+    exercise requestId VacationRequest_Accept
+
+  vacation <- submit shaul do
+    fetch vacationId
+  (_, shaulEmployee) <- submit shaul do
+    fetchByKey @EmployeeRole shaul
+  assert $ vacation.employeeRole == shaulEmployee
+
+  assertRemainingDays shaul 20
+  submit da do
+    exerciseByKey @EmployeeVacationAllocation shaul EmployeeVacationAllocation_AddDays with days = 2
+  assertRemainingDays shaul 22
+
+  pure ()
