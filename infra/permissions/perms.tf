@@ -31,3 +31,67 @@ resource "google_storage_bucket_iam_member" "ci-write-images" {
   role   = "roles/storage.admin"
   member = "serviceAccount:${google_service_account.ci.email}"
 }
+
+// The next 2 roles are incrementally built to have the minimal set of rights
+// to be able to deploy using Terraform.
+resource "google_project_iam_custom_role" "tf-write-state" {
+  role_id = "writeTerraformState"
+  title   = "Read and write Terraform state"
+  permissions = [
+    "storage.objects.list",
+    "storage.objects.get",
+    "storage.objects.create",
+    "storage.objects.delete"
+  ]
+}
+
+resource "google_project_iam_custom_role" "tf-deploy" {
+  role_id = "deployTerraform"
+  title   = "Deploy new versions through Terraform"
+  permissions = [
+    "compute.securityPolicies.get",
+    "compute.httpHealthChecks.get",
+    "compute.addresses.get",
+    "compute.networks.get",
+    "compute.subnetworks.get",
+    "compute.instances.get",
+    "compute.firewalls.get",
+    "compute.instanceGroups.get",
+    "compute.backendServices.get",
+    "compute.urlMaps.get",
+    "compute.targetHttpProxies.get",
+    "compute.targetHttpsProxies.get",
+    "compute.forwardingRules.get",
+    "compute.instances.delete",
+    "compute.zones.get",
+    "compute.images.get",
+    "compute.images.getFromFamily",
+    "compute.instances.create",
+    "compute.disks.create",
+    "compute.subnetworks.use",
+    "compute.subnetworks.useExternalIp",
+    "compute.instances.setMetadata",
+    "compute.instances.setServiceAccount",
+    "compute.instances.setTags",
+    "compute.instanceGroups.update",
+    "compute.instances.use",
+  ]
+}
+
+resource "google_service_account_iam_member" "ci-deploy" {
+  service_account_id = "projects/da-dev-pinacolada/serviceAccounts/837776980187-compute@developer.gserviceaccount.com"
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.ci.email}"
+}
+
+resource "google_storage_bucket_iam_member" "ci-deploy" {
+  bucket     = "davl-tfstate"
+  role       = "projects/da-dev-pinacolada/roles/writeTerraformState"
+  member     = "serviceAccount:${google_service_account.ci.email}"
+  depends_on = [google_project_iam_custom_role.tf-write-state]
+}
+
+resource "google_project_iam_member" "ci-deploy" {
+  role   = "projects/da-dev-pinacolada/roles/deployTerraform"
+  member = "serviceAccount:${google_service_account.ci.email}"
+}
