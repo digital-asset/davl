@@ -3,13 +3,13 @@ daml 1.2
 module DAVL where
 import DAVLA qualified as A
 import DAVLB qualified as B
-import DA.List hiding (head)
-import DA.List.Total (head)
+import DA.List
 import DA.Foldable (forA_)
 import qualified DA.Next.Map as M
 import DA.Action
 import DA.Upgrade (convert, Convertible)
-import Daml.Trigger
+import qualified Daml.Trigger as T
+import qualified Daml.Script as S
 
 -----------------
 -- Upgrade process
@@ -147,43 +147,128 @@ instance Convertible B.EmployeeProposal A.EmployeeProposal where
 
 -- Upgrade whenever user signaled consent with the creation of a token
 -- This doesn't work yet and runs into a daml-lf typechecker error.
--- upgradeEmployeeRoleTrigger : Trigger ()
--- upgradeEmployeeRoleTrigger = Trigger
-  -- { initialize = \_acs -> ()
-  -- , updateState = \_acs _message () -> ()
-  -- , rule = upgradeRule
-  -- , registeredTemplates =
-      -- RegisteredTemplates
-        -- [ registeredTemplate @(UpgradeToken A.EmployeeRole B.EmployeeRole)
-        -- , registeredTemplate @(Upgrade A.EmployeeRole B.EmployeeRole)
-        -- , registeredTemplate @(A.EmployeeRole)
-        -- ]
-  -- }
+upgradeTrigger : T.Trigger ()
+upgradeTrigger = T.Trigger
+  { initialize = \_acs -> ()
+  , updateState = \_acs _message () -> ()
+  , rule = upgradeRule
+  , registeredTemplates =
+      T.RegisteredTemplates
+        [ T.registeredTemplate @(UpgradeToken A.EmployeeRole B.EmployeeRole)
+        , T.registeredTemplate @(Upgrade A.EmployeeRole B.EmployeeRole)
+        , T.registeredTemplate @(A.EmployeeRole)
+        ]
+  }
 
--- upgradeRule : Party -> ACS -> M.Map CommandId [Command] -> () -> TriggerA ()
--- upgradeRule party acs commandsInFlight () = do
-  -- let tokens
-        -- = getContracts @(UpgradeToken A.EmployeeRole B.EmployeeRole) acs
-  -- let tokensWithOp op = filter (\(_tId, t) -> t.p == party && t.op == op) tokens
+upgradeRule : Party -> T.ACS -> M.Map T.CommandId [T.Command] -> () -> T.TriggerA ()
+upgradeRule op acs commandsInFlight () = do
 
-  -- let upgrades
-        -- = getContracts @(Upgrade A.EmployeeRole B.EmployeeRole) acs
+  -- upgrade Vacation
+  let vacationTokens
+        = T.getContracts @(UpgradeToken A.Vacation B.Vacation) acs
+  let vacationUpgrades
+        = T.getContracts @(Upgrade A.Vacation B.Vacation) acs
+  let vacationCs = T.getContracts @(A.Vacation) acs
+  let ready = do
+              (updCid, upd) <- vacationUpgrades
+              (cId, c) <- vacationCs
+              let tokens = [p | (_cId, UpgradeToken{p, op}) <- vacationTokens, op == op]
+              guard $ (dedupSort $ signatory c) == dedupSort tokens
+              pure (updCid, cId)
+  forA_ ready $ \(updCid, cId) -> T.dedupExercise updCid DoUpgrade with inC = cId
 
-  -- let cs = getContracts @(A.EmployeeRole) acs
-  -- let cs0 = filter (\(_cId, A.EmployeeRole{employee}) -> employee == party) cs
+  -- upgrade EmployeeVacationAllocation
+  let employeeVacationAllocationTokens
+        = T.getContracts @(UpgradeToken A.EmployeeVacationAllocation B.EmployeeVacationAllocation) acs
+  let employeeVacationAllocationUpgrades
+        = T.getContracts @(Upgrade A.EmployeeVacationAllocation B.EmployeeVacationAllocation) acs
+  let employeeVacationAllocationCs = T.getContracts @(A.EmployeeVacationAllocation) acs
+  let ready = do
+              (updCid, upd) <- employeeVacationAllocationUpgrades
+              (cId, c) <- employeeVacationAllocationCs
+              let tokens = [p | (_cId, UpgradeToken{p, op}) <- employeeVacationAllocationTokens, op == op]
+              guard $ (dedupSort $ signatory c) == dedupSort tokens
+              pure (updCid, cId)
+  forA_ ready $ \(updCid, cId) -> T.dedupExercise updCid DoUpgrade with inC = cId
 
-  -- unless (null tokens || null upgrades || null cs) $ do
-    -- -- it would be nice if TriggerA would be an instance of ActionFail for head, guard etc.
-    -- let (upgradeCoid, upgrade)::_us = upgrades
-    -- when (not $ null $ tokensWithOp upgrade.op) $ do
-      -- forA_ cs $ \(cId, _c)  -> dedupExercise upgradeCoid DoUpgrade with inC = cId
+  -- upgrade VacationRequest
+  let vacationRequestTokens
+        = T.getContracts @(UpgradeToken A.VacationRequest B.VacationRequest) acs
+  let vacationRequestUpgrades
+        = T.getContracts @(Upgrade A.VacationRequest B.VacationRequest) acs
+  let vacationRequestCs = T.getContracts @(A.VacationRequest) acs
+  let ready = do
+              (updCid, upd) <- vacationRequestUpgrades
+              (cId, c) <- vacationRequestCs
+              let tokens = [p | (_cId, UpgradeToken{p, op}) <- vacationRequestTokens, op == op]
+              guard $ (dedupSort $ signatory c) == dedupSort tokens
+              pure (updCid, cId)
+  forA_ ready $ \(updCid, cId) -> T.dedupExercise updCid DoUpgrade with inC = cId
+
+  -- upgrade EmpoyeeRole
+  let employeeRoleTokens
+        = T.getContracts @(UpgradeToken A.EmployeeRole B.EmployeeRole) acs
+  let employeeRoleUpgrades
+        = T.getContracts @(Upgrade A.EmployeeRole B.EmployeeRole) acs
+  let employeeRoleCs = T.getContracts @(A.EmployeeRole) acs
+  let ready = do
+              (updCid, upd) <- employeeRoleUpgrades
+              (cId, c) <- employeeRoleCs
+              let tokens = [p | (_cId, UpgradeToken{p, op}) <- employeeRoleTokens, op == op]
+              guard $ (dedupSort $ signatory c) == dedupSort tokens
+              pure (updCid, cId)
+  forA_ ready $ \(updCid, cId) -> T.dedupExercise updCid DoUpgrade with inC = cId
+
+  -- upgrade EmployeeProposal
+  let employeeProposalTokens
+        = T.getContracts @(UpgradeToken A.EmployeeProposal B.EmployeeProposal) acs
+  let employeeProposalUpgrades
+        = T.getContracts @(Upgrade A.EmployeeProposal B.EmployeeProposal) acs
+  let employeeProposalCs = T.getContracts @(A.EmployeeProposal) acs
+  let ready = do
+              (updCid, upd) <- employeeProposalUpgrades
+              (cId, c) <- employeeProposalCs
+              let tokens = [p | (_cId, UpgradeToken{p, op}) <- employeeProposalTokens, op == op]
+              guard $ (dedupSort $ signatory c) == dedupSort tokens
+              pure (updCid, cId)
+  forA_ ready $ \(updCid, cId) -> T.dedupExercise updCid DoUpgrade with inC = cId
+
 
 --------
 -- Tests
+test : S.Script ()
+test = do
+  alice <- S.allocateParty "Alice"
+  bob <- S.allocateParty "Bob"
+  company <- S.allocateParty "DA"
+  debug "allocated parties"
+  let employeeRole = A.EmployeeRole
+                      with A.employee = alice
+                           A.boss = bob
+                           A.company = company
+  propCid <- S.submit company $
+    S.createCmd $ A.EmployeeProposal with A.employeeRole = employeeRole; vacationDays = 30
+  debug "employee proposal"
+  S.submit alice $ S.exerciseCmd propCid $ A.EmployeeProposal_Accept
+  debug "proposal accept"
+  -- This step fails because toAnyChoice is not implemented in the lf conversion of `external`.
+  upCid <- S.submit company $
+    S.createCmd @(Upgrade A.EmployeeRole B.EmployeeRole) $ Upgrade {op = company, authorizers = [], obs = [alice, bob]}
+  debug "upgrade creation"
+  token <- S.submit alice $
+    S.createCmd @(UpgradeToken A.EmployeeRole B.EmployeeRole) $ UpgradeToken{op = company, p = alice}
+  debug "token creation"
 
--- Currently not possible to compile we
+  cs <- S.query @A.EmployeeRole alice
+  debug $ "employee role query" <> (show $ length cs)
+  case cs of
+    [(cid, _c)] ->
+      S.submit company $ do
+        S.exerciseCmd upCid $ DoUpgrade with inC = cid
+    _ -> error "daml query"
 
-test = scenario do
+test0 : Scenario ()
+test0 = do
   alice <- getParty "Alice"
   bob <- getParty "Bob"
   company <- getParty "DA"
@@ -198,11 +283,4 @@ test = scenario do
     create @(Upgrade A.EmployeeRole B.EmployeeRole) $ Upgrade {op = company, authorizers = [], obs = [alice, bob]}
   token <- submit alice $
     create @(UpgradeToken A.EmployeeRole B.EmployeeRole) $ UpgradeToken{op = company, p = alice}
-
-  -- this is currently not possible because we miss the TemplateKey instance from the imported
-  -- package
-  -- submit company $ do
-    -- (cid, _) <- fetchByKey @A.EmployeeRole alice
-    -- exercise upCid $ DoUpgrade with inC = cid
-
   pure ()
