@@ -32,7 +32,7 @@ template Upgrade
             exerciseByKey @UpgradeToken p GiveAuthority with k = authorizers
             pure ()
 
-      nonconsuming choice AddAuthority : ()
+      choice AddAuthority : ()
         with
           p : Party
         controller p
