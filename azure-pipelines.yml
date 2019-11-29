@@ -160,9 +160,43 @@ jobs:
               curl -XPOST \
                    -i \
                    -H 'Content-type: application/json' \
-                   --data "{\"text\":\"<https://dev.azure.com/digitalasset/davl/_build/results?buildId=$(Build.BuildId)|$MESSAGE>: $1\n\"}" \
+                   --data "{\"text\":\"<https://dev.azure.com/digitalasset/davl/_build/results?buildId=$(Build.BuildId)|$MESSAGE>:\n$1\n\"}" \
                    $(Slack.URL)
           }
+
+          # Deploying new code should be a routine change that CI can
+          # automate, but changing the shape of the infrastructure should
+          # not. Therefore, CI should only attempt to apply the terraform
+          # files when it can verify that:
+          # 1. The parent commit applies with no changes, and
+          # 2. The only changes to infra in the current commit are in the
+          #    versions file.
+          previous_commit_reflects_deployment () {
+              local current_sha=$(git rev-parse HEAD)
+              local previous_sha=$(git rev-parse HEAD~)
+              git checkout $previous_sha
+              set +e
+              # returns 0 if no changes to apply, 1 on error and 2 if changes
+              terraform plan -detailed-exitcode -var-file=deployed-versions.tfvars
+              local result=$?
+              set -e
+              git checkout $current_sha
+              return $result
+          }
+
+          current_commit_changes_infra () {
+              # returns 0 if output is non-empty, i.e. if there is at least one
+              # file in the infra folder that changed (besides the
+              # deployed-versions one)
+              git show --pretty="format:" --name-only -- . | grep -v infra/deployed-versions.tfvars
+          }
+
+          current_commit_changes_versions () {
+              # returns 0 if output is non-empty, i.e. deployed-versions has
+              # changed
+              git show --pretty="format:" --name-only -- . | grep infra/deployed-versions.tfvars
+          }
+
           export GOOGLE_APPLICATION_CREDENTIALS=$(mktemp)
           cleanup () {
               rm -f $GOOGLE_APPLICATION_CREDENTIALS
@@ -173,11 +207,23 @@ jobs:
 
           cd infra
           terraform init
-          if terraform apply -auto-approve -var-file=deployed-versions.tfvars; then
-              tell_slack "successfully deployed"
+
+          if previous_commit_reflects_deployment; then
+              if current_commit_changes_infra; then
+                  tell_slack "<!here> *WARNING*: Latest commit changes infra. Please apply manually."
+              else
+                  if current_commit_changes_versions; then
+                      if terraform apply -auto-approve -var-file=deployed-versions.tfvars; then
+                          tell_slack "started deployment of:\n\`\`\`$(cat deployed-versions.tfvars | jq -Rs . | sed 's/^"//' | sed 's/"$//')\`\`\`"
+                      else
+                          tell_slack "<!here> *ERROR*: failed to deploy"
+                      fi
+                  else
+                      echo "Nothing to do."
+                  fi
+              fi
           else
-              tell_slack "failed to deploy"
-              exit 1
+              tell_slack "<!here> *ERROR*: current infra has diverged from master. Manual correction required."
           fi
         env:
           GOOGLE_APPLICATION_CREDENTIALS_CONTENT: $(GOOGLE_APPLICATION_CREDENTIALS_CONTENT)
