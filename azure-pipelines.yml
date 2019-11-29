@@ -47,8 +47,9 @@ jobs:
           DIR=$(pwd)
 
           # Install DAML SDK
-          SDK_VERSION=$(cat v3/daml.yaml | grep sdk-version | awk '{print $2}')
-          curl https://get.daml.com | sh -s $SDK_VERSION
+          for d in $(find . | grep '[^/]*/daml.yaml' | xargs dirname); do
+             curl https://get.daml.com | sh -s $(cat $d/daml.yaml | grep sdk-version | awk '{print $2}')
+          done
 
           mkdir -p /tmp/daml
           cd $HOME/.daml
@@ -68,15 +69,22 @@ jobs:
           set -euo pipefail
 
           export PATH="$PATH:~/.daml/bin"
-          cd v3 && daml test
+          DIR=$(pwd)
+
+          for d in $(find . | grep '[^/]*/daml.yaml' | xargs dirname); do
+              cd $DIR/$d
+              daml test
+          done
         displayName: run-daml-tests
 
       # Deploy
       - bash: |
           set -euo pipefail
 
+          DEPLOYED_SDK=0.13.38
+
           get_tag () {
-              TZ=UTC git log -n1 --date=format-local:%Y%m%d%H%M --format=format:%cd-%h --abbrev=6 -- $@
+              TZ=UTC git log -n1 --date=format-local:%Y%m%d-%H%M --format=format:%cd-%h-${DEPLOYED_SDK} --abbrev=6 -- $@
           }
           tag_exists () {
               gcloud container images list-tags gcr.io/da-dev-pinacolada/$1 | grep -q $2
@@ -98,11 +106,8 @@ jobs:
           echo "$GOOGLE_APPLICATION_CREDENTIALS_CONTENT" > $GCS_KEY
           gcloud auth activate-service-account --key-file=$GCS_KEY
           gcloud auth configure-docker --quiet
-          SDK_VERSION=$(cat v3/daml.yaml | grep '^sdk-version:' | awk '{print $2}')
-          DAVL_VERSION=$(cat v3/daml.yaml | grep '^version:' | awk '{print $2}')
-          DAVL_NAME=$(cat v3/daml.yaml | grep '^name:' | awk '{print $2}')
 
-          SANDBOX_TAG=$(get_tag released v3/daml.yaml infra/sandbox.docker)
+          SANDBOX_TAG=$(get_tag released infra/sandbox.docker)
           if tag_exists sandbox $SANDBOX_TAG; then
               echo "sandbox $SANDBOX_TAG already exists."
           else
@@ -110,22 +115,22 @@ jobs:
               SANDBOX_IMAGE=gcr.io/da-dev-pinacolada/sandbox:$SANDBOX_TAG
               DOCKER_DIR=$(mktemp -d)
               cp -r released $DOCKER_DIR/released
-              cp $HOME/.daml/sdk/$SDK_VERSION/sandbox/sandbox.jar $DOCKER_DIR/sandbox.jar
+              cp $HOME/.daml/sdk/$DEPLOYED_SDK/sandbox/sandbox.jar $DOCKER_DIR/sandbox.jar
               docker build -t $SANDBOX_IMAGE -f infra/sandbox.docker $DOCKER_DIR
               docker push $SANDBOX_IMAGE
               echo "Done building $SANDBOX_IMAGE."
               tell_slack sandbox:$SANDBOX_TAG
           fi
 
-          JSON_API_TAG=$(get_tag v3/daml.yaml infra/json-api.docker)
+          JSON_API_TAG=$(get_tag infra/json-api.docker)
           if tag_exists json-api $JSON_API_TAG; then
               echo "json-api $JSON_API_TAG already exists."
           else
               echo "Building json-api image version $JSON_API_TAG..."
               JSON_API_IMAGE=gcr.io/da-dev-pinacolada/json-api:$JSON_API_TAG
               DOCKER_DIR=$(mktemp -d)
-              cp $HOME/.daml/sdk/$SDK_VERSION/json-api/json-api-logback.xml $DOCKER_DIR/logback.xml
-              cp $HOME/.daml/sdk/$SDK_VERSION/json-api/json-api.jar $DOCKER_DIR/json-api.jar
+              cp $HOME/.daml/sdk/$DEPLOYED_SDK/json-api/json-api-logback.xml $DOCKER_DIR/logback.xml
+              cp $HOME/.daml/sdk/$DEPLOYED_SDK/json-api/json-api.jar $DOCKER_DIR/json-api.jar
               docker build -t $JSON_API_IMAGE -f infra/json-api.docker $DOCKER_DIR
               docker push $JSON_API_IMAGE
               echo "Done building $JSON_API_IMAGE."
