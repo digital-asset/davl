@@ -15,175 +15,62 @@ import qualified Daml.Script as S
 -- Upgrade process
 template Upgrade
   with
-      op : Party
+      operator : Party
       authorizers : [Party]
-      obs : [Party]
+      observers : [Party]
   where
-      signatory (op::authorizers)
-      observer obs
+      signatory (operator::authorizers)
+      observer observers
       key authorizers : [Party]
       maintainer key
 
       nonconsuming choice GetAuthority : ()
         with
-          p : Party
-        controller op
+          authorizingParty : Party
+        controller operator
           do
-            exerciseByKey @UpgradeToken p GiveAuthority with k = authorizers
+            exerciseByKey @UpgradeToken authorizingParty GiveAuthority with k = authorizers
             pure ()
 
-      choice AddAuthority : ()
+      nonconsuming choice AddAuthority : ()
         with
-          p : Party
-        controller p
+          authorizingParty : Party
+        controller authorizingParty
           do
-            create this with authorizers = dedupSort $ p :: authorizers
+            archive self
+            create this with authorizers = dedupSort $ authorizingParty :: authorizers
             pure ()
+
+      nonconsuming choice Reset : ()
+        with
+        controller operator
+          do
+            archive self
+            create $ Upgrade with authorizers = [], operator = operator, observers = observers
+            pure ()
+
+      -- we could also do all nonconsuming choices and be completely async and then clean up after
+      -- each upgrade
+      -- nonconsuming choice  Cleanup : ()
+        -- with
+        -- controller operator
+            -- do
+              -- unless (null $ authorizers) do
+                -- forA_ (tail $ inits authorizers) $ \k -> do
+                  -- (cId, _c) <- fetchByKey @Upgrade k
+                  -- archive cId
 
       -- The model upgrade process
       ----------------------------
-      nonconsuming choice Vacation_CollectAuthority : ()
-        with
-          inC : ContractId A.Vacation
-        controller op
-          do
-            d <- fetch inC
-            let sigs = signatory d
-            foldlA (\acc sig -> do
-              exerciseByKey @Upgrade acc GetAuthority with p = sig
-              pure (dedupSort $ sig::acc)
-              ) authorizers (sigs \\ authorizers)
-            pure ()
-
-      nonconsuming choice Vacation_Go : ContractId B.Vacation
-        with
-          inC : ContractId A.Vacation
-        controller op
-          do
-            d <- fetch inC
-            archive inC
-            create $ convert d
-
-      nonconsuming choice Vacation_DoUpgrade : ()
-        with
-          inC : ContractId A.Vacation
-        controller op
-          do
-            d <- fetch inC
-            exerciseByKey @Upgrade authorizers Vacation_CollectAuthority with inC = inC
-            exerciseByKey @Upgrade (dedupSort $ signatory d) Vacation_Go with inC = inC
-            pure ()
-      ------------------------------
-
-
-
-      -- upgrade process repeated for different templates
-      ---------------------------------------------------
-      nonconsuming choice EmployeeVacationAllocation_CollectAuthority : ()
-        with
-          inC : ContractId A.EmployeeVacationAllocation
-        controller op
-          do
-            d <- fetch inC
-            let sigs = signatory d
-            foldlA (\acc sig -> do
-              exerciseByKey @Upgrade acc GetAuthority with p = sig
-              pure (dedupSort $ sig::acc)
-              ) authorizers (sigs \\ authorizers)
-            pure ()
-
-      nonconsuming choice EmployeeVacationAllocation_Go : ContractId B.EmployeeVacationAllocation
-        with
-          inC : ContractId A.EmployeeVacationAllocation
-        controller op
-          do
-            d <- fetch inC
-            archive inC
-            create $ convert d
-
-      nonconsuming choice EmployeeVacationAllocation_DoUpgrade : ()
-        with
-          inC : ContractId A.EmployeeVacationAllocation
-        controller op
-          do
-            d <- fetch inC
-            exerciseByKey @Upgrade authorizers EmployeeVacationAllocation_CollectAuthority with inC = inC
-            exerciseByKey @Upgrade (dedupSort $ signatory d) EmployeeVacationAllocation_Go with inC = inC
-            pure ()
-
-      nonconsuming choice VacationRequest_CollectAuthority : ()
-        with
-          inC : ContractId A.VacationRequest
-        controller op
-          do
-            d <- fetch inC
-            let sigs = signatory d
-            foldlA (\acc sig -> do
-              exerciseByKey @Upgrade acc GetAuthority with p = sig
-              pure (dedupSort $ sig::acc)
-              ) authorizers (sigs \\ authorizers)
-            pure ()
-
-      nonconsuming choice VacationRequest_Go : ContractId B.VacationRequest
-        with
-          inC : ContractId A.VacationRequest
-        controller op
-          do
-            d <- fetch inC
-            archive inC
-            create $ convert d
-
-      nonconsuming choice VacationRequest_DoUpgrade : ()
-        with
-          inC : ContractId A.VacationRequest
-        controller op
-          do
-            d <- fetch inC
-            exerciseByKey @Upgrade authorizers VacationRequest_CollectAuthority with inC = inC
-            exerciseByKey @Upgrade (dedupSort $ signatory d) VacationRequest_Go with inC = inC
-            pure ()
-
-      nonconsuming choice EmployeeRole_CollectAuthority : ()
-        with
-          inC : ContractId A.EmployeeRole
-        controller op
-          do
-            d <- fetch inC
-            let sigs = signatory d
-            foldlA (\acc sig -> do
-              exerciseByKey @Upgrade acc GetAuthority with p = sig
-              pure (dedupSort $ sig::acc)
-              ) authorizers (sigs \\ authorizers)
-            pure ()
-
-      nonconsuming choice EmployeeRole_Go : ContractId B.EmployeeRole
-        with
-          inC : ContractId A.EmployeeRole
-        controller op
-          do
-            d <- fetch inC
-            archive inC
-            create $ convert d
-
-      nonconsuming choice EmployeeRole_DoUpgrade : ()
-        with
-          inC : ContractId A.EmployeeRole
-        controller op
-          do
-            d <- fetch inC
-            exerciseByKey @Upgrade authorizers EmployeeRole_CollectAuthority with inC = inC
-            exerciseByKey @Upgrade (dedupSort $ signatory d) EmployeeRole_Go with inC = inC
-            pure ()
-
       nonconsuming choice EmployeeProposal_CollectAuthority : ()
         with
           inC : ContractId A.EmployeeProposal
-        controller op
+        controller operator
           do
             d <- fetch inC
             let sigs = signatory d
             foldlA (\acc sig -> do
-              exerciseByKey @Upgrade acc GetAuthority with p = sig
+              exerciseByKey @Upgrade acc GetAuthority with authorizingParty = sig
               pure (dedupSort $ sig::acc)
               ) authorizers (sigs \\ authorizers)
             pure ()
@@ -191,38 +78,180 @@ template Upgrade
       nonconsuming choice EmployeeProposal_Go : ContractId B.EmployeeProposal
         with
           inC : ContractId A.EmployeeProposal
-        controller op
+        controller operator
           do
             d <- fetch inC
             archive inC
-            create $ convert d
+            cid <- create $ convert d
+            exercise self Reset
+            pure cid
 
       nonconsuming choice EmployeeProposal_DoUpgrade : ()
         with
           inC : ContractId A.EmployeeProposal
-        controller op
+        controller operator
           do
             d <- fetch inC
-            exerciseByKey @Upgrade authorizers EmployeeProposal_CollectAuthority with inC = inC
+            exercise self EmployeeProposal_CollectAuthority with inC = inC
             exerciseByKey @Upgrade (dedupSort $ signatory d) EmployeeProposal_Go with inC = inC
+            pure ()
+
+      -------------------------
+      nonconsuming choice Vacation_CollectAuthority : ()
+        with
+          inC : ContractId A.Vacation
+        controller operator
+          do
+            d <- fetch inC
+            let sigs = signatory d
+            foldlA (\acc sig -> do
+              exerciseByKey @Upgrade acc GetAuthority with authorizingParty = sig
+              pure (dedupSort $ sig::acc)
+              ) authorizers (sigs \\ authorizers)
+            pure ()
+
+      nonconsuming choice Vacation_Go : ContractId B.Vacation
+        with
+          inC : ContractId A.Vacation
+        controller operator
+          do
+            d <- fetch inC
+            archive inC
+            cid <- create $ convert d
+            exercise self Reset
+            pure cid
+
+      nonconsuming choice Vacation_DoUpgrade : ()
+        with
+          inC : ContractId A.Vacation
+        controller operator
+          do
+            d <- fetch inC
+            exercise self Vacation_CollectAuthority with inC = inC
+            exerciseByKey @Upgrade (dedupSort $ signatory d) Vacation_Go with inC = inC
+            pure ()
+
+      -------------------------
+      nonconsuming choice EmployeeVacationAllocation_CollectAuthority : ()
+        with
+          inC : ContractId A.EmployeeVacationAllocation
+        controller operator
+          do
+            d <- fetch inC
+            let sigs = signatory d
+            foldlA (\acc sig -> do
+              exerciseByKey @Upgrade acc GetAuthority with authorizingParty = sig
+              pure (dedupSort $ sig::acc)
+              ) authorizers (sigs \\ authorizers)
+            pure ()
+
+      nonconsuming choice EmployeeVacationAllocation_Go : ContractId B.EmployeeVacationAllocation
+        with
+          inC : ContractId A.EmployeeVacationAllocation
+        controller operator
+          do
+            d <- fetch inC
+            archive inC
+            cid <- create $ convert d
+            exercise self Reset
+            pure cid
+
+      nonconsuming choice EmployeeVacationAllocation_DoUpgrade : ()
+        with
+          inC : ContractId A.EmployeeVacationAllocation
+        controller operator
+          do
+            d <- fetch inC
+            exercise self EmployeeVacationAllocation_CollectAuthority with inC = inC
+            exerciseByKey @Upgrade (dedupSort $ signatory d) EmployeeVacationAllocation_Go with inC = inC
+            pure ()
+
+      -------------------------
+      nonconsuming choice VacationRequest_CollectAuthority : ()
+        with
+          inC : ContractId A.VacationRequest
+        controller operator
+          do
+            d <- fetch inC
+            let sigs = signatory d
+            foldlA (\acc sig -> do
+              exerciseByKey @Upgrade acc GetAuthority with authorizingParty = sig
+              pure (dedupSort $ sig::acc)
+              ) authorizers (sigs \\ authorizers)
+            pure ()
+
+      nonconsuming choice VacationRequest_Go : ContractId B.VacationRequest
+        with
+          inC : ContractId A.VacationRequest
+        controller operator
+          do
+            d <- fetch inC
+            archive inC
+            cid <- create $ convert d
+            exercise self Reset
+            pure cid
+
+      nonconsuming choice VacationRequest_DoUpgrade : ()
+        with
+          inC : ContractId A.VacationRequest
+        controller operator
+          do
+            d <- fetch inC
+            exercise self VacationRequest_CollectAuthority with inC = inC
+            exerciseByKey @Upgrade (dedupSort $ signatory d) VacationRequest_Go with inC = inC
+            pure ()
+
+      -------------------------
+      nonconsuming choice EmployeeRole_CollectAuthority : ()
+        with
+          inC : ContractId A.EmployeeRole
+        controller operator
+          do
+            d <- fetch inC
+            let sigs = signatory d
+            foldlA (\acc sig -> do
+              exerciseByKey @Upgrade acc GetAuthority with authorizingParty = sig
+              pure (dedupSort $ sig::acc)
+              ) authorizers (sigs \\ authorizers)
+            pure ()
+
+      nonconsuming choice EmployeeRole_Go : ContractId B.EmployeeRole
+        with
+          inC : ContractId A.EmployeeRole
+        controller operator
+          do
+            d <- fetch inC
+            archive inC
+            cid <- create $ convert d
+            exercise self Reset
+            pure cid
+
+      nonconsuming choice EmployeeRole_DoUpgrade : ()
+        with
+          inC : ContractId A.EmployeeRole
+        controller operator
+          do
+            d <- fetch inC
+            exercise self EmployeeRole_CollectAuthority with inC = inC
+            exerciseByKey @Upgrade (dedupSort $ signatory d) EmployeeRole_Go with inC = inC
             pure ()
 
 template UpgradeToken
   with
-      p : Party
-      op : Party
+      authorizingParty : Party
+      operator : Party
   where
-      signatory p
-      observer op
-      key p : Party
+      signatory authorizingParty
+      observer operator
+      key authorizingParty : Party
       maintainer key
 
       nonconsuming choice GiveAuthority : ()
         with
           k : [Party]
-        controller op
+        controller operator
           do
-            exerciseByKey @Upgrade k AddAuthority with p
+            exerciseByKey @Upgrade k AddAuthority with authorizingParty
             pure ()
 
 -----------------------
@@ -273,81 +302,85 @@ upgradeTrigger = T.Trigger
   }
 
 upgradeRule : Party -> T.ACS -> M.Map T.CommandId [T.Command] -> () -> T.TriggerA ()
-upgradeRule op acs commandsInFlight () = do
+upgradeRule operator acs commandsInFlight () = do
+
+  -- upgrade EmployeeProposal
+  let employeeProposalTokens
+        = T.getContracts @UpgradeToken acs
+  let employeeProposalCs = T.getContracts @(A.EmployeeProposal) acs
+  let employeeProposalUpgrades = T.getContracts @Upgrade acs
+  let ready = do
+              -- this relies on the fact that there is only one upgrade contract
+              (updCid, upd) <- employeeProposalUpgrades
+              (cId, c) <- employeeProposalCs
+              let sigs = signatory c
+              let tokens = [authorizingParty | (_cId, UpgradeToken{authorizingParty, operator}) <- employeeProposalTokens, operator == operator, authorizingParty `elem` sigs]
+              guard $ length tokens == length sigs
+              pure (updCid, cId)
+  forA_ ready $ \(updCid, cId) -> T.dedupExercise updCid EmployeeProposal_DoUpgrade with inC = cId
 
   -- upgrade Vacation
   let vacationTokens
         = T.getContracts @UpgradeToken acs
-  let vacationUpgrades
-        = T.getContracts @Upgrade acs
   let vacationCs = T.getContracts @(A.Vacation) acs
+  let vacationUpgrades = T.getContracts @Upgrade acs
   let ready = do
+              -- this relies on the fact that there is only one upgrade contract
               (updCid, upd) <- vacationUpgrades
               (cId, c) <- vacationCs
-              let tokens = [p | (_cId, UpgradeToken{p, op}) <- vacationTokens, op == op]
-              guard $ (dedupSort $ signatory c) == dedupSort tokens
+              let sigs = signatory c
+              let tokens = [authorizingParty | (_cId, UpgradeToken{authorizingParty, operator}) <- vacationTokens, operator == operator, authorizingParty `elem` sigs]
+              guard $ length tokens == length sigs
               pure (updCid, cId)
   forA_ ready $ \(updCid, cId) -> T.dedupExercise updCid Vacation_DoUpgrade with inC = cId
 
-
   -- upgrade EmployeeVacationAllocation
-  let vacationTokens
+  let employeeVacationAllocationTokens
         = T.getContracts @UpgradeToken acs
-  let vacationUpgrades
-        = T.getContracts @Upgrade acs
-  let vacationCs = T.getContracts @(A.EmployeeVacationAllocation) acs
+  let employeeVacationAllocationCs = T.getContracts @(A.EmployeeVacationAllocation) acs
+  let employeeVacationAllocationUpgrades = T.getContracts @Upgrade acs
   let ready = do
-              (updCid, upd) <- vacationUpgrades
-              (cId, c) <- vacationCs
-              let tokens = [p | (_cId, UpgradeToken{p, op}) <- vacationTokens, op == op]
-              guard $ (dedupSort $ signatory c) == dedupSort tokens
+              -- this relies on the fact that there is only one upgrade contract
+              (updCid, upd) <- employeeVacationAllocationUpgrades
+              (cId, c) <- employeeVacationAllocationCs
+              let sigs = signatory c
+              let tokens = [authorizingParty | (_cId, UpgradeToken{authorizingParty, operator}) <- employeeVacationAllocationTokens, operator == operator, authorizingParty `elem` sigs]
+              guard $ length tokens == length sigs
               pure (updCid, cId)
   forA_ ready $ \(updCid, cId) -> T.dedupExercise updCid EmployeeVacationAllocation_DoUpgrade with inC = cId
 
   -- upgrade VacationRequest
-  let vacationTokens
+  let vacationRequestTokens
         = T.getContracts @UpgradeToken acs
-  let vacationUpgrades
-        = T.getContracts @Upgrade acs
-  let vacationCs = T.getContracts @(A.VacationRequest) acs
+  let vacationRequestCs = T.getContracts @(A.VacationRequest) acs
+  let vacationRequestUpgrades = T.getContracts @Upgrade acs
   let ready = do
-              (updCid, upd) <- vacationUpgrades
-              (cId, c) <- vacationCs
-              let tokens = [p | (_cId, UpgradeToken{p, op}) <- vacationTokens, op == op]
-              guard $ (dedupSort $ signatory c) == dedupSort tokens
+              -- this relies on the fact that there is only one upgrade contract
+              (updCid, upd) <- vacationRequestUpgrades
+              (cId, c) <- vacationRequestCs
+              let sigs = signatory c
+              let tokens = [authorizingParty | (_cId, UpgradeToken{authorizingParty, operator}) <- vacationRequestTokens, operator == operator, authorizingParty `elem` sigs]
+              guard $ length tokens == length sigs
               pure (updCid, cId)
   forA_ ready $ \(updCid, cId) -> T.dedupExercise updCid VacationRequest_DoUpgrade with inC = cId
 
   -- upgrade EmployeeRole
-  let vacationTokens
+  let employeeRoleTokens
         = T.getContracts @UpgradeToken acs
-  let vacationUpgrades
-        = T.getContracts @Upgrade acs
-  let vacationCs = T.getContracts @(A.EmployeeRole) acs
+  let employeeRoleCs = T.getContracts @(A.EmployeeRole) acs
+  let employeeRoleUpgrades = T.getContracts @Upgrade acs
   let ready = do
-              (updCid, upd) <- vacationUpgrades
-              (cId, c) <- vacationCs
-              let tokens = [p | (_cId, UpgradeToken{p, op}) <- vacationTokens, op == op]
-              guard $ (dedupSort $ signatory c) == dedupSort tokens
+              -- this relies on the fact that there is only one upgrade contract
+              (updCid, upd) <- employeeRoleUpgrades
+              (cId, c) <- employeeRoleCs
+              let sigs = signatory c
+              let tokens = [authorizingParty | (_cId, UpgradeToken{authorizingParty, operator}) <- employeeRoleTokens, operator == operator, authorizingParty `elem` sigs]
+              guard $ length tokens == length sigs
               pure (updCid, cId)
   forA_ ready $ \(updCid, cId) -> T.dedupExercise updCid EmployeeRole_DoUpgrade with inC = cId
 
-  -- upgrade EmployeeProposal
-  let vacationTokens
-        = T.getContracts @UpgradeToken acs
-  let vacationUpgrades
-        = T.getContracts @Upgrade acs
-  let vacationCs = T.getContracts @(A.EmployeeProposal) acs
-  let ready = do
-              (updCid, upd) <- vacationUpgrades
-              (cId, c) <- vacationCs
-              let tokens = [p | (_cId, UpgradeToken{p, op}) <- vacationTokens, op == op]
-              guard $ (dedupSort $ signatory c) == dedupSort tokens
-              pure (updCid, cId)
-  forA_ ready $ \(updCid, cId) -> T.dedupExercise updCid EmployeeProposal_DoUpgrade with inC = cId
-
---------
 -- Tests
+--------
 test : S.Script ()
 test = do
   alice <- S.allocateParty "Alice"
@@ -365,10 +398,10 @@ test = do
   debug "proposal accept"
   -- This step fails because toAnyChoice is not implemented in the lf conversion of `external`.
   upCid <- S.submit company $
-    S.createCmd @(Upgrade) $ Upgrade {op = company, authorizers = [], obs = [alice, bob]}
+    S.createCmd @(Upgrade) $ Upgrade {operator = company, authorizers = [], observers = [alice, bob]}
   debug "upgrade creation"
   token <- S.submit alice $
-    S.createCmd @(UpgradeToken) $ UpgradeToken{op = company, p = alice}
+    S.createCmd @(UpgradeToken) $ UpgradeToken{operator = company, authorizingParty = alice}
   debug "token creation"
 
   cs <- S.query @A.EmployeeRole alice
@@ -392,7 +425,7 @@ test0 = do
     create $ A.EmployeeProposal with A.employeeRole = employeeRole; vacationDays = 30
   submit alice $ exercise propCid $ A.EmployeeProposal_Accept
   upCid <- submit company $
-    create @(Upgrade) $ Upgrade {op = company, authorizers = [], obs = [alice, bob]}
+    create @(Upgrade) $ Upgrade {operator = company, authorizers = [], observers = [alice, bob]}
   token <- submit alice $
-    create @(UpgradeToken) $ UpgradeToken{op = company, p = alice}
+    create @(UpgradeToken) $ UpgradeToken{operator = company, authorizingParty = alice}
   pure ()
