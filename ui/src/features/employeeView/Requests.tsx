@@ -25,7 +25,7 @@ const Requests: React.FC<Props> = (props: Props) => {
   const requests = prettyRequests(requestContracts);
 
   const [exerciseRequestVacation, loadingRequestVacation] =
-    usePseudoExerciseByKey(v3.EmployeeRole.EmployeeRole_RequestVacation, [v3.VacationRequest]);
+    usePseudoExerciseByKey(v3.EmployeeRole.EmployeeRole_RequestVacation);
 
   const handleCancelRequest = () => alert('Canceling vacation requests is not yet implemented.');
 
