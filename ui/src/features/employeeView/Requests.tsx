@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { Segment, Header, List, Form, SemanticTRANSITIONS } from 'semantic-ui-react';
-import { useSelector } from 'react-redux';
 import ListActionItem from '../../components/ListActionItem';
 import { DatesRangeInput } from 'semantic-ui-calendar-react';
 import { VacationListItem } from '../../components/VacationListItem';
 import { vacationLength, prettyRequests } from '../../utils/vacation';
-import { useQuery, usePseudoExerciseByKey } from '../../app/damlReducer';
+import { useQuery, usePseudoExerciseByKey, useParty } from '../../app/damlReducer';
 import * as v3 from '../../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
-import { getLedger } from '../../app/store';
 import { EmployeeSummary } from '../../utils/employee';
 import { toast } from 'react-semantic-toasts';
 
@@ -19,7 +17,7 @@ const Requests: React.FC<Props> = (props: Props) => {
   const [currentRequest, setCurrentRequest] = useState('');
   const boss = props.employeeSummary ? props.employeeSummary.boss : '';
 
-  const party = useSelector(getLedger).party;
+  const party = useParty();
   const {loading: loadingRequests, contracts: requestContracts} =
     useQuery(v3.VacationRequest, () => ({vacation: {employeeRole: {employee: party}}}), [party]);
   const requests = prettyRequests(requestContracts);

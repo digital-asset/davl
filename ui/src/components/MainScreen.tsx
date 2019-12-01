@@ -2,10 +2,8 @@ import React from 'react'
 import { Image, Menu, Container, Grid } from 'semantic-ui-react'
 import EmployeeView from '../features/employeeView/EmployeeView';
 import BossView from '../features/bossView/BossView';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { logOut } from '../app/authReducer';
-import { RootState } from '../app/rootReducer';
-import { getLedger } from '../app/store';
 import * as daml from '../app/damlReducer';
 
 /**
@@ -13,11 +11,11 @@ import * as daml from '../app/damlReducer';
  */
 const MainScreen: React.FC = () => {
   const dispatch = useDispatch();
-  const party = useSelector((state: RootState) => getLedger(state).party);
+  const party = daml.useParty();
+  const reload = daml.useReload();
 
   const handleLogout = () => {
     dispatch(logOut());
-    dispatch(daml.stop());
   }
 
   return (
@@ -40,7 +38,7 @@ const MainScreen: React.FC = () => {
           <Menu.Item
             position='right'
             active={false}
-            onClick={() => dispatch(daml.reload())}
+            onClick={() => reload()}
             icon='refresh'
           />
           <Menu.Item

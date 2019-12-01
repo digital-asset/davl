@@ -5,11 +5,11 @@ import Ledger from '../ledger/ledger';
 import * as v3 from '../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 import { ThunkAction } from 'redux-thunk';
 import { RootState } from './rootReducer';
-import * as daml from './damlReducer';
 
 type State = {
   loggingIn: boolean;
   signingUp: boolean;
+  credentials?: Credentials;
 }
 
 const initialState: State = {
@@ -26,6 +26,7 @@ const slice = createSlice({
     endLogIn: (state: State, action: PayloadAction) => ({...state, loggingIn: false}),
     startSignUp: (state: State, action: PayloadAction) => ({...state, signingUp: true}),
     endSignUp: (state: State, action: PayloadAction) => ({...state, signingUp: false}),
+    setCredentials: (state: State, action: PayloadAction<Credentials>) => ({...state, credentials: action.payload}),
   },
 });
 
@@ -35,6 +36,7 @@ const {
   endLogIn,
   startSignUp,
   endSignUp,
+  setCredentials,
 } = slice.actions;
 
 export const reducer = slice.reducer;
@@ -45,7 +47,7 @@ export const logIn = (credentials: Credentials): AppThunk => async (dispatch) =>
     const ledger = new Ledger(credentials);
     const employeeRole = await ledger.pseudoLookupByKey(v3.EmployeeRole, {employee: credentials.party});
     if (employeeRole) {
-      dispatch(daml.start(credentials));
+      dispatch(setCredentials(credentials));
     } else {
       alert("You have not yet signed up.");
     }
@@ -55,7 +57,6 @@ export const logIn = (credentials: Credentials): AppThunk => async (dispatch) =>
 }
 
 export const logOut = (): ThunkAction<void, RootState, null, Action<string>> => (dispatch) => {
-  dispatch(daml.stop());
   dispatch(clearAll());
 }
 
@@ -78,12 +79,12 @@ export const signUp = (credentials: Credentials): AppThunk => async (dispatch) =
         await ledger.exercise(v3.EmployeeProposal.EmployeeProposal_Accept, employeeProposalFull.contractId, {});
         dispatch(endSignUp());
         await dispatch(logIn(credentials));
-      } else {
-        dispatch(endSignUp());
       }
     }
   } catch (error) {
     dispatch(endSignUp());
     throw error;
+  } finally {
+    dispatch(endSignUp());
   }
 }
