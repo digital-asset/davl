@@ -116,10 +116,12 @@ export const reducer = (state = initialState as State, action: Action): State =>
   return state;
 }
 
+const emptyQueryFactory = <T extends {}>(): Query<T> => ({} as Query<T>);
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const useQuery = <T>(template: Template<T>, queryFactory: () => Query<T>, queryDeps: readonly any[] | undefined): QueryStore.Entry<T> => {
+export const useQuery = <T>(template: Template<T>, queryFactory: () => Query<T> = emptyQueryFactory, queryDeps?: readonly any[]): QueryStore.Entry<T> => {
   const dispatch = useDispatch();
-  const query = useMemo(queryFactory, queryDeps)
+  const query = useMemo(queryFactory, queryDeps);
   const contracts = useSelector((state: root.RootState) => LedgerStore.getQueryResult(getLedgerStore(state), template, query));
   useEffect(() => {
     if (contracts === undefined) {
