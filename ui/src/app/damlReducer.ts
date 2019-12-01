@@ -78,7 +78,7 @@ const loadQuery = <T>(template: Template<T>, query: Query<T>): AppThunk => async
   dispatch(setQueryResult(template, query, contracts));
 }
 
-export const reloadTemplate = <T extends {}>(template: Template<T>): AppThunk => async (dispatch, getState) => {
+const reloadTemplate = <T extends {}>(template: Template<T>): AppThunk => async (dispatch, getState) => {
   const ledgerStore = getLedgerStore(getState());
   const templateStore = ledgerStore.templateStores.get(template) as TemplateStore.Store<T> | undefined;
   if (templateStore) {
@@ -87,6 +87,13 @@ export const reloadTemplate = <T extends {}>(template: Template<T>): AppThunk =>
       await dispatch(loadQuery(template, query));
     }));
   }
+}
+
+export const reload = (): AppThunk => async (dispatch, getState) => {
+  const ledgerStore = getLedgerStore(getState());
+  await Promise.all(ledgerStore.templateStores.toArray().map(([template]) =>
+    dispatch(reloadTemplate(template))
+  ));
 }
 
 const reloadForEvents = (events: Event[]): AppThunk => async (dispatch) => {

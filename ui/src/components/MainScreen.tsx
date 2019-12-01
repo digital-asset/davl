@@ -7,7 +7,6 @@ import { logOut } from '../app/authReducer';
 import { RootState } from '../app/rootReducer';
 import { getLedger } from '../app/store';
 import * as daml from '../app/damlReducer';
-import * as v3 from '../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 
 /**
  * React component for the main screen of the `App`.
@@ -19,12 +18,6 @@ const MainScreen: React.FC = () => {
   const handleLogout = () => {
     dispatch(logOut());
     dispatch(daml.stop());
-  }
-
-  const handleReload = () => {
-    dispatch(daml.reloadTemplate(v3.Vacation));
-    dispatch(daml.reloadTemplate(v3.VacationRequest));
-    dispatch(daml.reloadTemplate(v3.EmployeeVacationAllocation));
   }
 
   return (
@@ -47,7 +40,7 @@ const MainScreen: React.FC = () => {
           <Menu.Item
             position='right'
             active={false}
-            onClick={handleReload}
+            onClick={() => dispatch(daml.reload())}
             icon='refresh'
           />
           <Menu.Item
