@@ -1,17 +1,14 @@
 import * as immutable from 'immutable';
 import { Query, Contract, Template } from '@digitalasset/daml-json-types';
-import Credentials from '../ledger/credentials';
 import * as TemplateStore from './templateStore';
 
 export type Store = {
-  credentials: Credentials;
   templateStores: immutable.Map<Template<object>, TemplateStore.Store<object>>;
 }
 
-export const empty = (credentials: Credentials): Store => ({
-  credentials,
+export const empty: Store = {
   templateStores: immutable.Map(),
-});
+};
 
 export const setTemplateLoading = <T extends {}>(store: Store, template: Template<T>) => ({
   ...store,
