@@ -4,7 +4,6 @@ import createThunkErrorHandlerMiddleware from 'redux-thunk-error-handler';
 import thunkMiddleware from 'redux-thunk-recursion-detect';
 
 import rootReducer, { RootState } from './rootReducer'
-import Ledger from '../ledger/ledger';
 import { toast } from 'react-semantic-toasts';
 
 const defaultErrorHandler = (error: unknown) => {
@@ -46,12 +45,3 @@ export type AppDispatch = typeof store.dispatch;
 export type AppThunk<R = void> = ThunkAction<Promise<R>, RootState, null, Action<string>>;
 
 export default store;
-
-export const getLedger = (state: RootState): Ledger => {
-  const daml = state.daml;
-  if (daml) {
-    return new Ledger(daml.credentials);
-  } else {
-    throw Error('credentials not initialized');
-  }
-}

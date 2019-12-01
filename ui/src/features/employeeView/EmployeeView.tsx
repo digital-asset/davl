@@ -1,19 +1,17 @@
 import React from 'react';
 import Requests from './Requests';
-import { useSelector } from 'react-redux';
 import SummaryView from './SummaryView';
 import { Segment } from 'semantic-ui-react';
 import VacationListSegment from '../../components/VacationListSegment';
 import { toast } from 'react-semantic-toasts';
-import { getLedger } from '../../app/store';
-import { useQuery, usePseudoFetchByKey } from '../../app/damlReducer';
+import { useQuery, usePseudoFetchByKey, useParty } from '../../app/damlReducer';
 import * as v3 from '../../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 import { splitVacations } from '../../utils/vacation';
 import { EmployeeSummary } from '../../utils/employee';
 
 
 const EmployeeView: React.FC = () => {
-  const party = useSelector(getLedger).party;
+  const party = useParty();
   const allocation =
     usePseudoFetchByKey(v3.EmployeeVacationAllocation, () => ({employeeRole: {employee: party}}), [party]);
   let summary: EmployeeSummary | null = null;

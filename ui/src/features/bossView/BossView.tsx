@@ -1,16 +1,14 @@
 import React from 'react';
 import VacationListSegment from '../../components/VacationListSegment';
-import { useSelector } from 'react-redux';
 import { Vacation, prettyRequests, splitVacations } from '../../utils/vacation';
 import { Segment } from 'semantic-ui-react';
 import Staff from './Staff';
-import { useQuery, useExercise } from '../../app/damlReducer';
+import { useQuery, useExercise, useParty } from '../../app/damlReducer';
 import * as v3 from '../../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
-import { getLedger } from '../../app/store';
 import { toast } from 'react-semantic-toasts';
 
 const BossView: React.FC = () => {
-  const party = useSelector(getLedger).party;
+  const party = useParty();
 
   const {loading: loadingVacations, contracts: vacationContracts} =
     useQuery(v3.Vacation, () => ({employeeRole: {boss: party}}), [party]);

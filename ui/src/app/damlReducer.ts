@@ -1,37 +1,28 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 import { Template, Query, Contract, Choice, ContractId, lookupTemplate } from "@digitalasset/daml-json-types";
-import * as root from './rootReducer';
-import { useSelector, useDispatch } from "react-redux";
-import { AppThunk, AppDispatch } from "./store";
 import Ledger, { Event } from "../ledger/ledger";
-import Credentials from "../ledger/credentials";
 import * as QueryStore from './query';
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useContext } from "react";
 import * as LedgerStore from './ledgerStore';
 import * as TemplateStore from './templateStore';
+import React from "react";
 
-type State = LedgerStore.Store | null;
+export type Store = LedgerStore.Store;
 
-const getLedgerStore = (state: root.RootState): LedgerStore.Store => {
-  if (!state.daml) {
-    throw Error(`getLedgerStore before ${START}`);
+export type StoreHandle = [Store, React.Dispatch<Action>];
+
+export const DamlLedgerContext = React.createContext(null as StoreHandle | null);
+
+const useStore = (): StoreHandle => {
+  const handle = useContext(DamlLedgerContext);
+  if (!handle) {
+    throw Error("Trying to use DamlLedgerContext before initializing.")
   }
-  return state.daml;
+  return handle;
 }
 
-const START = 'daml/START';
-const STOP = 'daml/STOP';
 const SET_QUERY_LOADING = 'daml/SET_QUERY_LOADING';
 const SET_QUERY_RESULT = 'daml/SET_QUERY_RESULT';
-
-type StartAction = {
-  type: typeof START;
-  credentials: Credentials;
-}
-
-type StopAction = {
-  type: typeof STOP;
-}
 
 type SetQueryLoadingAction<T> = {
   type: typeof SET_QUERY_LOADING;
@@ -46,16 +37,7 @@ type SetQueryResultAction<T> = {
   contracts: Contract<T>[];
 }
 
-type Action = StartAction | StopAction | SetQueryLoadingAction<object> | SetQueryResultAction<object>;
-
-export const start = (credentials: Credentials): StartAction => ({
-  type: START,
-  credentials,
-});
-
-export const stop = (): StopAction => ({
-  type: STOP,
-});
+export type Action = SetQueryLoadingAction<object> | SetQueryResultAction<object>;
 
 const setQueryLoading = <T>(template: Template<T>, query: Query<T>): SetQueryLoadingAction<T> => ({
   type: SET_QUERY_LOADING,
@@ -70,33 +52,30 @@ const setQueryResult = <T>(template: Template<T>, query: Query<T>, contracts: Co
   contracts,
 });
 
-const loadQuery = <T>(template: Template<T>, query: Query<T>): AppThunk => async (dispatch, getState) => {
-  const ledgerStore = getLedgerStore(getState());
+const loadQuery = async <T extends {}>(store: Store, dispatch: React.Dispatch<Action>, template: Template<T>, query: Query<T>) => {
   dispatch(setQueryLoading(template, query));
-  const ledger = new Ledger(ledgerStore.credentials);
+  const ledger = new Ledger(store.credentials);
   const contracts = await ledger.query(template, query);
   dispatch(setQueryResult(template, query, contracts));
 }
 
-const reloadTemplate = <T extends {}>(template: Template<T>): AppThunk => async (dispatch, getState) => {
-  const ledgerStore = getLedgerStore(getState());
-  const templateStore = ledgerStore.templateStores.get(template) as TemplateStore.Store<T> | undefined;
+const reloadTemplate = async <T extends {}>(store: Store, dispatch: React.Dispatch<Action>, template: Template<T>) => {
+  const templateStore = store.templateStores.get(template) as TemplateStore.Store<T> | undefined;
   if (templateStore) {
     const queries: Query<T>[] = Array.from(templateStore.queryResults.keys());
     await Promise.all(queries.map(async (query) => {
-      await dispatch(loadQuery(template, query));
+      await loadQuery(store, dispatch, template, query);
     }));
   }
 }
 
-export const reload = (): AppThunk => async (dispatch, getState) => {
-  const ledgerStore = getLedgerStore(getState());
-  await Promise.all(ledgerStore.templateStores.toArray().map(([template]) =>
-    dispatch(reloadTemplate(template))
+export const reload = async (store: Store, dispatch: React.Dispatch<Action>) => {
+  await Promise.all(store.templateStores.toArray().map(([template]) =>
+    reloadTemplate(store, dispatch, template)
   ));
 }
 
-const reloadForEvents = (events: Event[]): AppThunk => async (dispatch) => {
+const reloadForEvents = async (store: Store, dispatch: React.Dispatch<Action>, events: Event[]) => {
   // TODO(MH): This is a sledge hammer approach. We completely reload every
   // single template that has been touched by the events. A future optimization
   // would be to remove the archived templates from their tables and add the
@@ -104,50 +83,33 @@ const reloadForEvents = (events: Event[]): AppThunk => async (dispatch) => {
   const templates = new Set(events.map((event) =>
     lookupTemplate('created' in event ? event.created.templateId : event.archived.templateId)
   ));
-  await Promise.all(Array.from(templates).map((template) => dispatch(reloadTemplate(template))));
+  await Promise.all(Array.from(templates).map((template) => reloadTemplate(store, dispatch, template)));
 }
 
-const runExercise = <T, C>(choice: Choice<T, C>, cid: ContractId<T>, argument: C): AppThunk => async (dispatch, getState) => {
-  const ledgerStore = getLedgerStore(getState());
-  const ledger = new Ledger(ledgerStore.credentials);
+const runExercise = async <T, C>(store: Store, dispatch: React.Dispatch<Action>, choice: Choice<T, C>, cid: ContractId<T>, argument: C) => {
+  const ledger = new Ledger(store.credentials);
   const events = await ledger.exercise(choice, cid, argument);
   // NOTE(MH): We want to signal the UI that the exercise is finished while
   // were still updating the affected templates "in the backgound".
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  dispatch(reloadForEvents(events));
+  reloadForEvents(store, dispatch, events);
 }
 
-const runPseudoExerciseByKey = <T, C>(choice: Choice<T, C>, key: Query<T>, argument: C): AppThunk => async (dispatch, getState) => {
-  const ledgerStore = getLedgerStore(getState());
-  const ledger = new Ledger(ledgerStore.credentials);
+const runPseudoExerciseByKey = async <T, C>(store: Store, dispatch: React.Dispatch<Action>, choice: Choice<T, C>, key: Query<T>, argument: C) => {
+  const ledger = new Ledger(store.credentials);
   const events = await ledger.pseudoExerciseByKey(choice, key, argument);
   // NOTE(MH): We want to signal the UI that the exercise is finished while
   // were still updating the affected templates "in the backgound".
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  dispatch(reloadForEvents(events));
+  reloadForEvents(store, dispatch, events);
 }
 
-
-const initialState: State = null;
-
-export const reducer = (state = initialState as State, action: Action): State => {
+export const reducer = (state: Store, action: Action): Store => {
   switch (action.type) {
-    case START: {
-      return LedgerStore.empty(action.credentials);
-    }
-    case STOP: {
-      return initialState;
-    }
     case SET_QUERY_LOADING: {
-      if (!state) {
-        throw Error(`${action.type} before ${START}`);
-      }
       return LedgerStore.setQueryLoading(state, action.template, action.query);
     }
     case SET_QUERY_RESULT: {
-      if (!state) {
-        throw Error(`${action.type} before ${START}`);
-      }
       return LedgerStore.setQueryResult(state, action.template, action.query, action.contracts);
     }
   }
@@ -158,14 +120,15 @@ const emptyQueryFactory = <T extends {}>(): Query<T> => ({} as Query<T>);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const useQuery = <T>(template: Template<T>, queryFactory: () => Query<T> = emptyQueryFactory, queryDeps?: readonly any[]): QueryStore.Entry<T> => {
-  const dispatch = useDispatch();
+  const [store, dispatch] = useStore();
   const query = useMemo(queryFactory, queryDeps);
-  const contracts = useSelector((state: root.RootState) => LedgerStore.getQueryResult(getLedgerStore(state), template, query));
+  const contracts = LedgerStore.getQueryResult(store, template, query);
   useEffect(() => {
     if (contracts === undefined) {
-      dispatch(loadQuery(template, query));
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      loadQuery(store, dispatch, template, query);
     }
-  }, [dispatch, template, query, contracts]);
+  }, [store, dispatch, template, query, contracts]);
   return contracts || TemplateStore.emptyQueryResult();
 }
 
@@ -181,26 +144,36 @@ export const usePseudoFetchByKey = <T>(template: Template<T>, keyFactory: () => 
   }), [entry]);
 }
 
-export const useExercise = <T, C>(choice: Choice<T, C>, additional?: Template<object>[]): [(cid: ContractId<T>, argument: C) => Promise<void>, boolean] => {
+export const useExercise = <T, C>(choice: Choice<T, C>): [(cid: ContractId<T>, argument: C) => Promise<void>, boolean] => {
   const [loading, setLoading] = useState(false);
-  const dispatch: AppDispatch = useDispatch();
+  const [store, dispatch] = useStore();
 
   const exercise = async (cid: ContractId<T>, argument: C) => {
     setLoading(true);
-    await dispatch(runExercise(choice, cid, argument));
+    await runExercise(store, dispatch, choice, cid, argument);
     setLoading(false);
   }
   return [exercise, loading];
 }
 
-export const usePseudoExerciseByKey = <T, C>(choice: Choice<T, C>, additional?: Template<object>[]): [(key: Query<T>, argument: C) => Promise<void>, boolean] => {
+export const usePseudoExerciseByKey = <T, C>(choice: Choice<T, C>): [(key: Query<T>, argument: C) => Promise<void>, boolean] => {
   const [loading, setLoading] = useState(false);
-  const dispatch: AppDispatch = useDispatch();
+  const [store, dispatch] = useStore();
 
   const exercise = async (key: Query<T>, argument: C) => {
     setLoading(true);
-    await dispatch(runPseudoExerciseByKey(choice, key, argument));
+    await runPseudoExerciseByKey(store, dispatch, choice, key, argument);
     setLoading(false);
   }
   return [exercise, loading];
+}
+
+export const useParty = () => {
+  const [store] = useStore();
+  return store.credentials.party;
+}
+
+export const useReload = () => {
+  const [store, dispatch] = useStore();
+  return () => reload(store, dispatch);
 }

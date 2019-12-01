@@ -1,13 +1,11 @@
 import React from 'react';
 import { Segment, Header, List } from 'semantic-ui-react';
-import { useSelector } from 'react-redux';
-import { getLedger } from '../../app/store';
-import { useQuery } from '../../app/damlReducer';
+import { useQuery, useParty } from '../../app/damlReducer';
 import * as v3 from '../../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 import { prettyEmployeeSummaries } from '../../utils/employee';
 
 const Staff: React.FC = () => {
-  const party = useSelector(getLedger).party;
+  const party = useParty();
 
   const {loading, contracts} =
     useQuery(v3.EmployeeVacationAllocation, () => ({employeeRole: {boss: party}}), [party]);
