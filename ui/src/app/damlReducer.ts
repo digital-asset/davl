@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-namespace */
-import { Template, Query, Contract } from "@digitalasset/daml-json-types";
+import { Template, Query, Contract, Choice } from "@digitalasset/daml-json-types";
 import * as root from './rootReducer';
 import { useSelector, useDispatch } from "react-redux";
-import { AppThunk } from "./store";
+import { AppThunk, AppDispatch } from "./store";
 import Ledger from "../ledger/ledger";
 import Credentials from "../ledger/credentials";
 import * as QueryStore from './query';
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import * as LedgerStore from './ledgerStore';
 import * as TemplateStore from './templateStore';
 
@@ -89,6 +89,12 @@ export const reloadTemplate = <T extends {}>(template: Template<T>): AppThunk =>
   }
 }
 
+const runPseudoExerciseByKey = <T, C>(choice: Choice<T, C>, key: Query<T>, argument: C, affected: Template<object>[]): AppThunk => async (dispatch, getState) => {
+  const ledgerStore = getLedgerStore(getState());
+  const ledger = new Ledger(ledgerStore.credentials);
+  await ledger.pseudoExerciseByKey(choice, key, argument);
+}
+
 
 const initialState: State = null;
 
@@ -141,4 +147,21 @@ export const usePseudoFetchByKey = <T>(template: Template<T>, keyFactory: () => 
     loading: entry.loading,
     contract: entry.contracts[0] || null,
   }), [entry]);
+}
+
+export const usePseudoExerciseByKey = <T, C>(choice: Choice<T, C>, affected: Template<object>[]): [(key: Query<T>, argument: C) => Promise<void>, boolean] => {
+  const [loading, setLoading] = useState(false);
+  const dispatch: AppDispatch = useDispatch();
+
+  const exercise = async (key: Query<T>, argument: C) => {
+    setLoading(true);
+    await dispatch(runPseudoExerciseByKey(choice, key, argument, affected));
+    setLoading(false);
+    affected.forEach((template) => {
+      // NOTE(MH): We deliberately "spawn" the refreshing in the background.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      dispatch(reloadTemplate(template));
+    });
+  }
+  return [exercise, loading];
 }
