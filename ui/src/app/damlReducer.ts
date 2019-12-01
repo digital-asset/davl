@@ -130,3 +130,15 @@ export const useQuery = <T>(template: Template<T>, queryFactory: () => Query<T> 
   }, [dispatch, template, query, contracts]);
   return contracts || TemplateStore.emptyQueryResult();
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const usePseudoFetchByKey = <T>(template: Template<T>, keyFactory: () => Query<T>, keyDeps?: readonly any[]): QueryStore.KeyEntry<T> => {
+  const entry = useQuery(template, keyFactory, keyDeps);
+  if (entry.contracts.length > 1) {
+    throw Error("usePseudoFetchByKey: query returned multiple cotracts");
+  }
+  return useMemo(() => ({
+    loading: entry.loading,
+    contract: entry.contracts[0] || null,
+  }), [entry]);
+}
