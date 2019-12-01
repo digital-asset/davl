@@ -1,21 +1,9 @@
 // Generated from DA/Upgrade.daml
 /* eslint-disable @typescript-eslint/camelcase */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import * as daml from '@digitalasset/daml-json-types';
 import * as jtv from '@mojotech/json-type-validation';
 import packageId from '../packageId';
-import * as DA_Generics from '../DA/Generics';
-import * as DA_Internal_Assert from '../DA/Internal/Assert';
-import * as DA_Internal_LF from '../DA/Internal/LF';
-import * as DA_Internal_Prelude from '../DA/Internal/Prelude';
-import * as DA_Internal_Record from '../DA/Internal/Record';
-import * as DA_Internal_Template from '../DA/Internal/Template';
-import * as DA_Next_Map from '../DA/Next/Map';
-import * as DA_Next_Set from '../DA/Next/Set';
-import * as pkg1d739910b47df63ee080c1a1df6e5f983f9c5a0573fc0a7c2c20d7592b96cb8d_Control_Exception_Base from '../../1d739910b47df63ee080c1a1df6e5f983f9c5a0573fc0a7c2c20d7592b96cb8d/Control/Exception/Base';
-import * as pkg1d739910b47df63ee080c1a1df6e5f983f9c5a0573fc0a7c2c20d7592b96cb8d_GHC_Base from '../../1d739910b47df63ee080c1a1df6e5f983f9c5a0573fc0a7c2c20d7592b96cb8d/GHC/Base';
-import * as pkg1d739910b47df63ee080c1a1df6e5f983f9c5a0573fc0a7c2c20d7592b96cb8d_GHC_Classes from '../../1d739910b47df63ee080c1a1df6e5f983f9c5a0573fc0a7c2c20d7592b96cb8d/GHC/Classes';
-import * as pkg1d739910b47df63ee080c1a1df6e5f983f9c5a0573fc0a7c2c20d7592b96cb8d_GHC_Show from '../../1d739910b47df63ee080c1a1df6e5f983f9c5a0573fc0a7c2c20d7592b96cb8d/GHC/Show';
 
 const moduleName = 'DA.Upgrade';
 const templateId = (entityName: string): daml.TemplateId => ({packageId, moduleName, entityName});
