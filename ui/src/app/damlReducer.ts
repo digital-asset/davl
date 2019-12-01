@@ -89,33 +89,35 @@ export const reloadTemplate = <T extends {}>(template: Template<T>): AppThunk =>
   }
 }
 
-const reloadForEvents = (events: Event[], additional?: Template<object>[]): AppThunk => async (dispatch) => {
-  const templatesSet = new Set(additional);
-  for (const event of events) {
-    templatesSet.add(lookupTemplate('created' in event ? event.created.templateId : event.archived.templateId));
-  }
-  const templates = Array.from(templatesSet);
-  await Promise.all(templates.map((template) => dispatch(reloadTemplate(template))));
+const reloadForEvents = (events: Event[]): AppThunk => async (dispatch) => {
+  // TODO(MH): This is a sledge hammer approach. We completely reload every
+  // single template that has been touched by the events. A future optimization
+  // would be to remove the archived templates from their tables and add the
+  // created templates wherever they match.
+  const templates = new Set(events.map((event) =>
+    lookupTemplate('created' in event ? event.created.templateId : event.archived.templateId)
+  ));
+  await Promise.all(Array.from(templates).map((template) => dispatch(reloadTemplate(template))));
 }
 
-const runExercise = <T, C>(choice: Choice<T, C>, cid: ContractId<T>, argument: C, additional?: Template<object>[]): AppThunk => async (dispatch, getState) => {
+const runExercise = <T, C>(choice: Choice<T, C>, cid: ContractId<T>, argument: C): AppThunk => async (dispatch, getState) => {
   const ledgerStore = getLedgerStore(getState());
   const ledger = new Ledger(ledgerStore.credentials);
   const events = await ledger.exercise(choice, cid, argument);
   // NOTE(MH): We want to signal the UI that the exercise is finished while
   // were still updating the affected templates "in the backgound".
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  dispatch(reloadForEvents(events, additional));
+  dispatch(reloadForEvents(events));
 }
 
-const runPseudoExerciseByKey = <T, C>(choice: Choice<T, C>, key: Query<T>, argument: C, additional?: Template<object>[]): AppThunk => async (dispatch, getState) => {
+const runPseudoExerciseByKey = <T, C>(choice: Choice<T, C>, key: Query<T>, argument: C): AppThunk => async (dispatch, getState) => {
   const ledgerStore = getLedgerStore(getState());
   const ledger = new Ledger(ledgerStore.credentials);
   const events = await ledger.pseudoExerciseByKey(choice, key, argument);
   // NOTE(MH): We want to signal the UI that the exercise is finished while
   // were still updating the affected templates "in the backgound".
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  dispatch(reloadForEvents(events, additional));
+  dispatch(reloadForEvents(events));
 }
 
 
@@ -178,7 +180,7 @@ export const useExercise = <T, C>(choice: Choice<T, C>, additional?: Template<ob
 
   const exercise = async (cid: ContractId<T>, argument: C) => {
     setLoading(true);
-    await dispatch(runExercise(choice, cid, argument, additional));
+    await dispatch(runExercise(choice, cid, argument));
     setLoading(false);
   }
   return [exercise, loading];
@@ -190,7 +192,7 @@ export const usePseudoExerciseByKey = <T, C>(choice: Choice<T, C>, additional?: 
 
   const exercise = async (key: Query<T>, argument: C) => {
     setLoading(true);
-    await dispatch(runPseudoExerciseByKey(choice, key, argument, additional));
+    await dispatch(runPseudoExerciseByKey(choice, key, argument));
     setLoading(false);
   }
   return [exercise, loading];
