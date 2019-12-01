@@ -6,6 +6,11 @@ export type Entry<T> = {
   contracts: Contract<T>[];
 }
 
+export type KeyEntry<T> = {
+  loading: boolean;
+  contract: Contract<T> | null;
+}
+
 export type Entries<T> = immutable.Map<Query<T>, Entry<T>>;
 
 export type Store = immutable.Map<Template<object>, Entries<object>>;

@@ -1,30 +1,34 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Requests from './Requests';
-import { useDispatch, useSelector } from 'react-redux';
-import { loadSummary } from './employeeViewReducer';
-import { RootState } from '../../app/rootReducer';
+import { useSelector } from 'react-redux';
 import SummaryView from './SummaryView';
 import { Segment } from 'semantic-ui-react';
 import VacationListSegment from '../../components/VacationListSegment';
 import { toast } from 'react-semantic-toasts';
 import { getLedger } from '../../app/store';
-import { useQuery } from '../../app/damlReducer';
+import { useQuery, usePseudoFetchByKey } from '../../app/damlReducer';
 import * as v3 from '../../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 import { splitVacations } from '../../utils/vacation';
+import { EmployeeSummary } from '../../utils/employee';
 
 
 const EmployeeView: React.FC = () => {
-  const dispatch = useDispatch();
-  useEffect(() => { dispatch(loadSummary()); }, [dispatch]);
-
-  const summary = useSelector((state: RootState) => state.employeeView.summary);
-  const loadingSummary = useSelector((state: RootState) => state.employeeView.loadingSummary);
-
   const party = useSelector(getLedger).party;
+  const allocation =
+    usePseudoFetchByKey(v3.EmployeeVacationAllocation, () => ({employeeRole: {employee: party}}), [party]);
+  let summary: EmployeeSummary | null = null;
+  if (allocation.contract) {
+    const {argument: {employeeRole: {employee, boss}, remainingDays}} = allocation.contract;
+    summary = {
+      employee,
+      boss,
+      remainingVacationDays: remainingDays,
+    };
+  }
+
   const {loading: loadingVacations, contracts: vacationContracts} =
     useQuery(v3.Vacation, () => ({employeeRole: {employee: party}}), [party]);
   const vacations = splitVacations(vacationContracts);
-
 
   const handleCancelVacation = () => toast({
     title: 'Not yet implemented',
@@ -35,8 +39,8 @@ const EmployeeView: React.FC = () => {
 
   return (
     <Segment.Group>
-      {summary ? <SummaryView {...summary} loading={loadingSummary} /> : <p>Loading summary...</p>}
-      <Requests />
+      {summary ? <SummaryView {...summary} loading={allocation.loading} /> : <p>Loading summary...</p>}
+      <Requests employeeSummary={summary} />
       <VacationListSegment
         header='Upcoming Vacations'
         loading={loadingVacations}

@@ -10,11 +10,16 @@ import { vacationLength, prettyRequests } from '../../utils/vacation';
 import { useQuery } from '../../app/damlReducer';
 import * as v3 from '../../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 import { getLedger } from '../../app/store';
+import { EmployeeSummary } from '../../utils/employee';
 
-const Requests: React.FC = () => {
+type Props = {
+  employeeSummary: EmployeeSummary | null;
+}
+
+const Requests: React.FC<Props> = (props: Props) => {
   const dispatch = useDispatch();
-  const boss = useSelector((state: RootState) => (state.employeeView.summary || {boss: ''}).boss);
-  const currentRequest = useSelector((state: RootState) => state.employeeView.currentRequest);
+  const boss = props.employeeSummary ? props.employeeSummary.boss : '';
+    const currentRequest = useSelector((state: RootState) => state.employeeView.currentRequest);
   const addingRequest = useSelector((state: RootState) => state.employeeView.addingRequest);
 
   const party = useSelector(getLedger).party;
