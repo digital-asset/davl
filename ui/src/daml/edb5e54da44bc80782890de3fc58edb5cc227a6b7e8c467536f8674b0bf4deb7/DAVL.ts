@@ -30,6 +30,7 @@ export const Vacation: daml.Template<Vacation> & {
   },
 };
 Vacation.Archive.template = Vacation;
+daml.registerTemplate(Vacation);
 
 export type VacationRequest_Accept = {
 };
@@ -62,6 +63,7 @@ export const VacationRequest: daml.Template<VacationRequest> & {
 };
 VacationRequest.Archive.template = VacationRequest;
 VacationRequest.VacationRequest_Accept.template = VacationRequest;
+daml.registerTemplate(VacationRequest);
 
 export type EmployeeVacationAllocation_AddDays = {
   days: daml.Int;
@@ -98,6 +100,7 @@ export const EmployeeVacationAllocation: daml.Template<EmployeeVacationAllocatio
 };
 EmployeeVacationAllocation.Archive.template = EmployeeVacationAllocation;
 EmployeeVacationAllocation.EmployeeVacationAllocation_AddDays.template = EmployeeVacationAllocation;
+daml.registerTemplate(EmployeeVacationAllocation);
 
 export type EmployeeProposal_Accept = {
 };
@@ -132,6 +135,7 @@ export const EmployeeProposal: daml.Template<EmployeeProposal> & {
 };
 EmployeeProposal.Archive.template = EmployeeProposal;
 EmployeeProposal.EmployeeProposal_Accept.template = EmployeeProposal;
+daml.registerTemplate(EmployeeProposal);
 
 export type EmployeeRole_RequestVacation = {
   fromDate: daml.Date;
@@ -172,3 +176,4 @@ export const EmployeeRole: daml.Template<EmployeeRole> & {
 };
 EmployeeRole.Archive.template = EmployeeRole;
 EmployeeRole.EmployeeRole_RequestVacation.template = EmployeeRole;
+daml.registerTemplate(EmployeeRole);

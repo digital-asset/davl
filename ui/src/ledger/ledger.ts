@@ -1,6 +1,6 @@
 import Credentials from './credentials';
-import { Choice, Contract, ContractId, Party, Template, Query } from '@digitalasset/daml-json-types';
-import { array, Result } from '@mojotech/json-type-validation';
+import { Choice, Contract, ContractId, Party, Template, Query, TemplateId, Serializable } from '@digitalasset/daml-json-types';
+import * as jtv from '@mojotech/json-type-validation';
 
 type LedgerResponse = {
   status: number;
@@ -10,6 +10,47 @@ type LedgerResponse = {
 type LedgerError = {
   status: number;
   errors: string[];
+}
+
+export type CreatedEvent = {
+  created: Contract<object>;
+}
+
+export type ArchivedEvent = {
+  archived: {
+    templateId: TemplateId;
+    contractId: ContractId<object>;
+    witnessParties: Party[];
+  };
+}
+
+export type Event = CreatedEvent | ArchivedEvent;
+
+// FIXME(MH): The cast below is a gross hack relying on the fact that
+// `Contract` will only use the `decoder` field of its argument. We should
+// instead provide something like a proper `AnyContract` in `daml-json-types`.
+const AnyTemplate: Template<object> = {
+  decoder: () => jtv.object({}),
+} as Template<object>;
+
+const CreatedEvent: Serializable<CreatedEvent> = {
+  decoder: () => jtv.object({
+    created: Contract(AnyTemplate).decoder(),
+  }),
+};
+
+const ArchivedEvent: Serializable<ArchivedEvent> = {
+  decoder: () => jtv.object({
+    archived: jtv.object({
+      templateId: TemplateId.decoder(),
+      contractId: ContractId(AnyTemplate).decoder(),
+      witnessParties: jtv.array(Party.decoder()),
+    }),
+  }),
+};
+
+const Event: Serializable<Event> = {
+  decoder: () => jtv.oneOf<Event>(CreatedEvent.decoder(), ArchivedEvent.decoder()),
 }
 
 /**
@@ -57,7 +98,7 @@ class Ledger {
     const payload = {"%templates": [template.templateId]};
     Object.assign(payload, query);
     const json = await this.submit('contracts/search', payload);
-    return Result.withException(array(Contract(template).decoder()).run(json));
+    return jtv.Result.withException(jtv.array(Contract(template).decoder()).run(json));
   }
 
   /**
@@ -100,13 +141,13 @@ class Ledger {
       argument,
     }
     const json = await this.submit('command/create', payload);
-    return Result.withException(Contract(template).decoder().run(json));
+    return jtv.Result.withException(Contract(template).decoder().run(json));
   }
 
   /**
    * Exercise a choice on a contract.
    */
-  async exercise<T, C>(choice: Choice<T, C>, contractId: ContractId<T>, argument: C): Promise<unknown> {
+  async exercise<T, C>(choice: Choice<T, C>, contractId: ContractId<T>, argument: C): Promise<Event[]> {
     const payload = {
       templateId: choice.template.templateId,
       contractId,
@@ -114,14 +155,14 @@ class Ledger {
       argument,
     };
     const json = await this.submit('command/exercise', payload);
-    return json;
+    return jtv.Result.withException(jtv.array(Event.decoder()).run(json));
   }
 
   /**
    * Mimic DAML's `exerciseByKey`. The `key` must be a formulation of the
    * contract key as a query.
    */
-  async pseudoExerciseByKey<T, C>(choice: Choice<T, C>, key: Query<T>, argument: C): Promise<unknown> {
+  async pseudoExerciseByKey<T, C>(choice: Choice<T, C>, key: Query<T>, argument: C): Promise<Event[]> {
     const contract = await this.pseudoFetchByKey(choice.template, key);
     return this.exercise(choice, contract.contractId, argument);
   }

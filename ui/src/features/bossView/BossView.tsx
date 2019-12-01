@@ -21,10 +21,7 @@ const BossView: React.FC = () => {
   const requests = prettyRequests(requestsContracts);
 
   const [exerciseApproveRequest] =
-    useExercise(
-      v3.VacationRequest.VacationRequest_Accept,
-      [v3.EmployeeVacationAllocation, v3.Vacation, v3.VacationRequest]
-    );
+    useExercise(v3.VacationRequest.VacationRequest_Accept);
 
   const handleApproveRequest = async (vacation: Vacation) => {
     await exerciseApproveRequest(vacation.contractId, {});

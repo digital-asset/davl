@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-namespace */
-import { Template, Query, Contract, Choice, ContractId } from "@digitalasset/daml-json-types";
+import { Template, Query, Contract, Choice, ContractId, lookupTemplate } from "@digitalasset/daml-json-types";
 import * as root from './rootReducer';
 import { useSelector, useDispatch } from "react-redux";
 import { AppThunk, AppDispatch } from "./store";
-import Ledger from "../ledger/ledger";
+import Ledger, { Event } from "../ledger/ledger";
 import Credentials from "../ledger/credentials";
 import * as QueryStore from './query';
 import { useEffect, useMemo, useState } from "react";
@@ -89,16 +89,33 @@ export const reloadTemplate = <T extends {}>(template: Template<T>): AppThunk =>
   }
 }
 
-const runExercise = <T, C>(choice: Choice<T, C>, cid: ContractId<T>, argument: C, affected: Template<object>[]): AppThunk => async (dispatch, getState) => {
-  const ledgerStore = getLedgerStore(getState());
-  const ledger = new Ledger(ledgerStore.credentials);
-  await ledger.exercise(choice, cid, argument);
+const reloadForEvents = (events: Event[], additional?: Template<object>[]): AppThunk => async (dispatch) => {
+  const templatesSet = new Set(additional);
+  for (const event of events) {
+    templatesSet.add(lookupTemplate('created' in event ? event.created.templateId : event.archived.templateId));
+  }
+  const templates = Array.from(templatesSet);
+  await Promise.all(templates.map((template) => dispatch(reloadTemplate(template))));
 }
 
-const runPseudoExerciseByKey = <T, C>(choice: Choice<T, C>, key: Query<T>, argument: C, affected: Template<object>[]): AppThunk => async (dispatch, getState) => {
+const runExercise = <T, C>(choice: Choice<T, C>, cid: ContractId<T>, argument: C, additional?: Template<object>[]): AppThunk => async (dispatch, getState) => {
   const ledgerStore = getLedgerStore(getState());
   const ledger = new Ledger(ledgerStore.credentials);
-  await ledger.pseudoExerciseByKey(choice, key, argument);
+  const events = await ledger.exercise(choice, cid, argument);
+  // NOTE(MH): We want to signal the UI that the exercise is finished while
+  // were still updating the affected templates "in the backgound".
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  dispatch(reloadForEvents(events, additional));
+}
+
+const runPseudoExerciseByKey = <T, C>(choice: Choice<T, C>, key: Query<T>, argument: C, additional?: Template<object>[]): AppThunk => async (dispatch, getState) => {
+  const ledgerStore = getLedgerStore(getState());
+  const ledger = new Ledger(ledgerStore.credentials);
+  const events = await ledger.pseudoExerciseByKey(choice, key, argument);
+  // NOTE(MH): We want to signal the UI that the exercise is finished while
+  // were still updating the affected templates "in the backgound".
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  dispatch(reloadForEvents(events, additional));
 }
 
 
@@ -155,36 +172,26 @@ export const usePseudoFetchByKey = <T>(template: Template<T>, keyFactory: () => 
   }), [entry]);
 }
 
-export const useExercise = <T, C>(choice: Choice<T, C>, affected: Template<object>[]): [(cid: ContractId<T>, argument: C) => Promise<void>, boolean] => {
+export const useExercise = <T, C>(choice: Choice<T, C>, additional?: Template<object>[]): [(cid: ContractId<T>, argument: C) => Promise<void>, boolean] => {
   const [loading, setLoading] = useState(false);
   const dispatch: AppDispatch = useDispatch();
 
   const exercise = async (cid: ContractId<T>, argument: C) => {
     setLoading(true);
-    await dispatch(runExercise(choice, cid, argument, affected));
+    await dispatch(runExercise(choice, cid, argument, additional));
     setLoading(false);
-    affected.forEach((template) => {
-      // NOTE(MH): We deliberately "spawn" the refreshing in the background.
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      dispatch(reloadTemplate(template));
-    });
   }
   return [exercise, loading];
 }
 
-export const usePseudoExerciseByKey = <T, C>(choice: Choice<T, C>, affected: Template<object>[]): [(key: Query<T>, argument: C) => Promise<void>, boolean] => {
+export const usePseudoExerciseByKey = <T, C>(choice: Choice<T, C>, additional?: Template<object>[]): [(key: Query<T>, argument: C) => Promise<void>, boolean] => {
   const [loading, setLoading] = useState(false);
   const dispatch: AppDispatch = useDispatch();
 
   const exercise = async (key: Query<T>, argument: C) => {
     setLoading(true);
-    await dispatch(runPseudoExerciseByKey(choice, key, argument, affected));
+    await dispatch(runPseudoExerciseByKey(choice, key, argument, additional));
     setLoading(false);
-    affected.forEach((template) => {
-      // NOTE(MH): We deliberately "spawn" the refreshing in the background.
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      dispatch(reloadTemplate(template));
-    });
   }
   return [exercise, loading];
 }
