@@ -1,16 +1,15 @@
 import React from 'react';
 import VacationListSegment from '../../components/VacationListSegment';
-import { useDispatch, useSelector } from 'react-redux';
-import { approveRequest } from './bossViewReducer';
+import { useSelector } from 'react-redux';
 import { Vacation, prettyRequests, splitVacations } from '../../utils/vacation';
 import { Segment } from 'semantic-ui-react';
 import Staff from './Staff';
-import { useQuery } from '../../app/damlReducer';
+import { useQuery, useExercise } from '../../app/damlReducer';
 import * as v3 from '../../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 import { getLedger } from '../../app/store';
+import { toast } from 'react-semantic-toasts';
 
 const BossView: React.FC = () => {
-  const dispatch = useDispatch();
   const party = useSelector(getLedger).party;
 
   const {loading: loadingVacations, contracts: vacationContracts} =
@@ -21,8 +20,21 @@ const BossView: React.FC = () => {
     useQuery(v3.VacationRequest, () => ({vacation: {employeeRole: {boss: party}}}), [party]);
   const requests = prettyRequests(requestsContracts);
 
-  const handleApproveRequest = (vacation: Vacation) =>
-    dispatch(approveRequest(vacation.contractId));
+  const [exerciseApproveRequest] =
+    useExercise(
+      v3.VacationRequest.VacationRequest_Accept,
+      [v3.EmployeeVacationAllocation, v3.Vacation, v3.VacationRequest]
+    );
+
+  const handleApproveRequest = async (vacation: Vacation) => {
+    await exerciseApproveRequest(vacation.contractId, {});
+    toast({
+      title: 'Success',
+      type: 'success',
+      time: 3000,
+      description: 'Request successfully approved.',
+    });
+  }
 
   return (
     <Segment.Group>

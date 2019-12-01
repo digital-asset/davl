@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-namespace */
-import { Template, Query, Contract, Choice } from "@digitalasset/daml-json-types";
+import { Template, Query, Contract, Choice, ContractId } from "@digitalasset/daml-json-types";
 import * as root from './rootReducer';
 import { useSelector, useDispatch } from "react-redux";
 import { AppThunk, AppDispatch } from "./store";
@@ -89,6 +89,12 @@ export const reloadTemplate = <T extends {}>(template: Template<T>): AppThunk =>
   }
 }
 
+const runExercise = <T, C>(choice: Choice<T, C>, cid: ContractId<T>, argument: C, affected: Template<object>[]): AppThunk => async (dispatch, getState) => {
+  const ledgerStore = getLedgerStore(getState());
+  const ledger = new Ledger(ledgerStore.credentials);
+  await ledger.exercise(choice, cid, argument);
+}
+
 const runPseudoExerciseByKey = <T, C>(choice: Choice<T, C>, key: Query<T>, argument: C, affected: Template<object>[]): AppThunk => async (dispatch, getState) => {
   const ledgerStore = getLedgerStore(getState());
   const ledger = new Ledger(ledgerStore.credentials);
@@ -147,6 +153,23 @@ export const usePseudoFetchByKey = <T>(template: Template<T>, keyFactory: () => 
     loading: entry.loading,
     contract: entry.contracts[0] || null,
   }), [entry]);
+}
+
+export const useExercise = <T, C>(choice: Choice<T, C>, affected: Template<object>[]): [(cid: ContractId<T>, argument: C) => Promise<void>, boolean] => {
+  const [loading, setLoading] = useState(false);
+  const dispatch: AppDispatch = useDispatch();
+
+  const exercise = async (cid: ContractId<T>, argument: C) => {
+    setLoading(true);
+    await dispatch(runExercise(choice, cid, argument, affected));
+    setLoading(false);
+    affected.forEach((template) => {
+      // NOTE(MH): We deliberately "spawn" the refreshing in the background.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      dispatch(reloadTemplate(template));
+    });
+  }
+  return [exercise, loading];
 }
 
 export const usePseudoExerciseByKey = <T, C>(choice: Choice<T, C>, affected: Template<object>[]): [(key: Query<T>, argument: C) => Promise<void>, boolean] => {
