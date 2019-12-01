@@ -2,7 +2,7 @@ import React from 'react'
 import { Image, Menu, Container, Grid } from 'semantic-ui-react'
 import EmployeeView from '../features/employeeView/EmployeeView';
 import BossView from '../features/bossView/BossView';
-import * as daml from '../app/damlReducer';
+import { useParty, useReload } from '../daml-react-hooks';
 
 type Props = {
   onLogout: () => void;
@@ -12,8 +12,8 @@ type Props = {
  * React component for the main screen of the `App`.
  */
 const MainScreen: React.FC<Props> = (props) => {
-  const party = daml.useParty();
-  const reload = daml.useReload();
+  const party = useParty();
+  const reload = useReload();
 
   return (
     <>
