@@ -2,21 +2,18 @@ import React from 'react'
 import { Image, Menu, Container, Grid } from 'semantic-ui-react'
 import EmployeeView from '../features/employeeView/EmployeeView';
 import BossView from '../features/bossView/BossView';
-import { useDispatch } from 'react-redux';
-import { logOut } from '../app/authReducer';
 import * as daml from '../app/damlReducer';
+
+type Props = {
+  onLogout: () => void;
+}
 
 /**
  * React component for the main screen of the `App`.
  */
-const MainScreen: React.FC = () => {
-  const dispatch = useDispatch();
+const MainScreen: React.FC<Props> = (props) => {
   const party = daml.useParty();
   const reload = daml.useReload();
-
-  const handleLogout = () => {
-    dispatch(logOut());
-  }
 
   return (
     <>
@@ -44,7 +41,7 @@ const MainScreen: React.FC = () => {
           <Menu.Item
             position='right'
             active={false}
-            onClick={handleLogout}
+            onClick={props.onLogout}
             icon='log out'
           />
         </Menu.Menu>
