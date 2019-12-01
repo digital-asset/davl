@@ -1,35 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Segment, Header, List, Form, SemanticTRANSITIONS } from 'semantic-ui-react';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../../app/rootReducer';
+import { useSelector } from 'react-redux';
 import ListActionItem from '../../components/ListActionItem';
 import { DatesRangeInput } from 'semantic-ui-calendar-react';
-import { addRequest, setCurrentRequest } from './employeeViewReducer';
 import { VacationListItem } from '../../components/VacationListItem';
 import { vacationLength, prettyRequests } from '../../utils/vacation';
-import { useQuery } from '../../app/damlReducer';
+import { useQuery, usePseudoExerciseByKey } from '../../app/damlReducer';
 import * as v3 from '../../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 import { getLedger } from '../../app/store';
 import { EmployeeSummary } from '../../utils/employee';
+import { toast } from 'react-semantic-toasts';
 
 type Props = {
   employeeSummary: EmployeeSummary | null;
 }
 
 const Requests: React.FC<Props> = (props: Props) => {
-  const dispatch = useDispatch();
+  const [currentRequest, setCurrentRequest] = useState('');
   const boss = props.employeeSummary ? props.employeeSummary.boss : '';
-    const currentRequest = useSelector((state: RootState) => state.employeeView.currentRequest);
-  const addingRequest = useSelector((state: RootState) => state.employeeView.addingRequest);
 
   const party = useSelector(getLedger).party;
   const {loading: loadingRequests, contracts: requestContracts} =
     useQuery(v3.VacationRequest, () => ({vacation: {employeeRole: {employee: party}}}), [party]);
   const requests = prettyRequests(requestContracts);
 
+  const [exerciseRequestVacation, loadingRequestVacation] =
+    usePseudoExerciseByKey(v3.EmployeeRole.EmployeeRole_RequestVacation, [v3.VacationRequest]);
+
   const handleCancelRequest = () => alert('Canceling vacation requests is not yet implemented.');
 
-  const handleAddRequest = (event?: React.FormEvent) => {
+  const handleAddRequest = async (event?: React.FormEvent) => {
     if (event) {
       event.preventDefault();
     }
@@ -37,13 +37,21 @@ const Requests: React.FC<Props> = (props: Props) => {
       alert('No date range set for the vacation request.');
       return;
     }
+    const key = {employee: party};
     const fromDate = currentRequest.slice(0, 10);
     const toDate = currentRequest.slice(-10);
-    dispatch(addRequest(fromDate, toDate));
+    await exerciseRequestVacation(key, {fromDate, toDate});
+    setCurrentRequest('');
+    toast({
+      title: 'Success',
+      type: 'success',
+      description: 'Request successfully submitted.',
+      time: 3000,
+    });
   }
 
   const handleCurrentRequestChange = (event: React.SyntheticEvent, data: {value: string}) =>
-    dispatch(setCurrentRequest(data.value));
+    setCurrentRequest(data.value);
 
   let days = '';
   if (currentRequest.length === 23) {
@@ -87,7 +95,7 @@ const Requests: React.FC<Props> = (props: Props) => {
               closable
               icon={false}
               allowSameEndDate
-              loading={addingRequest}
+              loading={loadingRequestVacation}
             />
           </Form>
           </List.Header>
