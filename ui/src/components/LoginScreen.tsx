@@ -1,21 +1,24 @@
 import React from 'react'
 import { Button, Form, Grid, Header, Segment } from 'semantic-ui-react'
 import Credentials, { preCheckCredentials } from '../ledger/credentials';
-import { useDispatch, useSelector } from 'react-redux';
-import { logIn, signUp } from '../app/authReducer';
-import { RootState } from '../app/rootReducer';
+import Ledger from '../ledger/ledger';
+import * as v3 from '../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
+
+type Props = {
+  onLogin: (credentials: Credentials) => void;
+}
+
+type Status = 'Normal' | 'LoggingIn' | 'SigningUp';
 
 /**
  * React component for the login screen of the `App`.
  */
-const LoginScreen: React.FC = () => {
-  const dispatch = useDispatch();
-  const loggingIn = useSelector((state: RootState) => state.auth.loggingIn);
-  const signingUp = useSelector((state: RootState) => state.auth.signingUp);
+const LoginScreen: React.FC<Props> = (props) => {
+  const [status, setStatus] = React.useState<Status>('Normal');
   const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
 
-  const withCredentials = (cont: (credentials: Credentials) => void) => {
+  const withCredentials = async (cont: (credentials: Credentials) => Promise<void>) => {
     const credentials = {
       party: username,
       token: password,
@@ -25,19 +28,54 @@ const LoginScreen: React.FC = () => {
       alert(error);
       return;
     }
-    cont(credentials);
+    await cont(credentials);
   }
 
-  const handleLogin = (event: React.FormEvent) => {
-    event.preventDefault();
-    withCredentials((credentials) => {
-      dispatch(logIn(credentials));
+  const handleLogin = async (event?: React.FormEvent) => {
+    if (event) {
+      event.preventDefault();
+    }
+    await withCredentials(async (credentials) => {
+      try {
+        setStatus('LoggingIn');
+        const ledger = new Ledger(credentials);
+        const employeeRole = await ledger.pseudoLookupByKey(v3.EmployeeRole, {employee: credentials.party});
+        if (employeeRole) {
+          props.onLogin(credentials);
+        } else {
+          alert("You have not yet signed up.");
+        }
+      } finally {
+        setStatus('Normal');
+      }
     });
   }
 
-  const handleSignup = (event: React.FormEvent) => {
+  const handleSignup = async (event: React.FormEvent) => {
     event.preventDefault();
-    withCredentials((credentials) => dispatch(signUp(credentials)));
+    await withCredentials(async (credentials) => {
+      try {
+        setStatus('SigningUp')
+        const ledger = new Ledger(credentials);
+        const employeeProposals =
+          await ledger.query(v3.EmployeeProposal, {employeeRole: {employee: credentials.party}});
+        if (employeeProposals.length === 0) {
+          alert('There is no invitation for you.');
+        } else if(employeeProposals.length > 1) {
+          alert('There are multiple invitations for you.');
+        } else {
+          const {contractId, argument: employeeProposal} = employeeProposals[0];
+          const employeeRole = employeeProposal.employeeRole;
+          const accept = window.confirm(`You have been invited to work for ${employeeRole.company}.\nBoss: ${employeeRole.boss}\nVacation days: ${employeeProposal.vacationDays}\nDo you accept?`);
+          if (accept) {
+            await ledger.exercise(v3.EmployeeProposal.EmployeeProposal_Accept, contractId, {});
+            await handleLogin();
+          }
+        }
+      } finally {
+        setStatus('Normal');
+      }
+    });
   }
 
   return (
@@ -70,14 +108,14 @@ const LoginScreen: React.FC = () => {
             <Button.Group fluid size='large'>
               <Button
                 primary
-                loading={loggingIn}
+                loading={status === 'LoggingIn'}
                 onClick={handleLogin}
               >
                 Log in
               </Button>
               <Button
                 secondary
-                loading={signingUp}
+                loading={status === 'SigningUp'}
                 onClick={handleSignup}
               >
                 Sign up
