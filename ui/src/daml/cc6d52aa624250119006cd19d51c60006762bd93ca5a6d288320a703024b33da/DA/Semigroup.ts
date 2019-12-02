@@ -3,10 +3,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import * as daml from '@digitalasset/daml-json-types';
 import * as jtv from '@mojotech/json-type-validation';
-import packageId from '../packageId';
-
-const moduleName = 'DA.Semigroup';
-const templateId = (entityName: string): daml.TemplateId => ({packageId, moduleName, entityName});
 
 export type Max<a4ip> = {
   unpack: a4ip;

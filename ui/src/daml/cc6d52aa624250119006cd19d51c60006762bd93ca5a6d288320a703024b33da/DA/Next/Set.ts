@@ -3,10 +3,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import * as daml from '@digitalasset/daml-json-types';
 import * as jtv from '@mojotech/json-type-validation';
-import packageId from '../../packageId';
-
-const moduleName = 'DA.Next.Set';
-const templateId = (entityName: string): daml.TemplateId => ({packageId, moduleName, entityName});
 
 export type Set<a9z2> = {
   textMap: { [key: string]: {} };
