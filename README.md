@@ -69,8 +69,19 @@ daml json-api --ledger-host localhost --ledger-port 6865 --http-port 7575 --appl
 
 4. Frontend dev server
 
-With the JSON API server up-and-running, you should be able to start the
-frontend server:
+If you haven't build the `daml-json-types` library yet, for instance when
+you're on a fresh clone of the repo, you need to build it first:
+
+```
+cd daml-json-types
+yarn build
+```
+
+During active development of `daml-json-types`, you might want to run
+`yarn build:watch` instead of `yarn build`.
+
+With the JSON API server up-and-running and `daml-json-types` built,
+you should be able to start the frontend server:
 
 ```
 cd ui
