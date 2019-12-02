@@ -1,77 +1,28 @@
 import { Template, Query, Contract, Choice, ContractId, lookupTemplate } from "@digitalasset/daml-json-types";
-import Ledger, { Event } from "../ledger/ledger";
+import { Event } from "./ledger";
 import { useEffect, useMemo, useState, useContext } from "react";
 import * as LedgerStore from './ledgerStore';
 import * as TemplateStore from './templateStore';
-import React from "react";
+import { setQueryLoading, setQueryResult } from "./reducer";
+import { DamlLedgerState, DamlLedgerContext } from './context';
 
-export type Store = {
-  data: LedgerStore.Store;
-  dispatch: React.Dispatch<Action>;
-  ledger: Ledger;
-}
-
-export const DamlLedgerContext = React.createContext(null as Store | null);
-
-const SET_QUERY_LOADING = 'SET_QUERY_LOADING';
-const SET_QUERY_RESULT = 'SET_QUERY_RESULT';
-
-type SetQueryLoadingAction<T> = {
-  type: typeof SET_QUERY_LOADING;
-  template: Template<T>;
-  query: Query<T>;
-}
-
-type SetQueryResultAction<T> = {
-  type: typeof SET_QUERY_RESULT;
-  template: Template<T>;
-  query: Query<T>;
-  contracts: Contract<T>[];
-}
-
-export type Action = SetQueryLoadingAction<object> | SetQueryResultAction<object>;
-
-const setQueryLoading = <T>(template: Template<T>, query: Query<T>): SetQueryLoadingAction<T> => ({
-  type: SET_QUERY_LOADING,
-  template,
-  query,
-});
-
-const setQueryResult = <T>(template: Template<T>, query: Query<T>, contracts: Contract<T>[]): SetQueryResultAction<T> => ({
-  type: SET_QUERY_RESULT,
-  template,
-  query,
-  contracts,
-});
-
-export const reducer = (ledgerStore: LedgerStore.Store, action: Action): LedgerStore.Store => {
-  switch (action.type) {
-    case SET_QUERY_LOADING: {
-      return LedgerStore.setQueryLoading(ledgerStore, action.template, action.query);
-    }
-    case SET_QUERY_RESULT: {
-      return LedgerStore.setQueryResult(ledgerStore, action.template, action.query, action.contracts);
-    }
-  }
-}
-
-const useStore = (): Store => {
-  const store = useContext(DamlLedgerContext);
-  if (!store) {
+const useDamlState = (): DamlLedgerState => {
+  const state = useContext(DamlLedgerContext);
+  if (!state) {
     throw Error("Trying to use DamlLedgerContext before initializing.")
   }
-  return store;
+  return state;
 }
 
 export const useParty = () => {
-  const store = useStore();
-  return store.ledger.party;
+  const state = useDamlState();
+  return state.ledger.party;
 }
 
-const loadQuery = async <T extends {}>(store: Store, template: Template<T>, query: Query<T>) => {
-  store.dispatch(setQueryLoading(template, query));
-  const contracts = await store.ledger.query(template, query);
-  store.dispatch(setQueryResult(template, query, contracts));
+const loadQuery = async <T extends {}>(state: DamlLedgerState, template: Template<T>, query: Query<T>) => {
+  state.dispatch(setQueryLoading(template, query));
+  const contracts = await state.ledger.query(template, query);
+  state.dispatch(setQueryResult(template, query, contracts));
 }
 
 const emptyQueryFactory = <T extends {}>(): Query<T> => ({} as Query<T>);
@@ -84,15 +35,15 @@ export type QueryResult<T> = {
 /// React Hook for a query against the `/contracts/search` endpoint of the JSON API.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const useQuery = <T>(template: Template<T>, queryFactory: () => Query<T> = emptyQueryFactory, queryDeps?: readonly any[]): QueryResult<T> => {
-  const store = useStore();
+  const state = useDamlState();
   const query = useMemo(queryFactory, queryDeps);
-  const contracts = LedgerStore.getQueryResult(store.data, template, query);
+  const contracts = LedgerStore.getQueryResult(state.store, template, query);
   useEffect(() => {
     if (contracts === undefined) {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      loadQuery(store, template, query);
+      loadQuery(state, template, query);
     }
-  }, [store, template, query, contracts]);
+  }, [state, template, query, contracts]);
   return contracts || TemplateStore.emptyQueryResult();
 }
 
@@ -116,17 +67,17 @@ export const usePseudoFetchByKey = <T>(template: Template<T>, keyFactory: () => 
   }), [entry]);
 }
 
-const reloadTemplate = async <T extends {}>(store: Store, template: Template<T>) => {
-  const templateStore = store.data.templateStores.get(template) as TemplateStore.Store<T> | undefined;
+const reloadTemplate = async <T extends {}>(state: DamlLedgerState, template: Template<T>) => {
+  const templateStore = state.store.templateStores.get(template) as TemplateStore.Store<T> | undefined;
   if (templateStore) {
     const queries: Query<T>[] = Array.from(templateStore.queryResults.keys());
     await Promise.all(queries.map(async (query) => {
-      await loadQuery(store, template, query);
+      await loadQuery(state, template, query);
     }));
   }
 }
 
-const reloadEvents = async (store: Store, events: Event[]) => {
+const reloadEvents = async (state: DamlLedgerState, events: Event[]) => {
   // TODO(MH): This is a sledge hammer approach. We completely reload every
   // single template that has been touched by the events. A future optimization
   // would be to remove the archived templates from their tables and add the
@@ -134,23 +85,23 @@ const reloadEvents = async (store: Store, events: Event[]) => {
   const templates = new Set(events.map((event) =>
     lookupTemplate('created' in event ? event.created.templateId : event.archived.templateId)
   ));
-  await Promise.all(Array.from(templates).map((template) => reloadTemplate(store, template)));
+  await Promise.all(Array.from(templates).map((template) => reloadTemplate(state, template)));
 }
 
 /// React Hook that returns a function to exercise a choice and a boolean
 /// indicator whether the exercise is currently running.
 export const useExercise = <T, C>(choice: Choice<T, C>): [(cid: ContractId<T>, argument: C) => Promise<void>, boolean] => {
   const [loading, setLoading] = useState(false);
-  const store = useStore();
+  const state = useDamlState();
 
   const exercise = async (cid: ContractId<T>, argument: C) => {
     setLoading(true);
-    const events = await store.ledger.exercise(choice, cid, argument);
+    const events = await state.ledger.exercise(choice, cid, argument);
     setLoading(false);
     // NOTE(MH): We want to signal the UI that the exercise is finished while
     // were still updating the affected templates "in the backgound".
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    reloadEvents(store, events);
+    reloadEvents(state, events);
   }
   return [exercise, loading];
 }
@@ -159,25 +110,25 @@ export const useExercise = <T, C>(choice: Choice<T, C>): [(cid: ContractId<T>, a
 /// indicator whether the exercise is currently running.
 export const usePseudoExerciseByKey = <T, C>(choice: Choice<T, C>): [(key: Query<T>, argument: C) => Promise<void>, boolean] => {
   const [loading, setLoading] = useState(false);
-  const store = useStore();
+  const state = useDamlState();
 
   const exercise = async (key: Query<T>, argument: C) => {
     setLoading(true);
-    const events = await store.ledger.pseudoExerciseByKey(choice, key, argument);
+    const events = await state.ledger.pseudoExerciseByKey(choice, key, argument);
     setLoading(false);
     // NOTE(MH): We want to signal the UI that the exercise is finished while
     // were still updating the affected templates "in the backgound".
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    reloadEvents(store, events);
+    reloadEvents(state, events);
   }
   return [exercise, loading];
 }
 
 /// React Hook to reload all queries currently present in the store.
 export const useReload = (): () => Promise<void> => {
-  const store = useStore();
+  const state = useDamlState();
   return async () => {
-    const templates = Array.from(store.data.templateStores.keys());
-    await Promise.all(templates.map((template) => reloadTemplate(store, template)));
+    const templates = Array.from(state.store.templateStores.keys());
+    await Promise.all(templates.map((template) => reloadTemplate(state, template)));
   }
 }
