@@ -3,10 +3,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import * as daml from '@digitalasset/daml-json-types';
 import * as jtv from '@mojotech/json-type-validation';
-import packageId from '../packageId';
-
-const moduleName = 'DA.Upgrade';
-const templateId = (entityName: string): daml.TemplateId => ({packageId, moduleName, entityName});
 
 export type MetaEquiv<a9Ou, a9Ov> = {
 };
