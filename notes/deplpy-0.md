@@ -61,7 +61,7 @@ However, it can still be an attractive deployment option for prototype
 demonstrations.
 
 DAML code can be loaded in the in-memory sandbox in two ways:
-- By specifying a path to a DAR file as a (repeatable) command-line option to
+- By specifying a path to a DAR file as a (repeatable) command-line argument to
   the sandbox directly, or
 - After startup, by uploading a DAR file through the gRPC API.
 
@@ -108,7 +108,7 @@ higher-level, portable way of describing workflows to run on many of them.
 
 If you're considering a distributed use-case, please refer to the [DAML-on-X]()
 documentation for an up-to-date list of currently-supported DAML backends, as
-we and our partners are constantly working hard at adding more.
+we and our partners are constantly working hard on adding more.
 
 Different ledgers have different deployment models of their own, as well as
 different capabilities that may limit the extent to which they can support the
