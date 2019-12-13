@@ -47,7 +47,7 @@ const BossView: React.FC = () => {
         loading={loadingVacations}
         viewer='boss'
         vacations={vacations.upcoming}
-        onClickVacation={() => {}}
+        onClickVacation={() => { /* do nothing */ }}
         icon='info'
       />
       <VacationListSegment
@@ -55,7 +55,7 @@ const BossView: React.FC = () => {
         loading={loadingVacations}
         viewer='boss'
         vacations={vacations.past}
-        onClickVacation={() => {}}
+        onClickVacation={() => { /* do nothing */ }}
         icon='info'
       />
     </Segment.Group>
