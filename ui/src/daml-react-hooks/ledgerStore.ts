@@ -1,5 +1,6 @@
 import * as immutable from 'immutable';
-import { Query, Contract, Template } from '@digitalasset/daml-json-types';
+import { Template } from '@digitalasset/daml-json-types';
+import { CreateEvent, Query } from '@digitalasset/daml-ledger-fetch';
 import * as TemplateStore from './templateStore';
 
 export type Store = {
@@ -26,7 +27,7 @@ export const setQueryLoading = <T extends {}>(store: Store, template: Template<T
     TemplateStore.setQueryLoading(templateStore, query))
 });
 
-export const setQueryResult = <T extends {}>(store: Store, template: Template<T>, query: Query<T>, contracts: Contract<T>[]): Store => ({
+export const setQueryResult = <T extends {}>(store: Store, template: Template<T>, query: Query<T>, contracts: CreateEvent<T>[]): Store => ({
   ...store,
   templateStores: store.templateStores.update(template, (templateStore = TemplateStore.empty()) =>
     TemplateStore.setQueryResult(templateStore, query, contracts))
