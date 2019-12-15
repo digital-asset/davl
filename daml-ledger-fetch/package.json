@@ -1,13 +1,15 @@
 {
   "private": true,
-  "name": "@digitalasset/daml-json-types",
+  "name": "@digitalasset/daml-ledger-fetch",
   "version": "0.0.1",
-  "description": "Types used by the DAML JSON API.",
+  "description": "Wrappers around DAML's JSON API.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "license": "Apache-2.0",
   "dependencies": {
-    "@mojotech/json-type-validation": "^3.1.0"
+    "@digitalasset/daml-json-types": "0.0.1",
+    "@mojotech/json-type-validation": "^3.1.0",
+    "cross-fetch": "^3.0.4"
   },
   "scripts": {
     "build": "tsc --build",
@@ -39,6 +41,6 @@
     "@typescript-eslint/eslint-plugin": "^2.11.0",
     "@typescript-eslint/parser": "^2.11.0",
     "eslint": "^6.7.2",
-    "typescript": "3.6.4"
+    "typescript": "3.7.3"
   }
 }

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Button, Form, Grid, Header, Segment } from 'semantic-ui-react'
 import Credentials, { preCheckCredentials } from '../daml-react-hooks/credentials';
-import Ledger from '../daml-react-hooks/ledger';
+import Ledger from '@digitalasset/daml-ledger-fetch';
 import * as v3 from '../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 
 type Props = {
@@ -38,7 +38,7 @@ const LoginScreen: React.FC<Props> = (props) => {
     await withCredentials(async (credentials) => {
       try {
         setStatus('LoggingIn');
-        const ledger = new Ledger(credentials);
+        const ledger = new Ledger(credentials.token);
         const employeeRole = await ledger.pseudoLookupByKey(v3.EmployeeRole, {employee: credentials.party});
         if (employeeRole) {
           props.onLogin(credentials);
@@ -56,7 +56,7 @@ const LoginScreen: React.FC<Props> = (props) => {
     await withCredentials(async (credentials) => {
       try {
         setStatus('SigningUp')
-        const ledger = new Ledger(credentials);
+        const ledger = new Ledger(credentials.token);
         const employeeProposals =
           await ledger.query(v3.EmployeeProposal, {employeeRole: {employee: credentials.party}});
         if (employeeProposals.length === 0) {

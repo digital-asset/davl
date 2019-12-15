@@ -1,6 +1,9 @@
-import Credentials from './credentials';
+// Copyright (c) 2019 The DAML Authors. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 import { Choice, Contract, ContractId, Party, Template, Query, TemplateId, Serializable } from '@digitalasset/daml-json-types';
 import * as jtv from '@mojotech/json-type-validation';
+import fetch from 'cross-fetch';
 
 type LedgerResponse = {
   status: number;
@@ -57,19 +60,25 @@ const Event: Serializable<Event> = {
  * An object of type `Ledger` represents a handle to a DAML ledger.
  */
 class Ledger {
-  readonly party: Party;
   private readonly token: string;
+  private readonly baseUrl: string;
 
-  constructor(credentials: Credentials) {
-    this.party = credentials.party;
-    this.token = credentials.token;
+  constructor(token: string, baseUrl?: string) {
+    this.token = token;
+    if (!baseUrl) {
+      this.baseUrl = '';
+    } else if (baseUrl.endsWith('/')) {
+      this.baseUrl = baseUrl;
+    } else {
+      throw Error(`The ledger base URL must end in a '/'. (${baseUrl})`);
+    }
   }
 
   /**
    * Internal function to submit a command to the JSON API.
    */
-  private async submit(method: string, payload: unknown): Promise<unknown> {
-    const httpResponse = await fetch(method, {
+  private async submit(endpoint: string, payload: unknown): Promise<unknown> {
+    const httpResponse = await fetch(this.baseUrl + endpoint, {
       body: JSON.stringify(payload),
       headers: {
         'Authorization': 'Bearer ' + this.token,
@@ -149,7 +158,7 @@ class Ledger {
    */
   async exercise<T, C>(choice: Choice<T, C>, contractId: ContractId<T>, argument: C): Promise<Event[]> {
     const payload = {
-      templateId: choice.template.templateId,
+      templateId: choice.template().templateId,
       contractId,
       choice: choice.choiceName,
       argument,
@@ -163,7 +172,7 @@ class Ledger {
    * contract key as a query.
    */
   async pseudoExerciseByKey<T, C>(choice: Choice<T, C>, key: Query<T>, argument: C): Promise<Event[]> {
-    const contract = await this.pseudoFetchByKey(choice.template, key);
+    const contract = await this.pseudoFetchByKey(choice.template(), key);
     return this.exercise(choice, contract.contractId, argument);
   }
 
@@ -183,3 +192,4 @@ class Ledger {
 }
 
 export default Ledger;
+
