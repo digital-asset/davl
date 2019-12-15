@@ -1,5 +1,5 @@
 import { Template, Query, Contract, Choice, ContractId, lookupTemplate } from "@digitalasset/daml-json-types";
-import { Event } from "./ledger";
+import { Event } from '@digitalasset/daml-ledger-fetch';
 import { useEffect, useMemo, useState, useContext } from "react";
 import * as LedgerStore from './ledgerStore';
 import * as TemplateStore from './templateStore';
@@ -16,7 +16,7 @@ const useDamlState = (): DamlLedgerState => {
 
 export const useParty = () => {
   const state = useDamlState();
-  return state.ledger.party;
+  return state.party;
 }
 
 const loadQuery = async <T extends {}>(state: DamlLedgerState, template: Template<T>, query: Query<T>) => {

@@ -25,12 +25,11 @@ export const Vacation: daml.Template<Vacation> & {
     toDate: daml.Date.decoder(),
   }),
   Archive: {
-    template: undefined as unknown as daml.Template<Vacation>,
+    template: () => Vacation,
     choiceName: 'Archive',
     decoder: pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive.decoder,
   },
 };
-Vacation.Archive.template = Vacation;
 daml.registerTemplate(Vacation);
 
 export type VacationRequest_Accept = {
@@ -52,18 +51,16 @@ export const VacationRequest: daml.Template<VacationRequest> & {
     vacation: Vacation.decoder(),
   }),
   Archive: {
-    template: undefined as unknown as daml.Template<VacationRequest>,
+    template: () => VacationRequest,
     choiceName: 'Archive',
     decoder: pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive.decoder,
   },
   VacationRequest_Accept: {
-    template: undefined as unknown as daml.Template<VacationRequest>,
+    template: () => VacationRequest,
     choiceName: 'VacationRequest_Accept',
     decoder: VacationRequest_Accept.decoder,
   },
 };
-VacationRequest.Archive.template = VacationRequest;
-VacationRequest.VacationRequest_Accept.template = VacationRequest;
 daml.registerTemplate(VacationRequest);
 
 export type EmployeeVacationAllocation_AddDays = {
@@ -89,18 +86,16 @@ export const EmployeeVacationAllocation: daml.Template<EmployeeVacationAllocatio
     remainingDays: daml.Int.decoder(),
   }),
   Archive: {
-    template: undefined as unknown as daml.Template<EmployeeVacationAllocation>,
+    template: () => EmployeeVacationAllocation,
     choiceName: 'Archive',
     decoder: pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive.decoder,
   },
   EmployeeVacationAllocation_AddDays: {
-    template: undefined as unknown as daml.Template<EmployeeVacationAllocation>,
+    template: () => EmployeeVacationAllocation,
     choiceName: 'EmployeeVacationAllocation_AddDays',
     decoder: EmployeeVacationAllocation_AddDays.decoder,
   },
 };
-EmployeeVacationAllocation.Archive.template = EmployeeVacationAllocation;
-EmployeeVacationAllocation.EmployeeVacationAllocation_AddDays.template = EmployeeVacationAllocation;
 daml.registerTemplate(EmployeeVacationAllocation);
 
 export type EmployeeProposal_Accept = {
@@ -124,18 +119,16 @@ export const EmployeeProposal: daml.Template<EmployeeProposal> & {
     vacationDays: daml.Int.decoder(),
   }),
   Archive: {
-    template: undefined as unknown as daml.Template<EmployeeProposal>,
+    template: () => EmployeeProposal,
     choiceName: 'Archive',
     decoder: pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive.decoder,
   },
   EmployeeProposal_Accept: {
-    template: undefined as unknown as daml.Template<EmployeeProposal>,
+    template: () => EmployeeProposal,
     choiceName: 'EmployeeProposal_Accept',
     decoder: EmployeeProposal_Accept.decoder,
   },
 };
-EmployeeProposal.Archive.template = EmployeeProposal;
-EmployeeProposal.EmployeeProposal_Accept.template = EmployeeProposal;
 daml.registerTemplate(EmployeeProposal);
 
 export type EmployeeRole_RequestVacation = {
@@ -165,16 +158,14 @@ export const EmployeeRole: daml.Template<EmployeeRole> & {
     boss: daml.Party.decoder(),
   }),
   Archive: {
-    template: undefined as unknown as daml.Template<EmployeeRole>,
+    template: () => EmployeeRole,
     choiceName: 'Archive',
     decoder: pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive.decoder,
   },
   EmployeeRole_RequestVacation: {
-    template: undefined as unknown as daml.Template<EmployeeRole>,
+    template: () => EmployeeRole,
     choiceName: 'EmployeeRole_RequestVacation',
     decoder: EmployeeRole_RequestVacation.decoder,
   },
 };
-EmployeeRole.Archive.template = EmployeeRole;
-EmployeeRole.EmployeeRole_RequestVacation.template = EmployeeRole;
 daml.registerTemplate(EmployeeRole);
