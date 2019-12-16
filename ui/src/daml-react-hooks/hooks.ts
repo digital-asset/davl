@@ -1,5 +1,5 @@
-import { Template, Query, Contract, Choice, ContractId, lookupTemplate } from "@digitalasset/daml-json-types";
-import { Event } from '@digitalasset/daml-ledger-fetch';
+import { Template, Choice, ContractId, lookupTemplate } from "@digitalasset/daml-json-types";
+import { Event, Query, CreateEvent } from '@digitalasset/daml-ledger-fetch';
 import { useEffect, useMemo, useState, useContext } from "react";
 import * as LedgerStore from './ledgerStore';
 import * as TemplateStore from './templateStore';
@@ -28,7 +28,7 @@ const loadQuery = async <T extends {}>(state: DamlLedgerState, template: Templat
 const emptyQueryFactory = <T extends {}>(): Query<T> => ({} as Query<T>);
 
 export type QueryResult<T> = {
-  contracts: Contract<T>[];
+  contracts: CreateEvent<T>[];
   loading: boolean;
 }
 
@@ -48,7 +48,7 @@ export const useQuery = <T>(template: Template<T>, queryFactory: () => Query<T> 
 }
 
 export type FetchResult<T> = {
-  contract: Contract<T> | null;
+  contract: CreateEvent<T> | null;
   loading: boolean;
 }
 
@@ -77,7 +77,7 @@ const reloadTemplate = async <T extends {}>(state: DamlLedgerState, template: Te
   }
 }
 
-const reloadEvents = async (state: DamlLedgerState, events: Event[]) => {
+const reloadEvents = async (state: DamlLedgerState, events: Event<unknown>[]) => {
   // TODO(MH): This is a sledge hammer approach. We completely reload every
   // single template that has been touched by the events. A future optimization
   // would be to remove the archived templates from their tables and add the

@@ -1,8 +1,8 @@
 import * as immutable from 'immutable';
-import { Query, Contract } from '@digitalasset/daml-json-types';
+import { CreateEvent, Query } from '@digitalasset/daml-ledger-fetch';
 
 export type QueryResult<T> = {
-  contracts: Contract<T>[];
+  contracts: CreateEvent<T>[];
   loading: boolean;
 }
 
@@ -28,7 +28,7 @@ export const setQueryLoading = <T>(store: Store<T>, query: Query<T>): Store<T> =
   queryResults: store.queryResults.update(query, (res = emptyQueryResult()) => ({...res, loading: true})),
 })
 
-export const setQueryResult = <T>(store: Store<T>, query: Query<T>, contracts: Contract<T>[]): Store<T> => ({
+export const setQueryResult = <T>(store: Store<T>, query: Query<T>, contracts: CreateEvent<T>[]): Store<T> => ({
   ...store,
   queryResults: store.queryResults.set(query, {contracts, loading: false})
 });
