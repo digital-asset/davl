@@ -1,10 +1,11 @@
 import { Template } from "@digitalasset/daml-json-types";
-import { CreateEvent, Query } from '@digitalasset/daml-ledger-fetch';
+import { CreateEvent, Query, Event } from '@digitalasset/daml-ledger-fetch';
 import * as LedgerStore from './ledgerStore';
 
 enum ActionType {
   SetQueryLoading,
   SetQueryResult,
+  UpdateQueryResult,
   SetFetchByKeyLoading,
   SetFetchByKeyResult,
 }
@@ -20,6 +21,13 @@ type SetQueryResultAction<T extends object> = {
   template: Template<T>;
   query: Query<T>;
   contracts: CreateEvent<T>[];
+}
+
+type UpdateQueryResultAction<T extends object> = {
+  type: typeof ActionType.UpdateQueryResult;
+  template: Template<T>;
+  query: Query<T>;
+  events: Event<T>[];
 }
 
 type SetFetchByKeyLoadingAction<T extends object, K> = {
@@ -38,6 +46,7 @@ type SetFetchByKeyResultAction<T extends object, K> = {
 export type Action =
   | SetQueryLoadingAction<object>
   | SetQueryResultAction<object>
+  | UpdateQueryResultAction<object>
   | SetFetchByKeyLoadingAction<object, unknown>
   | SetFetchByKeyResultAction<object, unknown>
 
@@ -52,6 +61,13 @@ export const setQueryResult = <T extends object>(template: Template<T>, query: Q
   template,
   query,
   contracts,
+});
+
+export const updateQueryResult = <T extends object>(template: Template<T>, query: Query<T>, events: Event<T>[]): UpdateQueryResultAction<T> => ({
+  type: ActionType.UpdateQueryResult,
+  template,
+  query,
+  events,
 });
 
 export const setFetchByKeyLoading = <T extends object, K>(template: Template<T, K>, key: K): SetFetchByKeyLoadingAction<T, K> => ({
@@ -74,6 +90,9 @@ export const reducer = (ledgerStore: LedgerStore.Store, action: Action): LedgerS
     }
     case ActionType.SetQueryResult: {
       return LedgerStore.setQueryResult(ledgerStore, action.template, action.query, action.contracts);
+    }
+    case ActionType.UpdateQueryResult: {
+      return LedgerStore.updateQueryResult(ledgerStore, action.template, action.query, action.events);
     }
     case ActionType.SetFetchByKeyLoading: {
       return LedgerStore.setFetchByKeyLoading(ledgerStore, action.template, action.key);
