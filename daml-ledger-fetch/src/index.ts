@@ -192,7 +192,8 @@ class Ledger {
       argument,
     };
     const json = await this.submit('command/exercise', payload);
-    return jtv.Result.withException(jtv.array(decodeEventUnknown()).run(json));
+    const {contracts} = jtv.Result.withException(jtv.object({contracts: jtv.array(decodeEventUnknown())}).run(json));
+    return contracts;
   }
 
   /**
