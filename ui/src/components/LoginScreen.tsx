@@ -8,13 +8,13 @@ type Props = {
   onLogin: (credentials: Credentials) => void;
 }
 
-type Status = 'Normal' | 'LoggingIn' | 'SigningUp';
+enum Status { Normal, LoggingIn, SigningUp }
 
 /**
  * React component for the login screen of the `App`.
  */
 const LoginScreen: React.FC<Props> = (props) => {
-  const [status, setStatus] = React.useState<Status>('Normal');
+  const [status, setStatus] = React.useState(Status.Normal);
   const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
 
@@ -37,16 +37,17 @@ const LoginScreen: React.FC<Props> = (props) => {
     }
     await withCredentials(async (credentials) => {
       try {
-        setStatus('LoggingIn');
+        setStatus(Status.LoggingIn);
         const ledger = new Ledger(credentials.token);
         const employeeRole = await ledger.pseudoLookupByKey(v3.EmployeeRole, {employee: credentials.party});
         if (employeeRole) {
+          setStatus(Status.Normal);
           props.onLogin(credentials);
         } else {
           alert("You have not yet signed up.");
         }
       } finally {
-        setStatus('Normal');
+        setStatus(Status.Normal);
       }
     });
   }
@@ -55,7 +56,7 @@ const LoginScreen: React.FC<Props> = (props) => {
     event.preventDefault();
     await withCredentials(async (credentials) => {
       try {
-        setStatus('SigningUp')
+        setStatus(Status.SigningUp)
         const ledger = new Ledger(credentials.token);
         const employeeProposals =
           await ledger.query(v3.EmployeeProposal, {employeeRole: {employee: credentials.party}});
@@ -73,7 +74,7 @@ const LoginScreen: React.FC<Props> = (props) => {
           }
         }
       } finally {
-        setStatus('Normal');
+        setStatus(Status.Normal);
       }
     });
   }
@@ -108,14 +109,14 @@ const LoginScreen: React.FC<Props> = (props) => {
             <Button.Group fluid size='large'>
               <Button
                 primary
-                loading={status === 'LoggingIn'}
+                loading={status === Status.LoggingIn}
                 onClick={handleLogin}
               >
                 Log in
               </Button>
               <Button
                 secondary
-                loading={status === 'SigningUp'}
+                loading={status === Status.SigningUp}
                 onClick={handleSignup}
               >
                 Sign up
