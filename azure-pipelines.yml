@@ -35,11 +35,9 @@ jobs:
       # Install DAML SDK, possibly from cache
       - bash: |
           set -euo pipefail
-          SDK_VERSION=$(cat v3/daml.yaml | grep sdk-version | awk '{print $2}')
-          echo ${SDK_VERSION} > /tmp/daml-version
       - task: CacheBeta@1
         inputs:
-          key: /tmp/daml-version
+          key: SDK_VERSION
           path: /tmp/daml
           cacheHitVar: DAML_CACHE_HIT
       - bash: |
@@ -47,7 +45,7 @@ jobs:
           DIR=$(pwd)
 
           # Install DAML SDK
-          SDK_VERSION=$(cat v3/daml.yaml | grep sdk-version | awk '{print $2}')
+          SDK_VERSION=$(cat SDK_VERSION)
           curl https://get.daml.com | sh -s $SDK_VERSION
 
           mkdir -p /tmp/daml
@@ -98,11 +96,9 @@ jobs:
           echo "$GOOGLE_APPLICATION_CREDENTIALS_CONTENT" > $GCS_KEY
           gcloud auth activate-service-account --key-file=$GCS_KEY
           gcloud auth configure-docker --quiet
-          SDK_VERSION=$(cat v3/daml.yaml | grep '^sdk-version:' | awk '{print $2}')
-          DAVL_VERSION=$(cat v3/daml.yaml | grep '^version:' | awk '{print $2}')
-          DAVL_NAME=$(cat v3/daml.yaml | grep '^name:' | awk '{print $2}')
+          SDK_VERSION=$(cat SDK_VERSION)
 
-          SANDBOX_TAG=$(get_tag released v3/daml.yaml infra/sandbox.docker)
+          SANDBOX_TAG=$(get_tag released SDK_VERSION infra/sandbox.docker)
           if tag_exists sandbox $SANDBOX_TAG; then
               echo "sandbox $SANDBOX_TAG already exists."
           else
@@ -117,7 +113,7 @@ jobs:
               tell_slack sandbox:$SANDBOX_TAG
           fi
 
-          JSON_API_TAG=$(get_tag v3/daml.yaml infra/json-api.docker)
+          JSON_API_TAG=$(get_tag SDK_VERSION infra/json-api.docker)
           if tag_exists json-api $JSON_API_TAG; then
               echo "json-api $JSON_API_TAG already exists."
           else
