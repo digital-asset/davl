@@ -99,7 +99,7 @@ jobs:
               SANDBOX_IMAGE=gcr.io/da-dev-pinacolada/sandbox:$SANDBOX_TAG
               DOCKER_DIR=$(mktemp -d)
               cp -r released $DOCKER_DIR/released
-              cp $HOME/.daml/sdk/$SDK_VERSION/sandbox/sandbox.jar $DOCKER_DIR/sandbox.jar
+              cp -r $HOME/.daml/sdk/$SDK_VERSION/daml-sdk $DOCKER_DIR/daml-sdk
               docker build -t $SANDBOX_IMAGE -f infra/sandbox.docker $DOCKER_DIR
               docker push $SANDBOX_IMAGE
               echo "Done building $SANDBOX_IMAGE."
@@ -113,8 +113,7 @@ jobs:
               echo "Building json-api image version $JSON_API_TAG..."
               JSON_API_IMAGE=gcr.io/da-dev-pinacolada/json-api:$JSON_API_TAG
               DOCKER_DIR=$(mktemp -d)
-              cp $HOME/.daml/sdk/$SDK_VERSION/json-api/json-api-logback.xml $DOCKER_DIR/logback.xml
-              cp $HOME/.daml/sdk/$SDK_VERSION/json-api/json-api.jar $DOCKER_DIR/json-api.jar
+              cp -r $HOME/.daml/sdk/$SDK_VERSION/daml-sdk $DOCKER_DIR/daml-sdk
               docker build -t $JSON_API_IMAGE -f infra/json-api.docker $DOCKER_DIR
               docker push $JSON_API_IMAGE
               echo "Done building $JSON_API_IMAGE."
