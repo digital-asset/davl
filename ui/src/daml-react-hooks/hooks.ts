@@ -90,36 +90,38 @@ const reloadEvents = async (state: DamlLedgerState, events: Event<unknown>[]) =>
 
 /// React Hook that returns a function to exercise a choice and a boolean
 /// indicator whether the exercise is currently running.
-export const useExercise = <T, C>(choice: Choice<T, C>): [(cid: ContractId<T>, argument: C) => Promise<void>, boolean] => {
+export const useExercise = <T, C, R>(choice: Choice<T, C, R>): [(cid: ContractId<T>, argument: C) => Promise<R>, boolean] => {
   const [loading, setLoading] = useState(false);
   const state = useDamlState();
 
   const exercise = async (cid: ContractId<T>, argument: C) => {
     setLoading(true);
-    const events = await state.ledger.exercise(choice, cid, argument);
+    const [result, events] = await state.ledger.exercise(choice, cid, argument);
     setLoading(false);
     // NOTE(MH): We want to signal the UI that the exercise is finished while
     // were still updating the affected templates "in the backgound".
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     reloadEvents(state, events);
+    return result;
   }
   return [exercise, loading];
 }
 
 /// React Hook that returns a function to exercise a choice and a boolean
 /// indicator whether the exercise is currently running.
-export const usePseudoExerciseByKey = <T, C>(choice: Choice<T, C>): [(key: Query<T>, argument: C) => Promise<void>, boolean] => {
+export const usePseudoExerciseByKey = <T, C, R>(choice: Choice<T, C, R>): [(key: Query<T>, argument: C) => Promise<R>, boolean] => {
   const [loading, setLoading] = useState(false);
   const state = useDamlState();
 
   const exercise = async (key: Query<T>, argument: C) => {
     setLoading(true);
-    const events = await state.ledger.pseudoExerciseByKey(choice, key, argument);
+    const [result, events] = await state.ledger.pseudoExerciseByKey(choice, key, argument);
     setLoading(false);
     // NOTE(MH): We want to signal the UI that the exercise is finished while
     // were still updating the affected templates "in the backgound".
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     reloadEvents(state, events);
+    return result;
   }
   return [exercise, loading];
 }

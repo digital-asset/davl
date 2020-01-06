@@ -1,8 +1,8 @@
 // Generated from DA/Internal/Prelude.daml
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import * as daml from '@digitalasset/daml-json-types';
 import * as jtv from '@mojotech/json-type-validation';
+import * as daml from '@digitalasset/daml-json-types';
 
 export type Down<aAZ> = {
   unpack: aAZ;

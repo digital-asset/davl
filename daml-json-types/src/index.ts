@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The DAML Authors. All rights reserved.
+// Copyright (c) 2020 The DAML Authors. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 import * as jtv from '@mojotech/json-type-validation';
 
@@ -10,6 +10,14 @@ export interface Serializable<T> {
   // NOTE(MH): This must be a function to allow for mutually recursive decoders.
   decoder: () => jtv.Decoder<T>;
 }
+
+/**
+ * This is a check to ensure that enum's are serializable. If the enum is named 'Color', the check
+ * is done by adding a line 'STATIC_IMPLEMENTS_SERIALIZABLE_CHECK<Color>(Color)' after the
+ * definition of 'Color'.
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+export const STATIC_IMPLEMENTS_SERIALIZABLE_CHECK = <T>(_: Serializable<T>) => {}
 
 /**
  * Identifier of a DAML template.
@@ -26,15 +34,17 @@ export type TemplateId = {
  */
 export interface Template<T> extends Serializable<T> {
   templateId: TemplateId;
-  Archive: Choice<T, {}>;
+  Archive: Choice<T, {}, {}>;
 }
 
 /**
  * Interface for objects representing DAML choices. It is similar to the
  * `Choice` type class in DAML.
  */
-export interface Choice<T, C> extends Serializable<C> {
+export interface Choice<T, C, R> {
   template: () => Template<T>;
+  argumentDecoder: () => jtv.Decoder<C>;
+  resultDecoder: () => jtv.Decoder<R>;
   choiceName: string;
 }
 

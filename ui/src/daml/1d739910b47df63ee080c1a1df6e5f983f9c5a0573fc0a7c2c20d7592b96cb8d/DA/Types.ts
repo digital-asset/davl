@@ -1,8 +1,8 @@
 // Generated from DA/Types.daml
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import * as daml from '@digitalasset/daml-json-types';
 import * as jtv from '@mojotech/json-type-validation';
+import * as daml from '@digitalasset/daml-json-types';
 
 export type Tuple20<a2lA, a2lB, a2lC, a2lD, a2lE, a2lF, a2lG, a2lH, a2lI, a2lJ, a2lK, a2lL, a2lM, a2lN, a2lO, a2lP, a2lQ, a2lR, a2lS, a2lT> = {
   _1: a2lA;
