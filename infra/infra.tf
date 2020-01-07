@@ -163,7 +163,7 @@ STARTUP
 }
 
 resource "google_compute_instance" "proxy" {
-  name         = "proxy"
+  name         = "proxy-${var.ui}"
   machine_type = "n1-standard-2"
 
   boot_disk {
