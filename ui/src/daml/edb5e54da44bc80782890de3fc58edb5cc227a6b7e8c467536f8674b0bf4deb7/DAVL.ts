@@ -1,8 +1,8 @@
 // Generated from DAVL.daml
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import * as daml from '@digitalasset/daml-json-types';
 import * as jtv from '@mojotech/json-type-validation';
+import * as daml from '@digitalasset/daml-json-types';
 
 import * as pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template from './../cc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da/DA/Internal/Template';
 
@@ -16,7 +16,7 @@ export type Vacation = {
   toDate: daml.Date;
 };
 export const Vacation: daml.Template<Vacation> & {
-  Archive: daml.Choice<Vacation, pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive>;
+  Archive: daml.Choice<Vacation, pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive, {} >;
 } = {
   templateId: templateId('Vacation'),
   decoder: () => jtv.object({
@@ -27,7 +27,8 @@ export const Vacation: daml.Template<Vacation> & {
   Archive: {
     template: () => Vacation,
     choiceName: 'Archive',
-    decoder: pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive.decoder,
+    argumentDecoder: pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive.decoder,
+    resultDecoder: () => daml.Unit.decoder(),
   },
 };
 daml.registerTemplate(Vacation);
@@ -43,8 +44,8 @@ export type VacationRequest = {
   vacation: Vacation;
 };
 export const VacationRequest: daml.Template<VacationRequest> & {
-  Archive: daml.Choice<VacationRequest, pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive>;
-  VacationRequest_Accept: daml.Choice<VacationRequest, VacationRequest_Accept>;
+  Archive: daml.Choice<VacationRequest, pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive, {} >;
+  VacationRequest_Accept: daml.Choice<VacationRequest, VacationRequest_Accept, daml.ContractId<Vacation> >;
 } = {
   templateId: templateId('VacationRequest'),
   decoder: () => jtv.object({
@@ -53,12 +54,14 @@ export const VacationRequest: daml.Template<VacationRequest> & {
   Archive: {
     template: () => VacationRequest,
     choiceName: 'Archive',
-    decoder: pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive.decoder,
+    argumentDecoder: pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive.decoder,
+    resultDecoder: () => daml.Unit.decoder(),
   },
   VacationRequest_Accept: {
     template: () => VacationRequest,
     choiceName: 'VacationRequest_Accept',
-    decoder: VacationRequest_Accept.decoder,
+    argumentDecoder: VacationRequest_Accept.decoder,
+    resultDecoder: () => daml.ContractId(Vacation).decoder(),
   },
 };
 daml.registerTemplate(VacationRequest);
@@ -77,8 +80,8 @@ export type EmployeeVacationAllocation = {
   remainingDays: daml.Int;
 };
 export const EmployeeVacationAllocation: daml.Template<EmployeeVacationAllocation> & {
-  Archive: daml.Choice<EmployeeVacationAllocation, pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive>;
-  EmployeeVacationAllocation_AddDays: daml.Choice<EmployeeVacationAllocation, EmployeeVacationAllocation_AddDays>;
+  Archive: daml.Choice<EmployeeVacationAllocation, pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive, {} >;
+  EmployeeVacationAllocation_AddDays: daml.Choice<EmployeeVacationAllocation, EmployeeVacationAllocation_AddDays, {} >;
 } = {
   templateId: templateId('EmployeeVacationAllocation'),
   decoder: () => jtv.object({
@@ -88,12 +91,14 @@ export const EmployeeVacationAllocation: daml.Template<EmployeeVacationAllocatio
   Archive: {
     template: () => EmployeeVacationAllocation,
     choiceName: 'Archive',
-    decoder: pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive.decoder,
+    argumentDecoder: pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive.decoder,
+    resultDecoder: () => daml.Unit.decoder(),
   },
   EmployeeVacationAllocation_AddDays: {
     template: () => EmployeeVacationAllocation,
     choiceName: 'EmployeeVacationAllocation_AddDays',
-    decoder: EmployeeVacationAllocation_AddDays.decoder,
+    argumentDecoder: EmployeeVacationAllocation_AddDays.decoder,
+    resultDecoder: () => daml.Unit.decoder(),
   },
 };
 daml.registerTemplate(EmployeeVacationAllocation);
@@ -110,8 +115,8 @@ export type EmployeeProposal = {
   vacationDays: daml.Int;
 };
 export const EmployeeProposal: daml.Template<EmployeeProposal> & {
-  Archive: daml.Choice<EmployeeProposal, pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive>;
-  EmployeeProposal_Accept: daml.Choice<EmployeeProposal, EmployeeProposal_Accept>;
+  Archive: daml.Choice<EmployeeProposal, pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive, {} >;
+  EmployeeProposal_Accept: daml.Choice<EmployeeProposal, EmployeeProposal_Accept, {} >;
 } = {
   templateId: templateId('EmployeeProposal'),
   decoder: () => jtv.object({
@@ -121,12 +126,14 @@ export const EmployeeProposal: daml.Template<EmployeeProposal> & {
   Archive: {
     template: () => EmployeeProposal,
     choiceName: 'Archive',
-    decoder: pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive.decoder,
+    argumentDecoder: pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive.decoder,
+    resultDecoder: () => daml.Unit.decoder(),
   },
   EmployeeProposal_Accept: {
     template: () => EmployeeProposal,
     choiceName: 'EmployeeProposal_Accept',
-    decoder: EmployeeProposal_Accept.decoder,
+    argumentDecoder: EmployeeProposal_Accept.decoder,
+    resultDecoder: () => daml.Unit.decoder(),
   },
 };
 daml.registerTemplate(EmployeeProposal);
@@ -148,8 +155,8 @@ export type EmployeeRole = {
   boss: daml.Party;
 };
 export const EmployeeRole: daml.Template<EmployeeRole> & {
-  Archive: daml.Choice<EmployeeRole, pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive>;
-  EmployeeRole_RequestVacation: daml.Choice<EmployeeRole, EmployeeRole_RequestVacation>;
+  Archive: daml.Choice<EmployeeRole, pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive, {} >;
+  EmployeeRole_RequestVacation: daml.Choice<EmployeeRole, EmployeeRole_RequestVacation, daml.ContractId<VacationRequest> >;
 } = {
   templateId: templateId('EmployeeRole'),
   decoder: () => jtv.object({
@@ -160,12 +167,14 @@ export const EmployeeRole: daml.Template<EmployeeRole> & {
   Archive: {
     template: () => EmployeeRole,
     choiceName: 'Archive',
-    decoder: pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive.decoder,
+    argumentDecoder: pkgcc6d52aa624250119006cd19d51c60006762bd93ca5a6d288320a703024b33da_DA_Internal_Template.Archive.decoder,
+    resultDecoder: () => daml.Unit.decoder(),
   },
   EmployeeRole_RequestVacation: {
     template: () => EmployeeRole,
     choiceName: 'EmployeeRole_RequestVacation',
-    decoder: EmployeeRole_RequestVacation.decoder,
+    argumentDecoder: EmployeeRole_RequestVacation.decoder,
+    resultDecoder: () => daml.ContractId(VacationRequest).decoder(),
   },
 };
 daml.registerTemplate(EmployeeRole);

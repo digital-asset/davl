@@ -1,8 +1,8 @@
 // Generated from DA/Generics.daml
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import * as daml from '@digitalasset/daml-json-types';
 import * as jtv from '@mojotech/json-type-validation';
+import * as daml from '@digitalasset/daml-json-types';
 
 export type MetaSel0 = {
   mbRecordName: ({} | null);
@@ -32,25 +32,69 @@ export const MetaData0: daml.Serializable<MetaData0> = ({
   }),
 });
 
-export type DecidedStrictness = unknown;
-export const DecidedStrictness: daml.Serializable<DecidedStrictness> = ({
-  decoder: jtv.unknownJson,
-});
+export enum DecidedStrictness{
+  DecidedLazy = 'DecidedLazy',
+  DecidedStrict = 'DecidedStrict',
+  DecidedUnpack = 'DecidedUnpack',
+}
+daml.STATIC_IMPLEMENTS_SERIALIZABLE_CHECK<DecidedStrictness>(DecidedStrictness)
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace DecidedStrictness{
+  export const decoder =
+  () => jtv.oneOf(
+    jtv.constant(DecidedStrictness.DecidedLazy),
+    jtv.constant(DecidedStrictness.DecidedStrict),
+    jtv.constant(DecidedStrictness.DecidedUnpack),
+  )
+}
 
-export type SourceStrictness = unknown;
-export const SourceStrictness: daml.Serializable<SourceStrictness> = ({
-  decoder: jtv.unknownJson,
-});
+export enum SourceStrictness{
+  NoSourceStrictness = 'NoSourceStrictness',
+  SourceLazy = 'SourceLazy',
+  SourceStrict = 'SourceStrict',
+}
+daml.STATIC_IMPLEMENTS_SERIALIZABLE_CHECK<SourceStrictness>(SourceStrictness)
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace SourceStrictness{
+  export const decoder =
+  () => jtv.oneOf(
+    jtv.constant(SourceStrictness.NoSourceStrictness),
+    jtv.constant(SourceStrictness.SourceLazy),
+    jtv.constant(SourceStrictness.SourceStrict),
+  )
+}
 
-export type SourceUnpackedness = unknown;
-export const SourceUnpackedness: daml.Serializable<SourceUnpackedness> = ({
-  decoder: jtv.unknownJson,
-});
+export enum SourceUnpackedness{
+  NoSourceUnpackedness = 'NoSourceUnpackedness',
+  SourceNoUnpack = 'SourceNoUnpack',
+  SourceUnpack = 'SourceUnpack',
+}
+daml.STATIC_IMPLEMENTS_SERIALIZABLE_CHECK<SourceUnpackedness>(SourceUnpackedness)
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace SourceUnpackedness{
+  export const decoder =
+  () => jtv.oneOf(
+    jtv.constant(SourceUnpackedness.NoSourceUnpackedness),
+    jtv.constant(SourceUnpackedness.SourceNoUnpack),
+    jtv.constant(SourceUnpackedness.SourceUnpack),
+  )
+}
 
-export type Associativity = unknown;
-export const Associativity: daml.Serializable<Associativity> = ({
-  decoder: jtv.unknownJson,
-});
+export enum Associativity{
+  LeftAssociative = 'LeftAssociative',
+  RightAssociative = 'RightAssociative',
+  NotAssociative = 'NotAssociative',
+}
+daml.STATIC_IMPLEMENTS_SERIALIZABLE_CHECK<Associativity>(Associativity)
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace Associativity{
+  export const decoder =
+  () => jtv.oneOf(
+    jtv.constant(Associativity.LeftAssociative),
+    jtv.constant(Associativity.RightAssociative),
+    jtv.constant(Associativity.NotAssociative),
+  )
+}
 
 export type Infix0 = {
   associativity: Associativity;
