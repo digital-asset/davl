@@ -3,7 +3,7 @@ import { Event, Query, CreateEvent } from '@digitalasset/daml-ledger-fetch';
 import { useEffect, useMemo, useState, useContext } from "react";
 import * as LedgerStore from './ledgerStore';
 import * as TemplateStore from './templateStore';
-import { setQueryLoading, setQueryResult } from "./reducer";
+import { setQueryLoading, setQueryResult, setFetchByKeyLoading, setFetchByKeyResult } from "./reducer";
 import { DamlLedgerState, DamlLedgerContext } from './context';
 
 const useDamlState = (): DamlLedgerState => {
@@ -47,9 +47,36 @@ export const useQuery = <T extends object, K>(template: Template<T, K>, queryFac
   return contracts || TemplateStore.emptyQueryResult();
 }
 
+const loadFetchByKey = async <T extends object, K>(state: DamlLedgerState, template: Template<T, K>, key: K) => {
+  state.dispatch(setFetchByKeyLoading(template, key));
+  let contract;
+  if (key === undefined) {
+    console.error(`Calling useFetchByKey on template without a contract key: ${template}`);
+    contract = null;
+  } else {
+    contract = await state.ledger.lookupByKey(template, key as K extends undefined ? never : K);
+  }
+  state.dispatch(setFetchByKeyResult(template, key, contract));
+}
+
 export type FetchResult<T extends object, K> = {
   contract: CreateEvent<T, K> | null;
   loading: boolean;
+}
+
+/// React Hook for a lookup by key against the `/contracts/lookup` endpoint of the JSON API.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useFetchByKey = <T extends object, K>(template: Template<T, K>, keyFactory: () => K, keyDeps?: readonly any[]): FetchResult<T, K> => {
+  const state = useDamlState();
+  const key = useMemo(keyFactory, keyDeps);
+  const contract = LedgerStore.getFetchByKeyResult(state.store, template, key);
+  useEffect(() => {
+    if (contract === undefined) {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      loadFetchByKey(state, template, key);
+    }
+  }, [state, template, key, contract]);
+  return contract ?? TemplateStore.emptyFetchResult();
 }
 
 /// React Hook for a query against the `/contracts/search` endpoint that yields
@@ -71,9 +98,11 @@ const reloadTemplate = async <T extends object, K>(state: DamlLedgerState, templ
   const templateStore = state.store.templateStores.get(template) as TemplateStore.Store<T, K> | undefined;
   if (templateStore) {
     const queries: Query<T>[] = Array.from(templateStore.queryResults.keys());
-    await Promise.all(queries.map(async (query) => {
-      await loadQuery(state, template, query);
-    }));
+    const keys: K[] = Array.from(templateStore.fetchByKeyResults.keys());
+    await Promise.all([
+      Promise.all(queries.map(async (query) => await loadQuery(state, template, query))),
+      Promise.all(keys.map(async (key) => await loadFetchByKey(state, template, key))),
+    ]);
   }
 }
 

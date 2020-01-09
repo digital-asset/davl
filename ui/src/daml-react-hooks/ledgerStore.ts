@@ -32,3 +32,20 @@ export const setQueryResult = <T extends object>(store: Store, template: Templat
   templateStores: store.templateStores.update(template, (templateStore = TemplateStore.empty()) =>
     TemplateStore.setQueryResult(templateStore, query, contracts))
 });
+
+export const getFetchByKeyResult = <T extends object, K>(store: Store, template: Template<T, K>, key: K): TemplateStore.FetchResult<T, K> | undefined => {
+  const templateStore = store.templateStores.get(template) as TemplateStore.Store<T, K> | undefined;
+  return templateStore?.fetchByKeyResults.get(key);
+}
+
+export const setFetchByKeyLoading = <T extends object, K>(store: Store, template: Template<T, K>, key: K): Store => ({
+  ...store,
+  templateStores: store.templateStores.update(template, (templateStore = TemplateStore.empty()) =>
+    TemplateStore.setFetchByKeyLoading(templateStore, key))
+});
+
+export const setFetchByKeyResult = <T extends object, K>(store: Store, template: Template<T>, key: K, contract: CreateEvent<T, K> | null): Store => ({
+  ...store,
+  templateStores: store.templateStores.update(template, (templateStore = TemplateStore.empty()) =>
+    TemplateStore.setFetchByKeyResult(templateStore, key, contract))
+});
