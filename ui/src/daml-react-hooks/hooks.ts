@@ -27,14 +27,14 @@ const loadQuery = async <T extends object>(state: DamlLedgerState, template: Tem
 
 const emptyQueryFactory = <T extends object>(): Query<T> => ({} as Query<T>);
 
-export type QueryResult<T extends object> = {
-  contracts: CreateEvent<T>[];
+export type QueryResult<T extends object, K> = {
+  contracts: CreateEvent<T, K>[];
   loading: boolean;
 }
 
 /// React Hook for a query against the `/contracts/search` endpoint of the JSON API.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const useQuery = <T extends object>(template: Template<T>, queryFactory: () => Query<T> = emptyQueryFactory, queryDeps?: readonly any[]): QueryResult<T> => {
+export const useQuery = <T extends object, K>(template: Template<T, K>, queryFactory: () => Query<T> = emptyQueryFactory, queryDeps?: readonly any[]): QueryResult<T, K> => {
   const state = useDamlState();
   const query = useMemo(queryFactory, queryDeps);
   const contracts = LedgerStore.getQueryResult(state.store, template, query);
@@ -47,16 +47,16 @@ export const useQuery = <T extends object>(template: Template<T>, queryFactory: 
   return contracts || TemplateStore.emptyQueryResult();
 }
 
-export type FetchResult<T extends object> = {
-  contract: CreateEvent<T> | null;
+export type FetchResult<T extends object, K> = {
+  contract: CreateEvent<T, K> | null;
   loading: boolean;
 }
 
-/// React Hook for a query against the `/contracts/seach` endpoint that yields
+/// React Hook for a query against the `/contracts/search` endpoint that yields
 /// at most one contract. This can be thought of as a poor man's version of
 /// `fetchByKey`.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const usePseudoFetchByKey = <T extends object>(template: Template<T>, keyFactory: () => Query<T>, keyDeps?: readonly any[]): FetchResult<T> => {
+export const usePseudoFetchByKey = <T extends object, K>(template: Template<T, K>, keyFactory: () => Query<T>, keyDeps?: readonly any[]): FetchResult<T, K> => {
   const entry = useQuery(template, keyFactory, keyDeps);
   if (entry.contracts.length > 1) {
     throw Error("usePseudoFetchByKey: query returned multiple cotracts");
@@ -67,8 +67,8 @@ export const usePseudoFetchByKey = <T extends object>(template: Template<T>, key
   }), [entry]);
 }
 
-const reloadTemplate = async <T extends object>(state: DamlLedgerState, template: Template<T>) => {
-  const templateStore = state.store.templateStores.get(template) as TemplateStore.Store<T> | undefined;
+const reloadTemplate = async <T extends object, K>(state: DamlLedgerState, template: Template<T, K>) => {
+  const templateStore = state.store.templateStores.get(template) as TemplateStore.Store<T, K> | undefined;
   if (templateStore) {
     const queries: Query<T>[] = Array.from(templateStore.queryResults.keys());
     await Promise.all(queries.map(async (query) => {

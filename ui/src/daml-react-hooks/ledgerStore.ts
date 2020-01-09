@@ -4,7 +4,7 @@ import { CreateEvent, Query } from '@digitalasset/daml-ledger-fetch';
 import * as TemplateStore from './templateStore';
 
 export type Store = {
-  templateStores: immutable.Map<Template<object>, TemplateStore.Store<object>>;
+  templateStores: immutable.Map<Template<object, unknown>, TemplateStore.Store<object, unknown>>;
 }
 
 export const empty: Store = {
@@ -16,8 +16,8 @@ export const setTemplateLoading = <T extends object>(store: Store, template: Tem
   templateStores: store.templateStores.update(template, TemplateStore.setAllLoading)
 });
 
-export const getQueryResult = <T extends object>(store: Store, template: Template<T>, query: Query<T>): TemplateStore.QueryResult<T> | undefined=> {
-  const templateStore = store.templateStores.get(template) as TemplateStore.Store<T> | undefined;
+export const getQueryResult = <T extends object, K>(store: Store, template: Template<T, K>, query: Query<T>): TemplateStore.QueryResult<T, K> | undefined=> {
+  const templateStore = store.templateStores.get(template) as TemplateStore.Store<T, K> | undefined;
   return templateStore === undefined ? undefined : templateStore.queryResults.get(query);
 }
 
