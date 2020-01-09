@@ -4,7 +4,10 @@
 import * as jtv from '@mojotech/json-type-validation';
 import * as daml from '@digitalasset/daml-json-types';
 
-export type Minstd = unknown;
+export type Minstd = 
+  |  { tag: 'Minstd'; value: daml.Int }
 export const Minstd: daml.Serializable<Minstd> = ({
-  decoder: jtv.unknownJson,
+  decoder: () => jtv.oneOf(
+    jtv.object<Minstd>({tag: jtv.constant('Minstd'), value: jtv.lazy(() => daml.Int.decoder())}),
+  )
 });

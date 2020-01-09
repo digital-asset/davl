@@ -65,7 +65,7 @@ const LoginScreen: React.FC<Props> = (props) => {
         } else if(employeeProposals.length > 1) {
           alert('There are multiple invitations for you.');
         } else {
-          const {contractId, argument: employeeProposal} = employeeProposals[0];
+          const {contractId, payload: employeeProposal} = employeeProposals[0];
           const employeeRole = employeeProposal.employeeRole;
           const accept = window.confirm(`You have been invited to work for ${employeeRole.company}.\nBoss: ${employeeRole.boss}\nVacation days: ${employeeProposal.vacationDays}\nDo you accept?`);
           if (accept) {
