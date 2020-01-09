@@ -16,9 +16,9 @@ export const setTemplateLoading = <T extends object>(store: Store, template: Tem
   templateStores: store.templateStores.update(template, TemplateStore.setAllLoading)
 });
 
-export const getQueryResult = <T extends object, K>(store: Store, template: Template<T, K>, query: Query<T>): TemplateStore.QueryResult<T, K> | undefined=> {
+export const getQueryResult = <T extends object, K>(store: Store, template: Template<T, K>, query: Query<T>): TemplateStore.QueryResult<T, K> | undefined => {
   const templateStore = store.templateStores.get(template) as TemplateStore.Store<T, K> | undefined;
-  return templateStore === undefined ? undefined : templateStore.queryResults.get(query);
+  return templateStore?.queryResults.get(query);
 }
 
 export const setQueryLoading = <T extends object>(store: Store, template: Template<T>, query: Query<T>): Store => ({

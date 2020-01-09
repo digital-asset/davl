@@ -44,7 +44,7 @@ export const useQuery = <T extends object, K>(template: Template<T, K>, queryFac
       loadQuery(state, template, query);
     }
   }, [state, template, query, contracts]);
-  return contracts || TemplateStore.emptyQueryResult();
+  return contracts ?? TemplateStore.emptyQueryResult();
 }
 
 const loadFetchByKey = async <T extends object, K>(state: DamlLedgerState, template: Template<T, K>, key: K) => {

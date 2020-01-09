@@ -2,32 +2,34 @@ import { Template } from "@digitalasset/daml-json-types";
 import { CreateEvent, Query } from '@digitalasset/daml-ledger-fetch';
 import * as LedgerStore from './ledgerStore';
 
-const SET_QUERY_LOADING = 'SET_QUERY_LOADING';
-const SET_QUERY_RESULT = 'SET_QUERY_RESULT';
-const SET_FETCH_BY_KEY_LOADING = 'SET_FETCH_BY_KEY_LOADING';
-const SET_FETCH_BY_KEY_RESULT = 'SET_FETCH_BY_KEY_RESULT';
+enum ActionType {
+  SetQueryLoading,
+  SetQueryResult,
+  SetFetchByKeyLoading,
+  SetFetchByKeyResult,
+}
 
 type SetQueryLoadingAction<T extends object> = {
-  type: typeof SET_QUERY_LOADING;
+  type: typeof ActionType.SetQueryLoading;
   template: Template<T>;
   query: Query<T>;
 }
 
 type SetQueryResultAction<T extends object> = {
-  type: typeof SET_QUERY_RESULT;
+  type: typeof ActionType.SetQueryResult;
   template: Template<T>;
   query: Query<T>;
   contracts: CreateEvent<T>[];
 }
 
 type SetFetchByKeyLoadingAction<T extends object, K> = {
-  type: typeof SET_FETCH_BY_KEY_LOADING;
+  type: typeof ActionType.SetFetchByKeyLoading;
   template: Template<T, K>;
   key: K;
 }
 
 type SetFetchByKeyResultAction<T extends object, K> = {
-  type: typeof SET_FETCH_BY_KEY_RESULT;
+  type: typeof ActionType.SetFetchByKeyResult;
   template: Template<T, K>;
   key: K;
   contract: CreateEvent<T, K> | null;
@@ -40,26 +42,26 @@ export type Action =
   | SetFetchByKeyResultAction<object, unknown>
 
 export const setQueryLoading = <T extends object>(template: Template<T>, query: Query<T>): SetQueryLoadingAction<T> => ({
-  type: SET_QUERY_LOADING,
+  type: ActionType.SetQueryLoading,
   template,
   query,
 });
 
 export const setQueryResult = <T extends object>(template: Template<T>, query: Query<T>, contracts: CreateEvent<T>[]): SetQueryResultAction<T> => ({
-  type: SET_QUERY_RESULT,
+  type: ActionType.SetQueryResult,
   template,
   query,
   contracts,
 });
 
 export const setFetchByKeyLoading = <T extends object, K>(template: Template<T, K>, key: K): SetFetchByKeyLoadingAction<T, K> => ({
-  type: SET_FETCH_BY_KEY_LOADING,
+  type: ActionType.SetFetchByKeyLoading,
   template,
   key,
 });
 
 export const setFetchByKeyResult = <T extends object, K>(template: Template<T, K>, key: K, contract: CreateEvent<T, K> | null): SetFetchByKeyResultAction<T, K> => ({
-  type: SET_FETCH_BY_KEY_RESULT,
+  type: ActionType.SetFetchByKeyResult,
   template,
   key,
   contract,
@@ -67,16 +69,16 @@ export const setFetchByKeyResult = <T extends object, K>(template: Template<T, K
 
 export const reducer = (ledgerStore: LedgerStore.Store, action: Action): LedgerStore.Store => {
   switch (action.type) {
-    case SET_QUERY_LOADING: {
+    case ActionType.SetQueryLoading: {
       return LedgerStore.setQueryLoading(ledgerStore, action.template, action.query);
     }
-    case SET_QUERY_RESULT: {
+    case ActionType.SetQueryResult: {
       return LedgerStore.setQueryResult(ledgerStore, action.template, action.query, action.contracts);
     }
-    case SET_FETCH_BY_KEY_LOADING: {
+    case ActionType.SetFetchByKeyLoading: {
       return LedgerStore.setFetchByKeyLoading(ledgerStore, action.template, action.key);
     }
-    case SET_FETCH_BY_KEY_RESULT: {
+    case ActionType.SetFetchByKeyResult: {
       return LedgerStore.setFetchByKeyResult(ledgerStore, action.template, action.key, action.contract);
     }
   }
