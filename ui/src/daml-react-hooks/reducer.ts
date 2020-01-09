@@ -5,13 +5,13 @@ import * as LedgerStore from './ledgerStore';
 const SET_QUERY_LOADING = 'SET_QUERY_LOADING';
 const SET_QUERY_RESULT = 'SET_QUERY_RESULT';
 
-type SetQueryLoadingAction<T> = {
+type SetQueryLoadingAction<T extends object> = {
   type: typeof SET_QUERY_LOADING;
   template: Template<T>;
   query: Query<T>;
 }
 
-type SetQueryResultAction<T> = {
+type SetQueryResultAction<T extends object> = {
   type: typeof SET_QUERY_RESULT;
   template: Template<T>;
   query: Query<T>;
@@ -20,13 +20,13 @@ type SetQueryResultAction<T> = {
 
 export type Action = SetQueryLoadingAction<object> | SetQueryResultAction<object>;
 
-export const setQueryLoading = <T>(template: Template<T>, query: Query<T>): SetQueryLoadingAction<T> => ({
+export const setQueryLoading = <T extends object>(template: Template<T>, query: Query<T>): SetQueryLoadingAction<T> => ({
   type: SET_QUERY_LOADING,
   template,
   query,
 });
 
-export const setQueryResult = <T>(template: Template<T>, query: Query<T>, contracts: CreateEvent<T>[]): SetQueryResultAction<T> => ({
+export const setQueryResult = <T extends object>(template: Template<T>, query: Query<T>, contracts: CreateEvent<T>[]): SetQueryResultAction<T> => ({
   type: SET_QUERY_RESULT,
   template,
   query,

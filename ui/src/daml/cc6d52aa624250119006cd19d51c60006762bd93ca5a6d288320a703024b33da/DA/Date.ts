@@ -4,7 +4,7 @@
 import * as jtv from '@mojotech/json-type-validation';
 import * as daml from '@digitalasset/daml-json-types';
 
-export enum Month{
+export enum Month {
   Jan = 'Jan',
   Feb = 'Feb',
   Mar = 'Mar',
@@ -20,9 +20,8 @@ export enum Month{
 }
 daml.STATIC_IMPLEMENTS_SERIALIZABLE_CHECK<Month>(Month)
 // eslint-disable-next-line @typescript-eslint/no-namespace
-export namespace Month{
-  export const decoder =
-  () => jtv.oneOf(
+export namespace Month {
+  export const decoder = () => jtv.oneOf(
     jtv.constant(Month.Jan),
     jtv.constant(Month.Feb),
     jtv.constant(Month.Mar),
@@ -35,10 +34,10 @@ export namespace Month{
     jtv.constant(Month.Oct),
     jtv.constant(Month.Nov),
     jtv.constant(Month.Dec),
-  )
+  );
 }
 
-export enum DayOfWeek{
+export enum DayOfWeek {
   Monday = 'Monday',
   Tuesday = 'Tuesday',
   Wednesday = 'Wednesday',
@@ -49,9 +48,8 @@ export enum DayOfWeek{
 }
 daml.STATIC_IMPLEMENTS_SERIALIZABLE_CHECK<DayOfWeek>(DayOfWeek)
 // eslint-disable-next-line @typescript-eslint/no-namespace
-export namespace DayOfWeek{
-  export const decoder =
-  () => jtv.oneOf(
+export namespace DayOfWeek {
+  export const decoder = () => jtv.oneOf(
     jtv.constant(DayOfWeek.Monday),
     jtv.constant(DayOfWeek.Tuesday),
     jtv.constant(DayOfWeek.Wednesday),
@@ -59,5 +57,5 @@ export namespace DayOfWeek{
     jtv.constant(DayOfWeek.Friday),
     jtv.constant(DayOfWeek.Saturday),
     jtv.constant(DayOfWeek.Sunday),
-  )
+  );
 }

@@ -19,22 +19,22 @@ export const useParty = () => {
   return state.party;
 }
 
-const loadQuery = async <T extends {}>(state: DamlLedgerState, template: Template<T>, query: Query<T>) => {
+const loadQuery = async <T extends object>(state: DamlLedgerState, template: Template<T>, query: Query<T>) => {
   state.dispatch(setQueryLoading(template, query));
   const contracts = await state.ledger.query(template, query);
   state.dispatch(setQueryResult(template, query, contracts));
 }
 
-const emptyQueryFactory = <T extends {}>(): Query<T> => ({} as Query<T>);
+const emptyQueryFactory = <T extends object>(): Query<T> => ({} as Query<T>);
 
-export type QueryResult<T> = {
+export type QueryResult<T extends object> = {
   contracts: CreateEvent<T>[];
   loading: boolean;
 }
 
 /// React Hook for a query against the `/contracts/search` endpoint of the JSON API.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const useQuery = <T>(template: Template<T>, queryFactory: () => Query<T> = emptyQueryFactory, queryDeps?: readonly any[]): QueryResult<T> => {
+export const useQuery = <T extends object>(template: Template<T>, queryFactory: () => Query<T> = emptyQueryFactory, queryDeps?: readonly any[]): QueryResult<T> => {
   const state = useDamlState();
   const query = useMemo(queryFactory, queryDeps);
   const contracts = LedgerStore.getQueryResult(state.store, template, query);
@@ -47,7 +47,7 @@ export const useQuery = <T>(template: Template<T>, queryFactory: () => Query<T> 
   return contracts || TemplateStore.emptyQueryResult();
 }
 
-export type FetchResult<T> = {
+export type FetchResult<T extends object> = {
   contract: CreateEvent<T> | null;
   loading: boolean;
 }
@@ -56,7 +56,7 @@ export type FetchResult<T> = {
 /// at most one contract. This can be thought of as a poor man's version of
 /// `fetchByKey`.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const usePseudoFetchByKey = <T>(template: Template<T>, keyFactory: () => Query<T>, keyDeps?: readonly any[]): FetchResult<T> => {
+export const usePseudoFetchByKey = <T extends object>(template: Template<T>, keyFactory: () => Query<T>, keyDeps?: readonly any[]): FetchResult<T> => {
   const entry = useQuery(template, keyFactory, keyDeps);
   if (entry.contracts.length > 1) {
     throw Error("usePseudoFetchByKey: query returned multiple cotracts");
@@ -67,7 +67,7 @@ export const usePseudoFetchByKey = <T>(template: Template<T>, keyFactory: () => 
   }), [entry]);
 }
 
-const reloadTemplate = async <T extends {}>(state: DamlLedgerState, template: Template<T>) => {
+const reloadTemplate = async <T extends object>(state: DamlLedgerState, template: Template<T>) => {
   const templateStore = state.store.templateStores.get(template) as TemplateStore.Store<T> | undefined;
   if (templateStore) {
     const queries: Query<T>[] = Array.from(templateStore.queryResults.keys());
@@ -77,7 +77,7 @@ const reloadTemplate = async <T extends {}>(state: DamlLedgerState, template: Te
   }
 }
 
-const reloadEvents = async (state: DamlLedgerState, events: Event<unknown>[]) => {
+const reloadEvents = async (state: DamlLedgerState, events: Event<object>[]) => {
   // TODO(MH): This is a sledge hammer approach. We completely reload every
   // single template that has been touched by the events. A future optimization
   // would be to remove the archived templates from their tables and add the
@@ -90,7 +90,7 @@ const reloadEvents = async (state: DamlLedgerState, events: Event<unknown>[]) =>
 
 /// React Hook that returns a function to exercise a choice and a boolean
 /// indicator whether the exercise is currently running.
-export const useExercise = <T, C, R>(choice: Choice<T, C, R>): [(cid: ContractId<T>, argument: C) => Promise<R>, boolean] => {
+export const useExercise = <T extends object, C, R>(choice: Choice<T, C, R>): [(cid: ContractId<T>, argument: C) => Promise<R>, boolean] => {
   const [loading, setLoading] = useState(false);
   const state = useDamlState();
 
@@ -109,7 +109,7 @@ export const useExercise = <T, C, R>(choice: Choice<T, C, R>): [(cid: ContractId
 
 /// React Hook that returns a function to exercise a choice and a boolean
 /// indicator whether the exercise is currently running.
-export const usePseudoExerciseByKey = <T, C, R>(choice: Choice<T, C, R>): [(key: Query<T>, argument: C) => Promise<R>, boolean] => {
+export const usePseudoExerciseByKey = <T extends object, C, R>(choice: Choice<T, C, R>): [(key: Query<T>, argument: C) => Promise<R>, boolean] => {
   const [loading, setLoading] = useState(false);
   const state = useDamlState();
 

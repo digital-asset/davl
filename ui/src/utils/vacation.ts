@@ -13,7 +13,7 @@ export type Vacation = {
   toDate: string;
 }
 
-export const makeVacation = <T extends {}>(contractId: ContractId<T>, {employeeRole: {employee, boss}, fromDate, toDate}: v3.Vacation) =>
+export const makeVacation = <T extends object>(contractId: ContractId<T>, {employeeRole: {employee, boss}, fromDate, toDate}: v3.Vacation) =>
   ({contractId, employee, boss, fromDate, toDate})
 
 export const vacationLength = (vacation: {fromDate: string; toDate: string}): number => {
@@ -37,7 +37,7 @@ export const emptyVacations: Vacations = {
 
 export const prettyRequests = (requestContracts: CreateEvent<v3.VacationRequest>[]): Vacation[] => {
   const requests: Vacation[] =
-    requestContracts.map(({contractId, argument}) => makeVacation(contractId, argument.vacation));
+    requestContracts.map(({contractId, payload}) => makeVacation(contractId, payload.vacation));
   requests.sort(ordVacationOnFromDate.compare);
   return requests;
 }
@@ -45,7 +45,7 @@ export const prettyRequests = (requestContracts: CreateEvent<v3.VacationRequest>
 
 export const splitVacations = (vacationContracts: CreateEvent<v3.Vacation>[]) => {
   const today = moment().format('YYYY-MM-DD');
-  const vacations = vacationContracts.map((vacation) => makeVacation(vacation.contractId, vacation.argument))
+  const vacations = vacationContracts.map((vacation) => makeVacation(vacation.contractId, vacation.payload))
   const {left: upcoming, right: past} =
     partition((vacation: Vacation) => vacation.fromDate <= today)(vacations);
   upcoming.sort(ordVacationOnFromDate.compare);

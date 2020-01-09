@@ -6,7 +6,7 @@ import * as daml from '@digitalasset/daml-json-types';
 
 export type RelTime = {
   microseconds: daml.Int;
-};
+}
 export const RelTime: daml.Serializable<RelTime> = ({
   decoder: () => jtv.object({
     microseconds: daml.Int.decoder(),

@@ -25,7 +25,7 @@ export type Tuple20<a2lA, a2lB, a2lC, a2lD, a2lE, a2lF, a2lG, a2lH, a2lI, a2lJ, 
   _18: a2lR;
   _19: a2lS;
   _20: a2lT;
-};
+}
 export const Tuple20 = <a2lA, a2lB, a2lC, a2lD, a2lE, a2lF, a2lG, a2lH, a2lI, a2lJ, a2lK, a2lL, a2lM, a2lN, a2lO, a2lP, a2lQ, a2lR, a2lS, a2lT>(a2lA: daml.Serializable<a2lA>, a2lB: daml.Serializable<a2lB>, a2lC: daml.Serializable<a2lC>, a2lD: daml.Serializable<a2lD>, a2lE: daml.Serializable<a2lE>, a2lF: daml.Serializable<a2lF>, a2lG: daml.Serializable<a2lG>, a2lH: daml.Serializable<a2lH>, a2lI: daml.Serializable<a2lI>, a2lJ: daml.Serializable<a2lJ>, a2lK: daml.Serializable<a2lK>, a2lL: daml.Serializable<a2lL>, a2lM: daml.Serializable<a2lM>, a2lN: daml.Serializable<a2lN>, a2lO: daml.Serializable<a2lO>, a2lP: daml.Serializable<a2lP>, a2lQ: daml.Serializable<a2lQ>, a2lR: daml.Serializable<a2lR>, a2lS: daml.Serializable<a2lS>, a2lT: daml.Serializable<a2lT>): daml.Serializable<Tuple20<a2lA, a2lB, a2lC, a2lD, a2lE, a2lF, a2lG, a2lH, a2lI, a2lJ, a2lK, a2lL, a2lM, a2lN, a2lO, a2lP, a2lQ, a2lR, a2lS, a2lT>> => ({
   decoder: () => jtv.object({
     _1: a2lA.decoder(),
@@ -71,7 +71,7 @@ export type Tuple19<a2lU, a2lV, a2lW, a2lX, a2lY, a2lZ, a2m0, a2m1, a2m2, a2m3, 
   _17: a2ma;
   _18: a2mb;
   _19: a2mc;
-};
+}
 export const Tuple19 = <a2lU, a2lV, a2lW, a2lX, a2lY, a2lZ, a2m0, a2m1, a2m2, a2m3, a2m4, a2m5, a2m6, a2m7, a2m8, a2m9, a2ma, a2mb, a2mc>(a2lU: daml.Serializable<a2lU>, a2lV: daml.Serializable<a2lV>, a2lW: daml.Serializable<a2lW>, a2lX: daml.Serializable<a2lX>, a2lY: daml.Serializable<a2lY>, a2lZ: daml.Serializable<a2lZ>, a2m0: daml.Serializable<a2m0>, a2m1: daml.Serializable<a2m1>, a2m2: daml.Serializable<a2m2>, a2m3: daml.Serializable<a2m3>, a2m4: daml.Serializable<a2m4>, a2m5: daml.Serializable<a2m5>, a2m6: daml.Serializable<a2m6>, a2m7: daml.Serializable<a2m7>, a2m8: daml.Serializable<a2m8>, a2m9: daml.Serializable<a2m9>, a2ma: daml.Serializable<a2ma>, a2mb: daml.Serializable<a2mb>, a2mc: daml.Serializable<a2mc>): daml.Serializable<Tuple19<a2lU, a2lV, a2lW, a2lX, a2lY, a2lZ, a2m0, a2m1, a2m2, a2m3, a2m4, a2m5, a2m6, a2m7, a2m8, a2m9, a2ma, a2mb, a2mc>> => ({
   decoder: () => jtv.object({
     _1: a2lU.decoder(),
@@ -115,7 +115,7 @@ export type Tuple18<a2md, a2me, a2mf, a2mg, a2mh, a2mi, a2mj, a2mk, a2ml, a2mm, 
   _16: a2ms;
   _17: a2mt;
   _18: a2mu;
-};
+}
 export const Tuple18 = <a2md, a2me, a2mf, a2mg, a2mh, a2mi, a2mj, a2mk, a2ml, a2mm, a2mn, a2mo, a2mp, a2mq, a2mr, a2ms, a2mt, a2mu>(a2md: daml.Serializable<a2md>, a2me: daml.Serializable<a2me>, a2mf: daml.Serializable<a2mf>, a2mg: daml.Serializable<a2mg>, a2mh: daml.Serializable<a2mh>, a2mi: daml.Serializable<a2mi>, a2mj: daml.Serializable<a2mj>, a2mk: daml.Serializable<a2mk>, a2ml: daml.Serializable<a2ml>, a2mm: daml.Serializable<a2mm>, a2mn: daml.Serializable<a2mn>, a2mo: daml.Serializable<a2mo>, a2mp: daml.Serializable<a2mp>, a2mq: daml.Serializable<a2mq>, a2mr: daml.Serializable<a2mr>, a2ms: daml.Serializable<a2ms>, a2mt: daml.Serializable<a2mt>, a2mu: daml.Serializable<a2mu>): daml.Serializable<Tuple18<a2md, a2me, a2mf, a2mg, a2mh, a2mi, a2mj, a2mk, a2ml, a2mm, a2mn, a2mo, a2mp, a2mq, a2mr, a2ms, a2mt, a2mu>> => ({
   decoder: () => jtv.object({
     _1: a2md.decoder(),
@@ -157,7 +157,7 @@ export type Tuple17<a2mv, a2mw, a2mx, a2my, a2mz, a2mA, a2mB, a2mC, a2mD, a2mE, 
   _15: a2mJ;
   _16: a2mK;
   _17: a2mL;
-};
+}
 export const Tuple17 = <a2mv, a2mw, a2mx, a2my, a2mz, a2mA, a2mB, a2mC, a2mD, a2mE, a2mF, a2mG, a2mH, a2mI, a2mJ, a2mK, a2mL>(a2mv: daml.Serializable<a2mv>, a2mw: daml.Serializable<a2mw>, a2mx: daml.Serializable<a2mx>, a2my: daml.Serializable<a2my>, a2mz: daml.Serializable<a2mz>, a2mA: daml.Serializable<a2mA>, a2mB: daml.Serializable<a2mB>, a2mC: daml.Serializable<a2mC>, a2mD: daml.Serializable<a2mD>, a2mE: daml.Serializable<a2mE>, a2mF: daml.Serializable<a2mF>, a2mG: daml.Serializable<a2mG>, a2mH: daml.Serializable<a2mH>, a2mI: daml.Serializable<a2mI>, a2mJ: daml.Serializable<a2mJ>, a2mK: daml.Serializable<a2mK>, a2mL: daml.Serializable<a2mL>): daml.Serializable<Tuple17<a2mv, a2mw, a2mx, a2my, a2mz, a2mA, a2mB, a2mC, a2mD, a2mE, a2mF, a2mG, a2mH, a2mI, a2mJ, a2mK, a2mL>> => ({
   decoder: () => jtv.object({
     _1: a2mv.decoder(),
@@ -197,7 +197,7 @@ export type Tuple16<a2mM, a2mN, a2mO, a2mP, a2mQ, a2mR, a2mS, a2mT, a2mU, a2mV, 
   _14: a2mZ;
   _15: a2n0;
   _16: a2n1;
-};
+}
 export const Tuple16 = <a2mM, a2mN, a2mO, a2mP, a2mQ, a2mR, a2mS, a2mT, a2mU, a2mV, a2mW, a2mX, a2mY, a2mZ, a2n0, a2n1>(a2mM: daml.Serializable<a2mM>, a2mN: daml.Serializable<a2mN>, a2mO: daml.Serializable<a2mO>, a2mP: daml.Serializable<a2mP>, a2mQ: daml.Serializable<a2mQ>, a2mR: daml.Serializable<a2mR>, a2mS: daml.Serializable<a2mS>, a2mT: daml.Serializable<a2mT>, a2mU: daml.Serializable<a2mU>, a2mV: daml.Serializable<a2mV>, a2mW: daml.Serializable<a2mW>, a2mX: daml.Serializable<a2mX>, a2mY: daml.Serializable<a2mY>, a2mZ: daml.Serializable<a2mZ>, a2n0: daml.Serializable<a2n0>, a2n1: daml.Serializable<a2n1>): daml.Serializable<Tuple16<a2mM, a2mN, a2mO, a2mP, a2mQ, a2mR, a2mS, a2mT, a2mU, a2mV, a2mW, a2mX, a2mY, a2mZ, a2n0, a2n1>> => ({
   decoder: () => jtv.object({
     _1: a2mM.decoder(),
@@ -235,7 +235,7 @@ export type Tuple15<a2n2, a2n3, a2n4, a2n5, a2n6, a2n7, a2n8, a2n9, a2na, a2nb, 
   _13: a2ne;
   _14: a2nf;
   _15: a2ng;
-};
+}
 export const Tuple15 = <a2n2, a2n3, a2n4, a2n5, a2n6, a2n7, a2n8, a2n9, a2na, a2nb, a2nc, a2nd, a2ne, a2nf, a2ng>(a2n2: daml.Serializable<a2n2>, a2n3: daml.Serializable<a2n3>, a2n4: daml.Serializable<a2n4>, a2n5: daml.Serializable<a2n5>, a2n6: daml.Serializable<a2n6>, a2n7: daml.Serializable<a2n7>, a2n8: daml.Serializable<a2n8>, a2n9: daml.Serializable<a2n9>, a2na: daml.Serializable<a2na>, a2nb: daml.Serializable<a2nb>, a2nc: daml.Serializable<a2nc>, a2nd: daml.Serializable<a2nd>, a2ne: daml.Serializable<a2ne>, a2nf: daml.Serializable<a2nf>, a2ng: daml.Serializable<a2ng>): daml.Serializable<Tuple15<a2n2, a2n3, a2n4, a2n5, a2n6, a2n7, a2n8, a2n9, a2na, a2nb, a2nc, a2nd, a2ne, a2nf, a2ng>> => ({
   decoder: () => jtv.object({
     _1: a2n2.decoder(),
@@ -271,7 +271,7 @@ export type Tuple14<a2nh, a2ni, a2nj, a2nk, a2nl, a2nm, a2nn, a2no, a2np, a2nq, 
   _12: a2ns;
   _13: a2nt;
   _14: a2nu;
-};
+}
 export const Tuple14 = <a2nh, a2ni, a2nj, a2nk, a2nl, a2nm, a2nn, a2no, a2np, a2nq, a2nr, a2ns, a2nt, a2nu>(a2nh: daml.Serializable<a2nh>, a2ni: daml.Serializable<a2ni>, a2nj: daml.Serializable<a2nj>, a2nk: daml.Serializable<a2nk>, a2nl: daml.Serializable<a2nl>, a2nm: daml.Serializable<a2nm>, a2nn: daml.Serializable<a2nn>, a2no: daml.Serializable<a2no>, a2np: daml.Serializable<a2np>, a2nq: daml.Serializable<a2nq>, a2nr: daml.Serializable<a2nr>, a2ns: daml.Serializable<a2ns>, a2nt: daml.Serializable<a2nt>, a2nu: daml.Serializable<a2nu>): daml.Serializable<Tuple14<a2nh, a2ni, a2nj, a2nk, a2nl, a2nm, a2nn, a2no, a2np, a2nq, a2nr, a2ns, a2nt, a2nu>> => ({
   decoder: () => jtv.object({
     _1: a2nh.decoder(),
@@ -305,7 +305,7 @@ export type Tuple13<a2nv, a2nw, a2nx, a2ny, a2nz, a2nA, a2nB, a2nC, a2nD, a2nE, 
   _11: a2nF;
   _12: a2nG;
   _13: a2nH;
-};
+}
 export const Tuple13 = <a2nv, a2nw, a2nx, a2ny, a2nz, a2nA, a2nB, a2nC, a2nD, a2nE, a2nF, a2nG, a2nH>(a2nv: daml.Serializable<a2nv>, a2nw: daml.Serializable<a2nw>, a2nx: daml.Serializable<a2nx>, a2ny: daml.Serializable<a2ny>, a2nz: daml.Serializable<a2nz>, a2nA: daml.Serializable<a2nA>, a2nB: daml.Serializable<a2nB>, a2nC: daml.Serializable<a2nC>, a2nD: daml.Serializable<a2nD>, a2nE: daml.Serializable<a2nE>, a2nF: daml.Serializable<a2nF>, a2nG: daml.Serializable<a2nG>, a2nH: daml.Serializable<a2nH>): daml.Serializable<Tuple13<a2nv, a2nw, a2nx, a2ny, a2nz, a2nA, a2nB, a2nC, a2nD, a2nE, a2nF, a2nG, a2nH>> => ({
   decoder: () => jtv.object({
     _1: a2nv.decoder(),
@@ -337,7 +337,7 @@ export type Tuple12<a2nI, a2nJ, a2nK, a2nL, a2nM, a2nN, a2nO, a2nP, a2nQ, a2nR, 
   _10: a2nR;
   _11: a2nS;
   _12: a2nT;
-};
+}
 export const Tuple12 = <a2nI, a2nJ, a2nK, a2nL, a2nM, a2nN, a2nO, a2nP, a2nQ, a2nR, a2nS, a2nT>(a2nI: daml.Serializable<a2nI>, a2nJ: daml.Serializable<a2nJ>, a2nK: daml.Serializable<a2nK>, a2nL: daml.Serializable<a2nL>, a2nM: daml.Serializable<a2nM>, a2nN: daml.Serializable<a2nN>, a2nO: daml.Serializable<a2nO>, a2nP: daml.Serializable<a2nP>, a2nQ: daml.Serializable<a2nQ>, a2nR: daml.Serializable<a2nR>, a2nS: daml.Serializable<a2nS>, a2nT: daml.Serializable<a2nT>): daml.Serializable<Tuple12<a2nI, a2nJ, a2nK, a2nL, a2nM, a2nN, a2nO, a2nP, a2nQ, a2nR, a2nS, a2nT>> => ({
   decoder: () => jtv.object({
     _1: a2nI.decoder(),
@@ -367,7 +367,7 @@ export type Tuple11<a2nU, a2nV, a2nW, a2nX, a2nY, a2nZ, a2o0, a2o1, a2o2, a2o3, 
   _9: a2o2;
   _10: a2o3;
   _11: a2o4;
-};
+}
 export const Tuple11 = <a2nU, a2nV, a2nW, a2nX, a2nY, a2nZ, a2o0, a2o1, a2o2, a2o3, a2o4>(a2nU: daml.Serializable<a2nU>, a2nV: daml.Serializable<a2nV>, a2nW: daml.Serializable<a2nW>, a2nX: daml.Serializable<a2nX>, a2nY: daml.Serializable<a2nY>, a2nZ: daml.Serializable<a2nZ>, a2o0: daml.Serializable<a2o0>, a2o1: daml.Serializable<a2o1>, a2o2: daml.Serializable<a2o2>, a2o3: daml.Serializable<a2o3>, a2o4: daml.Serializable<a2o4>): daml.Serializable<Tuple11<a2nU, a2nV, a2nW, a2nX, a2nY, a2nZ, a2o0, a2o1, a2o2, a2o3, a2o4>> => ({
   decoder: () => jtv.object({
     _1: a2nU.decoder(),
@@ -395,7 +395,7 @@ export type Tuple10<a2o5, a2o6, a2o7, a2o8, a2o9, a2oa, a2ob, a2oc, a2od, a2oe> 
   _8: a2oc;
   _9: a2od;
   _10: a2oe;
-};
+}
 export const Tuple10 = <a2o5, a2o6, a2o7, a2o8, a2o9, a2oa, a2ob, a2oc, a2od, a2oe>(a2o5: daml.Serializable<a2o5>, a2o6: daml.Serializable<a2o6>, a2o7: daml.Serializable<a2o7>, a2o8: daml.Serializable<a2o8>, a2o9: daml.Serializable<a2o9>, a2oa: daml.Serializable<a2oa>, a2ob: daml.Serializable<a2ob>, a2oc: daml.Serializable<a2oc>, a2od: daml.Serializable<a2od>, a2oe: daml.Serializable<a2oe>): daml.Serializable<Tuple10<a2o5, a2o6, a2o7, a2o8, a2o9, a2oa, a2ob, a2oc, a2od, a2oe>> => ({
   decoder: () => jtv.object({
     _1: a2o5.decoder(),
@@ -421,7 +421,7 @@ export type Tuple9<a2of, a2og, a2oh, a2oi, a2oj, a2ok, a2ol, a2om, a2on> = {
   _7: a2ol;
   _8: a2om;
   _9: a2on;
-};
+}
 export const Tuple9 = <a2of, a2og, a2oh, a2oi, a2oj, a2ok, a2ol, a2om, a2on>(a2of: daml.Serializable<a2of>, a2og: daml.Serializable<a2og>, a2oh: daml.Serializable<a2oh>, a2oi: daml.Serializable<a2oi>, a2oj: daml.Serializable<a2oj>, a2ok: daml.Serializable<a2ok>, a2ol: daml.Serializable<a2ol>, a2om: daml.Serializable<a2om>, a2on: daml.Serializable<a2on>): daml.Serializable<Tuple9<a2of, a2og, a2oh, a2oi, a2oj, a2ok, a2ol, a2om, a2on>> => ({
   decoder: () => jtv.object({
     _1: a2of.decoder(),
@@ -445,7 +445,7 @@ export type Tuple8<a2oo, a2op, a2oq, a2or, a2os, a2ot, a2ou, a2ov> = {
   _6: a2ot;
   _7: a2ou;
   _8: a2ov;
-};
+}
 export const Tuple8 = <a2oo, a2op, a2oq, a2or, a2os, a2ot, a2ou, a2ov>(a2oo: daml.Serializable<a2oo>, a2op: daml.Serializable<a2op>, a2oq: daml.Serializable<a2oq>, a2or: daml.Serializable<a2or>, a2os: daml.Serializable<a2os>, a2ot: daml.Serializable<a2ot>, a2ou: daml.Serializable<a2ou>, a2ov: daml.Serializable<a2ov>): daml.Serializable<Tuple8<a2oo, a2op, a2oq, a2or, a2os, a2ot, a2ou, a2ov>> => ({
   decoder: () => jtv.object({
     _1: a2oo.decoder(),
@@ -467,7 +467,7 @@ export type Tuple7<a2ow, a2ox, a2oy, a2oz, a2oA, a2oB, a2oC> = {
   _5: a2oA;
   _6: a2oB;
   _7: a2oC;
-};
+}
 export const Tuple7 = <a2ow, a2ox, a2oy, a2oz, a2oA, a2oB, a2oC>(a2ow: daml.Serializable<a2ow>, a2ox: daml.Serializable<a2ox>, a2oy: daml.Serializable<a2oy>, a2oz: daml.Serializable<a2oz>, a2oA: daml.Serializable<a2oA>, a2oB: daml.Serializable<a2oB>, a2oC: daml.Serializable<a2oC>): daml.Serializable<Tuple7<a2ow, a2ox, a2oy, a2oz, a2oA, a2oB, a2oC>> => ({
   decoder: () => jtv.object({
     _1: a2ow.decoder(),
@@ -487,7 +487,7 @@ export type Tuple6<a2oD, a2oE, a2oF, a2oG, a2oH, a2oI> = {
   _4: a2oG;
   _5: a2oH;
   _6: a2oI;
-};
+}
 export const Tuple6 = <a2oD, a2oE, a2oF, a2oG, a2oH, a2oI>(a2oD: daml.Serializable<a2oD>, a2oE: daml.Serializable<a2oE>, a2oF: daml.Serializable<a2oF>, a2oG: daml.Serializable<a2oG>, a2oH: daml.Serializable<a2oH>, a2oI: daml.Serializable<a2oI>): daml.Serializable<Tuple6<a2oD, a2oE, a2oF, a2oG, a2oH, a2oI>> => ({
   decoder: () => jtv.object({
     _1: a2oD.decoder(),
@@ -505,7 +505,7 @@ export type Tuple5<a2oJ, a2oK, a2oL, a2oM, a2oN> = {
   _3: a2oL;
   _4: a2oM;
   _5: a2oN;
-};
+}
 export const Tuple5 = <a2oJ, a2oK, a2oL, a2oM, a2oN>(a2oJ: daml.Serializable<a2oJ>, a2oK: daml.Serializable<a2oK>, a2oL: daml.Serializable<a2oL>, a2oM: daml.Serializable<a2oM>, a2oN: daml.Serializable<a2oN>): daml.Serializable<Tuple5<a2oJ, a2oK, a2oL, a2oM, a2oN>> => ({
   decoder: () => jtv.object({
     _1: a2oJ.decoder(),
@@ -521,7 +521,7 @@ export type Tuple4<a2oO, a2oP, a2oQ, a2oR> = {
   _2: a2oP;
   _3: a2oQ;
   _4: a2oR;
-};
+}
 export const Tuple4 = <a2oO, a2oP, a2oQ, a2oR>(a2oO: daml.Serializable<a2oO>, a2oP: daml.Serializable<a2oP>, a2oQ: daml.Serializable<a2oQ>, a2oR: daml.Serializable<a2oR>): daml.Serializable<Tuple4<a2oO, a2oP, a2oQ, a2oR>> => ({
   decoder: () => jtv.object({
     _1: a2oO.decoder(),
@@ -535,7 +535,7 @@ export type Tuple3<a2oS, a2oT, a2oU> = {
   _1: a2oS;
   _2: a2oT;
   _3: a2oU;
-};
+}
 export const Tuple3 = <a2oS, a2oT, a2oU>(a2oS: daml.Serializable<a2oS>, a2oT: daml.Serializable<a2oT>, a2oU: daml.Serializable<a2oU>): daml.Serializable<Tuple3<a2oS, a2oT, a2oU>> => ({
   decoder: () => jtv.object({
     _1: a2oS.decoder(),
@@ -547,7 +547,7 @@ export const Tuple3 = <a2oS, a2oT, a2oU>(a2oS: daml.Serializable<a2oS>, a2oT: da
 export type Tuple2<a2oV, a2oW> = {
   _1: a2oV;
   _2: a2oW;
-};
+}
 export const Tuple2 = <a2oV, a2oW>(a2oV: daml.Serializable<a2oV>, a2oW: daml.Serializable<a2oW>): daml.Serializable<Tuple2<a2oV, a2oW>> => ({
   decoder: () => jtv.object({
     _1: a2oV.decoder(),
@@ -555,7 +555,12 @@ export const Tuple2 = <a2oV, a2oW>(a2oV: daml.Serializable<a2oV>, a2oW: daml.Ser
   }),
 });
 
-export type Either<a2oX, a2oY> = unknown;
+export type Either<a2oX, a2oY> = 
+  |  { tag: 'Left'; value: a2oX }
+  |  { tag: 'Right'; value: a2oY }
 export const Either = <a2oX, a2oY>(a2oX: daml.Serializable<a2oX>, a2oY: daml.Serializable<a2oY>): daml.Serializable<Either<a2oX, a2oY>> => ({
-  decoder: jtv.unknownJson,
+  decoder: () => jtv.oneOf(
+    jtv.object<Either<a2oX, a2oY>>({tag: jtv.constant('Left'), value: jtv.lazy(() => a2oX.decoder())}),
+    jtv.object<Either<a2oX, a2oY>>({tag: jtv.constant('Right'), value: jtv.lazy(() => a2oY.decoder())}),
+  )
 });
