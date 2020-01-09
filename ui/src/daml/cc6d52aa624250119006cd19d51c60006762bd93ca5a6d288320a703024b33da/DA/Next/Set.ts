@@ -6,7 +6,7 @@ import * as daml from '@digitalasset/daml-json-types';
 
 export type Set<a9z2> = {
   textMap: { [key: string]: {} };
-};
+}
 export const Set = <a9z2>(a9z2: daml.Serializable<a9z2>): daml.Serializable<Set<a9z2>> => ({
   decoder: () => jtv.object({
     textMap: daml.TextMap(daml.Unit).decoder(),

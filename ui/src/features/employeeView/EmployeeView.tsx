@@ -16,7 +16,7 @@ const EmployeeView: React.FC = () => {
     usePseudoFetchByKey(v3.EmployeeVacationAllocation, () => ({employeeRole: {employee: party}}), [party]);
   let summary: EmployeeSummary | null = null;
   if (allocation.contract) {
-    const {argument: {employeeRole: {employee, boss}, remainingDays}} = allocation.contract;
+    const {payload: {employeeRole: {employee, boss}, remainingDays}} = allocation.contract;
     summary = {
       employee,
       boss,

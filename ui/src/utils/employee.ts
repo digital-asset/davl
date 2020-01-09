@@ -13,7 +13,7 @@ export const ordEmployeeSummaryOnName: Ord<EmployeeSummary> =
   contramap((summary: EmployeeSummary) => summary.employee)(ordString);
 
 export const prettyEmployeeSummaries = (allocations: CreateEvent<v3.EmployeeVacationAllocation>[]): EmployeeSummary[] => {
-  const staff = allocations.map(({argument: {employeeRole: {employee, boss}, remainingDays}}) =>
+  const staff = allocations.map(({payload: {employeeRole: {employee, boss}, remainingDays}}) =>
     ({employee, boss, remainingVacationDays: remainingDays}));
   staff.sort(ordEmployeeSummaryOnName.compare);
   return staff;

@@ -6,7 +6,7 @@ import * as daml from '@digitalasset/daml-json-types';
 
 export type TemplateTypeRep = {
   getTemplateTypeRep: string;
-};
+}
 export const TemplateTypeRep: daml.Serializable<TemplateTypeRep> = ({
   decoder: () => jtv.object({
     getTemplateTypeRep: daml.Text.decoder(),
@@ -15,7 +15,7 @@ export const TemplateTypeRep: daml.Serializable<TemplateTypeRep> = ({
 
 export type AnyChoice = {
   getAnyChoice: {};
-};
+}
 export const AnyChoice: daml.Serializable<AnyChoice> = ({
   decoder: () => jtv.object({
     getAnyChoice: daml.Unit.decoder(),
@@ -24,7 +24,7 @@ export const AnyChoice: daml.Serializable<AnyChoice> = ({
 
 export type AnyTemplate = {
   getAnyTemplate: {};
-};
+}
 export const AnyTemplate: daml.Serializable<AnyTemplate> = ({
   decoder: () => jtv.object({
     getAnyTemplate: daml.Unit.decoder(),
