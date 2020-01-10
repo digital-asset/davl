@@ -79,21 +79,6 @@ export const useFetchByKey = <T extends object, K>(template: Template<T, K>, key
   return contract ?? TemplateStore.emptyFetchResult();
 }
 
-/// React Hook for a query against the `/contracts/search` endpoint that yields
-/// at most one contract. This can be thought of as a poor man's version of
-/// `fetchByKey`.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const usePseudoFetchByKey = <T extends object, K>(template: Template<T, K>, keyFactory: () => Query<T>, keyDeps?: readonly any[]): FetchResult<T, K> => {
-  const entry = useQuery(template, keyFactory, keyDeps);
-  if (entry.contracts.length > 1) {
-    throw Error("usePseudoFetchByKey: query returned multiple cotracts");
-  }
-  return useMemo(() => ({
-    loading: entry.loading,
-    contract: entry.contracts[0] || null,
-  }), [entry]);
-}
-
 const reloadTemplate = async <T extends object, K>(state: DamlLedgerState, template: Template<T, K>) => {
   const templateStore = state.store.templateStores.get(template) as TemplateStore.Store<T, K> | undefined;
   if (templateStore) {
