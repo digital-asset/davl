@@ -47,39 +47,41 @@ export const setQueryResult = <T extends object, K>(store: Store<T, K>, query: Q
   queryResults: store.queryResults.set(query, {contracts, loading: false})
 });
 
-export const updateQueryResult = <T extends object, K>(store: Store<T, K>, query: Query<T>, events: Event<T>[]): Store<T, K> => ({
+export const updateQueryResult = <T extends object, K>(store: Store<T, K>, query: Query<T>, events: Event<T, K>[]): Store<T, K> => ({
   ...store,
   queryResults: store.queryResults.update(query, (res = emptyQueryResult()) => {
     // partition the events into archived contract ids and created events that match the query.
-    const archivedAndCreated: [ContractId<T>[], CreateEvent<T, K>[]] = events.reduce<[ContractId<T>[], CreateEvent<T, K>[]]>
-      ((acc, event : Event<T>) => {
-          return ('created' in event ? [acc[0], eventMatchesQuery(event.created.payload, query) ? acc[1].concat(event.created as CreateEvent<T, K>) : acc[1]]
-                                      : [acc[0].concat(event.archived.contractId), acc[1]])
-        }
-      , [[], []])
+    // TODO(MH): Use a `Set` for the archived contract ids.
+    const [archived, created] = events.reduce<[ContractId<T>[], CreateEvent<T, K>[]]>(
+      (acc, event) => 'created' in event
+        ? [acc[0], payloadMatchesQuery(event.created.payload, query) ? acc[1].concat(event.created)
+        : acc[1]] : [acc[0].concat(event.archived.contractId), acc[1]],
+      [[], []],
+    );
 
     // append the newly created events that match the query and drop the archived ones.
-    const updatedContracts = res.contracts.concat(archivedAndCreated[1])
-                                          .filter((value : CreateEvent<T, K>) => !archivedAndCreated[0].includes(value.contractId))
-    return {contracts: updatedContracts, loading: false}
-  })
+    const contracts = res
+      .contracts
+      .concat(created)
+      .filter((contract) => !(archived.includes(contract.contractId)));
+    return {contracts, loading: false};
+  }),
 });
 
-export const eventMatchesQuery= <T>(payload: T, query: Query<T>) : boolean => {
-  if (typeof payload === "object" && typeof query === "object") {
-    const keys = Object.keys(query) as (keyof Query<T> & keyof T)[]
-    return keys.reduce<boolean>((acc, k) => {
-      if (k in payload)
-        return eventMatchesQuery(payload[k], query[k] as any) && acc
-      else
-        return false
-    }, true)
-  } else if (typeof payload === typeof query) {
-      return payload === query
-  } else
-      return false
+export const payloadMatchesQuery = <T>(payload: T, query: Query<T>): boolean => {
+  if (typeof payload === 'object' && typeof query === 'object') {
+    const keys = Object.keys(query) as (keyof T & keyof Query<T>)[]
+    return keys.reduce<boolean>(
+      // TODO(MH): We should consider some form of crashing/logging when the
+      // `key` below is not a key of `payload`.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (acc, key) => acc && key in payload && payloadMatchesQuery(payload[key], query[key] as any),
+      true,
+    );
+  } else {
+    return typeof payload === typeof query && payload === query
+  }
 }
-
 
 export const setFetchByKeyLoading = <T extends object, K>(store: Store<T, K>, key: K): Store<T, K> => ({
   ...store,
@@ -90,4 +92,3 @@ export const setFetchByKeyResult = <T extends object, K>(store: Store<T, K>, key
   ...store,
   fetchByKeyResults: store.fetchByKeyResults.set(key, {contract, loading: false}),
 });
-

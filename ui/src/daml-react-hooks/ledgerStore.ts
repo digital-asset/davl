@@ -33,7 +33,7 @@ export const setQueryResult = <T extends object>(store: Store, template: Templat
     TemplateStore.setQueryResult(templateStore, query, contracts))
 });
 
-export const updateQueryResult = <T extends {}>(store: Store, template: Template<T>, query: Query<T>, events: Event<T>[]): Store => ({
+export const updateQueryResult = <T extends object>(store: Store, template: Template<T>, query: Query<T>, events: Event<T>[]): Store => ({
   ...store,
   templateStores: store.templateStores.update(template, (templateStore = TemplateStore.empty()) =>
     TemplateStore.updateQueryResult(templateStore, query, events))
@@ -55,4 +55,3 @@ export const setFetchByKeyResult = <T extends object, K>(store: Store, template:
   templateStores: store.templateStores.update(template, (templateStore = TemplateStore.empty()) =>
     TemplateStore.setFetchByKeyResult(templateStore, key, contract))
 });
-

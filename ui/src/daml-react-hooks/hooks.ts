@@ -1,4 +1,4 @@
-import { Template, Choice, ContractId, TemplateId, lookupTemplate } from "@digitalasset/daml-json-types";
+import { Template, Choice, ContractId, lookupTemplate } from "@digitalasset/daml-json-types";
 import { Event, Query, CreateEvent } from '@digitalasset/daml-ledger-fetch';
 import { useEffect, useMemo, useState, useContext } from "react";
 import * as LedgerStore from './ledgerStore';
@@ -92,23 +92,20 @@ const reloadTemplate = async <T extends object, K>(state: DamlLedgerState, templ
   }
 }
 
-type Events<T extends object> = Event<T, unknown>[]
-const updateTemplate = <T extends object, K>(state: DamlLedgerState, template: Template<T, K>, events: Events<T>) => {
+// TODO(MH): We need to update the key lookups as well.
+const updateTemplate = <T extends object, K>(state: DamlLedgerState, template: Template<T, K>, events: Event<T, K>[]) => {
   const templateStore = state.store.templateStores.get(template) as TemplateStore.Store<T, K> | undefined;
-  if (templateStore) {
+  if (templateStore !== undefined) {
     const queries: Query<T>[] = Array.from(templateStore.queryResults.keys());
-    queries.forEach((query) => state.dispatch(updateQueryResult(template, query, events)))
-    }
+    queries.forEach((query) => state.dispatch(updateQueryResult(template, query, events)));
+  }
 }
 
-export const updateEvents = (state: DamlLedgerState, events: Events<object>) : void => {
-  const getTemplateId = (event: Event<object>) : TemplateId => {
-      return ('created' in event ? event.created.templateId : event.archived.templateId)
-  }
-  const eventsByTemplateId = immutable.List(events).groupBy(getTemplateId);
-  eventsByTemplateId.forEach((events, tid) => {
-    updateTemplate(state, lookupTemplate(tid), events.valueSeq().toArray() as Events<object>)
-  })
+export const updateEvents = (state: DamlLedgerState, events: Event<object>[]) => {
+  const eventsByTemplateId = immutable.List(events).groupBy((event) =>
+    'created' in event ? event.created.templateId : event.archived.templateId);
+  eventsByTemplateId.forEach((events, tid) =>
+    updateTemplate(state, lookupTemplate(tid), events.valueSeq().toArray()));
 }
 
 /// React Hook that returns a function to exercise a choice and a boolean
