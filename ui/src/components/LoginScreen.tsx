@@ -39,7 +39,7 @@ const LoginScreen: React.FC<Props> = (props) => {
       try {
         setStatus(Status.LoggingIn);
         const ledger = new Ledger(credentials.token);
-        const employeeRole = await ledger.pseudoLookupByKey(v3.EmployeeRole, {employee: credentials.party});
+        const employeeRole = await ledger.lookupByKey(v3.EmployeeRole, credentials.party);
         if (employeeRole) {
           setStatus(Status.Normal);
           props.onLogin(credentials);
