@@ -1,5 +1,5 @@
 import {ContractId, registerTemplate} from '@digitalasset/daml-json-types'
-import {Event} from '@digitalasset/daml-ledger-fetch'
+import Ledger, {Event} from '@digitalasset/daml-ledger-fetch'
 import * as jtv from '@mojotech/json-type-validation'
 import {configure, mount} from 'enzyme'
 import Adapter from 'enzyme-adapter-react-16'
@@ -7,12 +7,14 @@ import React from 'react'
 import DamlLedger from '../daml-react-hooks/DamlLedger'
 import Credentials from './credentials'
 import {updateEvents, useDamlState} from './hooks'
-import {setQueryResult} from "./reducer"
+import {setQueryResult, Action, reducer} from "./reducer"
+import {DamlLedgerState} from './context'
+import * as LedgerStore from './ledgerStore'
 
 configure({ adapter: new Adapter()})
 
 // mock data
-const dummyCredentials : Credentials = {party: 'noparty', token: 'noledger'}
+const dummyCredentials: Credentials = {party: 'noparty', token: 'noledger'}
 const templateId = {  packageId: 'A'
                     , moduleName: 'B'
                     , entityName : 'C'
@@ -32,10 +34,10 @@ const payload = {value: {value1 : '123', value2: 1}}
 const key = "key"
 
 type T={
-  value: {value1 : string, value2: number}
+  value: {value1: string, value2: number}
 }
 
-const createdEvent = (cid: ContractId<T>, argument: T = payload) : Event<T> => {
+const createdEvent = (cid: ContractId<T>, argument: T = payload): Event<T> => {
   return(
     {created: { templateId: templateId
               , contractId: cid
@@ -49,7 +51,7 @@ const createdEvent = (cid: ContractId<T>, argument: T = payload) : Event<T> => {
   )
 }
 
-const archivedEvent = (cid: ContractId<T>) : Event<T> => {
+const archivedEvent = (cid: ContractId<T>): Event<T> => {
   return(
     {archived: { templateId: templateId
                , contractId: cid
@@ -58,108 +60,55 @@ const archivedEvent = (cid: ContractId<T>) : Event<T> => {
   )
 }
 
-
-// tests
-type Props = {
-  events: Event<T>[]
-}
-const HookWrapper : React.FC<Props> = ({events}) => {
-  const state = useDamlState()
-  const init = () => {
-    state.dispatch(setQueryResult(template, query, []))
+const mockDamlLedgerState = (): DamlLedgerState => {
+  const state: DamlLedgerState = {
+    store: LedgerStore.setQueryResult(LedgerStore.empty, template, query, []),
+    dispatch: () => {return;},
+    party: 'NO_PARTY',
+    ledger: new Ledger('NO_TOKEN'),
+  };
+  state.dispatch = (action: Action) => {
+    state.store = reducer(state.store, action);
   }
-
-  const go = () => {
-    updateEvents(state, events)
-  }
-
-  const result : number | undefined = state.store.templateStores.get(template)?.queryResults.get(query)?.contracts.length
-  return(
-    <div>
-      <button title='init' onClick={init} />
-      <button title='button' onClick={go} />
-      <span title='result'>{result}</span>
-    </div>
-  )
+  return state;
 }
 
-describe("DAML hooks", () => {
+describe('daml-react-hooks', () => {
   registerTemplate(template)
+
   it("no events result in unchanged state", () => {
-    const wrapper = mount (
-        <DamlLedger credentials={dummyCredentials}>
-          <HookWrapper events={[]}>
-          </HookWrapper>
-        </DamlLedger>
-    )
-    wrapper.find({title: 'init'}).invoke('onClick')()
-    wrapper.find({title: 'button'}).invoke('onClick')()
-    expect(wrapper.find({title: 'result'}).text()).toEqual('0')
-    wrapper.unmount()
-  })
+    const state = mockDamlLedgerState();
+    updateEvents(state, [])
+    expect(state.store.templateStores.get(template)?.queryResults.get(query)?.contracts).toHaveLength(0);
+  });
 
   it("adding one event", () => {
-    const wrapper = mount(
-        <DamlLedger credentials={dummyCredentials}>
-          <HookWrapper events={[createdEvent('0#0')]}>
-          </HookWrapper>
-        </DamlLedger>
-    )
-    wrapper.find({title: 'init'}).invoke('onClick')()
-    wrapper.find({title: 'button'}).invoke('onClick')()
-    expect(wrapper.find({title: 'result'}).text()).toEqual('1')
-    wrapper.unmount()
-  })
+    const state = mockDamlLedgerState();
+    updateEvents(state, [createdEvent('0#0')])
+    expect(state.store.templateStores.get(template)?.queryResults.get(query)?.contracts).toHaveLength(1);
+  });
 
   it("adding three events", () => {
-    const wrapper = mount(
-        <DamlLedger credentials={dummyCredentials}>
-          <HookWrapper events={[createdEvent('0#0'), createdEvent('0#1'), createdEvent('0#2')]}>
-          </HookWrapper>
-        </DamlLedger>
-    )
-    wrapper.find({title: 'init'}).invoke('onClick')()
-    wrapper.find({title: 'button'}).invoke('onClick')()
-    expect(wrapper.find({title: 'result'}).text()).toEqual('3')
-    wrapper.unmount()
+    const state = mockDamlLedgerState();
+    updateEvents(state, [createdEvent('0#0'), createdEvent('0#1'), createdEvent('0#2')])
+    expect(state.store.templateStores.get(template)?.queryResults.get(query)?.contracts).toHaveLength(3);
   })
 
   it("adding two events and archiving one", () => {
-    const wrapper = mount(
-        <DamlLedger credentials={dummyCredentials}>
-          <HookWrapper events={[createdEvent('0#0'), createdEvent('0#1'), archivedEvent('0#0')]}>
-          </HookWrapper>
-        </DamlLedger>
-    )
-    wrapper.find({title: 'init'}).invoke('onClick')()
-    wrapper.find({title: 'button'}).invoke('onClick')()
-    expect(wrapper.find({title: 'result'}).text()).toEqual('1')
-    wrapper.unmount()
+    const state = mockDamlLedgerState();
+    updateEvents(state, [createdEvent('0#0'), createdEvent('0#1'), archivedEvent('0#0')])
+    expect(state.store.templateStores.get(template)?.queryResults.get(query)?.contracts).toHaveLength(1);
   })
 
   it("archiving a non-existant contract", () => {
-    const wrapper = mount(
-        <DamlLedger credentials={dummyCredentials}>
-          <HookWrapper events={[createdEvent('0#0'), createdEvent('0#1'), archivedEvent('0#2')]}>
-          </HookWrapper>
-        </DamlLedger>
-    )
-    wrapper.find({title: 'init'}).invoke('onClick')()
-    wrapper.find({title: 'button'}).invoke('onClick')()
-    expect(wrapper.find({title: 'result'}).text()).toEqual('2')
-    wrapper.unmount()
+    const state = mockDamlLedgerState();
+    updateEvents(state, [createdEvent('0#0'), archivedEvent('0#2')])
+    expect(state.store.templateStores.get(template)?.queryResults.get(query)?.contracts).toHaveLength(1);
   })
 
   it("adding an event that doesn't match the query", () => {
-    const wrapper = mount(
-        <DamlLedger credentials={dummyCredentials}>
-          <HookWrapper events={[createdEvent('0#0', {value : {value1: 'something else', value2: 1}})]}>
-          </HookWrapper>
-        </DamlLedger>
-    )
-    wrapper.find({title: 'init'}).invoke('onClick')()
-    wrapper.find({title: 'button'}).invoke('onClick')()
-    expect(wrapper.find({title: 'result'}).text()).toEqual('0')
-    wrapper.unmount()
+    const state = mockDamlLedgerState();
+    updateEvents(state, [createdEvent('0#0', {value : {value1: 'something else', value2: 1}})])
+    expect(state.store.templateStores.get(template)?.queryResults.get(query)?.contracts).toHaveLength(0);
   })
 });
