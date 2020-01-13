@@ -51,19 +51,23 @@ export const updateQueryResult = <T extends object, K>(store: Store<T, K>, query
   ...store,
   queryResults: store.queryResults.update(query, (res = emptyQueryResult()) => {
     // partition the events into archived contract ids and created events that match the query.
-    // TODO(MH): Use a `Set` for the archived contract ids.
-    const [archived, created] = events.reduce<[ContractId<T>[], CreateEvent<T, K>[]]>(
-      (acc, event) => 'created' in event
-        ? [acc[0], payloadMatchesQuery(event.created.payload, query) ? acc[1].concat(event.created)
-        : acc[1]] : [acc[0].concat(event.archived.contractId), acc[1]],
-      [[], []],
-    );
+    const archived: Set<ContractId<T>> = new Set();
+    const created: CreateEvent<T, K>[] = [];
+    for (const event of events) {
+      if ('created' in event) {
+        if (payloadMatchesQuery(event.created.payload, query)) {
+          created.push(event.created);
+        }
+      } else {
+        archived.add(event.archived.contractId);
+      }
+    }
 
     // append the newly created events that match the query and drop the archived ones.
     const contracts = res
       .contracts
       .concat(created)
-      .filter((contract) => !(archived.includes(contract.contractId)));
+      .filter((contract) => !archived.has(contract.contractId));
     return {contracts, loading: false};
   }),
 });
