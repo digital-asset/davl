@@ -62,7 +62,7 @@ const archivedEvent = (cid: ContractId<T>): Event<T> => {
 
 const mockDamlLedgerState = (): DamlLedgerState => {
   const state: DamlLedgerState = {
-    store: LedgerStore.setQueryResult(LedgerStore.empty, template, query, []),
+    store: LedgerStore.setQueryResult(LedgerStore.empty(), template, query, []),
     dispatch: () => {return;},
     party: 'NO_PARTY',
     ledger: new Ledger('NO_TOKEN'),

@@ -10,7 +10,7 @@ type Props = {
 }
 
 const DamlLedger: React.FC<Props> = (props) => {
-  const [store, dispatch] = useReducer(reducer, LedgerStore.empty);
+  const [store, dispatch] = useReducer(reducer, LedgerStore.empty());
   const state = useMemo(() => ({
     store,
     dispatch,

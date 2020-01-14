@@ -7,9 +7,9 @@ export type Store = {
   templateStores: immutable.Map<Template<object, unknown>, TemplateStore.Store<object, unknown>>;
 }
 
-export const empty: Store = {
+export const empty = (): Store => ({
   templateStores: immutable.Map(),
-};
+});
 
 export const setTemplateLoading = <T extends object>(store: Store, template: Template<T>) => ({
   ...store,
