@@ -5,9 +5,9 @@ import * as LedgerStore from './ledgerStore';
 enum ActionType {
   SetQueryLoading,
   SetQueryResult,
-  UpdateQueryResult,
   SetFetchByKeyLoading,
   SetFetchByKeyResult,
+  AddEvents,
 }
 
 type SetQueryLoadingAction<T extends object> = {
@@ -23,13 +23,6 @@ type SetQueryResultAction<T extends object> = {
   contracts: CreateEvent<T>[];
 }
 
-type UpdateQueryResultAction<T extends object> = {
-  type: typeof ActionType.UpdateQueryResult;
-  template: Template<T>;
-  query: Query<T>;
-  events: Event<T>[];
-}
-
 type SetFetchByKeyLoadingAction<T extends object, K> = {
   type: typeof ActionType.SetFetchByKeyLoading;
   template: Template<T, K>;
@@ -43,12 +36,17 @@ type SetFetchByKeyResultAction<T extends object, K> = {
   contract: CreateEvent<T, K> | null;
 }
 
+type AddEventsAction = {
+  type: typeof ActionType.AddEvents;
+  events: Event<object>[];
+}
+
 export type Action =
   | SetQueryLoadingAction<object>
   | SetQueryResultAction<object>
-  | UpdateQueryResultAction<object>
   | SetFetchByKeyLoadingAction<object, unknown>
   | SetFetchByKeyResultAction<object, unknown>
+  | AddEventsAction
 
 export const setQueryLoading = <T extends object>(template: Template<T>, query: Query<T>): SetQueryLoadingAction<T> => ({
   type: ActionType.SetQueryLoading,
@@ -61,13 +59,6 @@ export const setQueryResult = <T extends object>(template: Template<T>, query: Q
   template,
   query,
   contracts,
-});
-
-export const updateQueryResult = <T extends object>(template: Template<T>, query: Query<T>, events: Event<T>[]): UpdateQueryResultAction<T> => ({
-  type: ActionType.UpdateQueryResult,
-  template,
-  query,
-  events,
 });
 
 export const setFetchByKeyLoading = <T extends object, K>(template: Template<T, K>, key: K): SetFetchByKeyLoadingAction<T, K> => ({
@@ -83,6 +74,11 @@ export const setFetchByKeyResult = <T extends object, K>(template: Template<T, K
   contract,
 });
 
+export const addEvents= (events: Event<object>[]): AddEventsAction => ({
+  type: ActionType.AddEvents,
+  events,
+});
+
 export const reducer = (ledgerStore: LedgerStore.Store, action: Action): LedgerStore.Store => {
   switch (action.type) {
     case ActionType.SetQueryLoading: {
@@ -91,14 +87,14 @@ export const reducer = (ledgerStore: LedgerStore.Store, action: Action): LedgerS
     case ActionType.SetQueryResult: {
       return LedgerStore.setQueryResult(ledgerStore, action.template, action.query, action.contracts);
     }
-    case ActionType.UpdateQueryResult: {
-      return LedgerStore.updateQueryResult(ledgerStore, action.template, action.query, action.events);
-    }
     case ActionType.SetFetchByKeyLoading: {
       return LedgerStore.setFetchByKeyLoading(ledgerStore, action.template, action.key);
     }
     case ActionType.SetFetchByKeyResult: {
       return LedgerStore.setFetchByKeyResult(ledgerStore, action.template, action.key, action.contract);
+    }
+    case ActionType.AddEvents: {
+      return LedgerStore.addEvents(ledgerStore, action.events);
     }
   }
 }
