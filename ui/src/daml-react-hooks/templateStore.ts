@@ -47,30 +47,25 @@ export const setQueryResult = <T extends object, K>(store: Store<T, K>, query: Q
   queryResults: store.queryResults.set(query, {contracts, loading: false})
 });
 
-export const updateQueryResult = <T extends object, K>(store: Store<T, K>, query: Query<T>, events: Event<T, K>[]): Store<T, K> => ({
-  ...store,
-  queryResults: store.queryResults.update(query, (res = emptyQueryResult()) => {
-    // partition the events into archived contract ids and created events that match the query.
-    const archived: Set<ContractId<T>> = new Set();
-    const created: CreateEvent<T, K>[] = [];
-    for (const event of events) {
-      if ('created' in event) {
-        if (payloadMatchesQuery(event.created.payload, query)) {
-          created.push(event.created);
-        }
-      } else {
-        archived.add(event.archived.contractId);
-      }
+// TODO(MH): We need to update the key lookups as well.
+export const addEvents = <T extends object, K>(store: Store<T, K>, events: Event<T, K>[]): Store<T, K> => {
+  const archived: Set<ContractId<T>> = new Set();
+  const created: CreateEvent<T, K>[] = [];
+  for (const event of events) {
+    if ('created' in event) {
+      created.push(event.created);
+    } else {
+      archived.add(event.archived.contractId);
     }
-
-    // append the newly created events that match the query and drop the archived ones.
-    const contracts = res
-      .contracts
-      .concat(created)
+  }
+  const queryResults = store.queryResults.map((queryResult, query) => {
+    const contracts = queryResult.contracts
+      .concat(created.filter((event) => payloadMatchesQuery(event.payload, query)))
       .filter((contract) => !archived.has(contract.contractId));
-    return {contracts, loading: false};
-  }),
-});
+    return {...queryResult, contracts};
+  });
+  return {...store, queryResults};
+}
 
 export const payloadMatchesQuery = <T>(payload: T, query: Query<T>): boolean => {
   if (typeof payload === 'object' && typeof query === 'object') {

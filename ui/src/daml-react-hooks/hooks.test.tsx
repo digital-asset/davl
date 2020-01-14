@@ -6,7 +6,7 @@ import Adapter from 'enzyme-adapter-react-16'
 import React from 'react'
 import DamlLedger from '../daml-react-hooks/DamlLedger'
 import Credentials from './credentials'
-import {updateEvents, useDamlState} from './hooks'
+import {useDamlState} from './hooks'
 import {setQueryResult, Action, reducer} from "./reducer"
 import {DamlLedgerState} from './context'
 import * as LedgerStore from './ledgerStore'
@@ -34,7 +34,7 @@ const payload = {value: {value1 : '123', value2: 1}}
 const key = "key"
 
 type T={
-  value: {value1: string, value2: number}
+  value: {value1: string; value2: number};
 }
 
 const createdEvent = (cid: ContractId<T>, argument: T = payload): Event<T> => {
@@ -71,6 +71,10 @@ const mockDamlLedgerState = (): DamlLedgerState => {
     state.store = reducer(state.store, action);
   }
   return state;
+}
+
+const updateEvents = (state: DamlLedgerState, events: Event<object>[]) => {
+  state.store = LedgerStore.addEvents(state.store, events);
 }
 
 describe('daml-react-hooks', () => {
