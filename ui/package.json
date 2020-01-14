@@ -26,7 +26,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test --testURL='http://localhost:7575'",
     "eject": "react-scripts eject",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx src/",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx --max-warnings 0 src/",
     "storybook": "start-storybook -p 9001 -c .storybook"
   },
   "eslintConfig": {

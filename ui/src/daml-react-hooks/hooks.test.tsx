@@ -1,20 +1,11 @@
 import {ContractId, registerTemplate} from '@digitalasset/daml-json-types'
 import Ledger, {Event} from '@digitalasset/daml-ledger-fetch'
 import * as jtv from '@mojotech/json-type-validation'
-import {configure, mount} from 'enzyme'
-import Adapter from 'enzyme-adapter-react-16'
-import React from 'react'
-import DamlLedger from '../daml-react-hooks/DamlLedger'
-import Credentials from './credentials'
-import {useDamlState} from './hooks'
-import {setQueryResult, Action, reducer} from "./reducer"
+import {Action, reducer} from "./reducer"
 import {DamlLedgerState} from './context'
 import * as LedgerStore from './ledgerStore'
 
-configure({ adapter: new Adapter()})
-
 // mock data
-const dummyCredentials: Credentials = {party: 'noparty', token: 'noledger'}
 const templateId = {  packageId: 'A'
                     , moduleName: 'B'
                     , entityName : 'C'
