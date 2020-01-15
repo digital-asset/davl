@@ -10,10 +10,10 @@ export type Formula<a6PY> =
   |  { tag: 'Conjunction'; value: Formula<a6PY>[] }
   |  { tag: 'Disjunction'; value: Formula<a6PY>[] }
 export const Formula = <a6PY>(a6PY: daml.Serializable<a6PY>): daml.Serializable<Formula<a6PY>> => ({
-  decoder: () => jtv.oneOf(
-    jtv.object<Formula<a6PY>>({tag: jtv.constant('Proposition'), value: jtv.lazy(() => a6PY.decoder())}),
-    jtv.object<Formula<a6PY>>({tag: jtv.constant('Negation'), value: jtv.lazy(() => Formula(a6PY).decoder())}),
-    jtv.object<Formula<a6PY>>({tag: jtv.constant('Conjunction'), value: jtv.lazy(() => daml.List(Formula(a6PY)).decoder())}),
-    jtv.object<Formula<a6PY>>({tag: jtv.constant('Disjunction'), value: jtv.lazy(() => daml.List(Formula(a6PY)).decoder())}),
+  decoder: () => jtv.oneOf<Formula<a6PY>>(
+    jtv.object({tag: jtv.constant('Proposition'), value: jtv.lazy(() => a6PY.decoder())}),
+    jtv.object({tag: jtv.constant('Negation'), value: jtv.lazy(() => Formula(a6PY).decoder())}),
+    jtv.object({tag: jtv.constant('Conjunction'), value: jtv.lazy(() => daml.List(Formula(a6PY)).decoder())}),
+    jtv.object({tag: jtv.constant('Disjunction'), value: jtv.lazy(() => daml.List(Formula(a6PY)).decoder())}),
   )
 });

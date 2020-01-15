@@ -11,7 +11,7 @@ export const Max = <a4ip>(a4ip: daml.Serializable<a4ip>): daml.Serializable<Max<
   decoder: () => jtv.object({
     unpack: a4ip.decoder(),
   }),
-});
+})
 
 export type Min<a4iq> = {
   unpack: a4iq;
@@ -20,4 +20,4 @@ export const Min = <a4iq>(a4iq: daml.Serializable<a4iq>): daml.Serializable<Min<
   decoder: () => jtv.object({
     unpack: a4iq.decoder(),
   }),
-});
+})

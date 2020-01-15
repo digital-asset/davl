@@ -12,7 +12,7 @@ export enum Ordering {
 daml.STATIC_IMPLEMENTS_SERIALIZABLE_CHECK<Ordering>(Ordering)
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Ordering {
-  export const decoder = () => jtv.oneOf(
+  export const decoder = () => jtv.oneOf<Ordering>(
     jtv.constant(Ordering.LT),
     jtv.constant(Ordering.EQ),
     jtv.constant(Ordering.GT),
@@ -24,4 +24,4 @@ export type Proxy<a> = {
 export const Proxy = <a>(a: daml.Serializable<a>): daml.Serializable<Proxy<a>> => ({
   decoder: () => jtv.object({
   }),
-});
+})

@@ -11,14 +11,14 @@ export const Down = <aAZ>(aAZ: daml.Serializable<aAZ>): daml.Serializable<Down<a
   decoder: () => jtv.object({
     unpack: aAZ.decoder(),
   }),
-});
+})
 
 export type Optional<aB2> = 
   |  { tag: 'None'; value: {} }
   |  { tag: 'Some'; value: aB2 }
 export const Optional = <aB2>(aB2: daml.Serializable<aB2>): daml.Serializable<Optional<aB2>> => ({
-  decoder: () => jtv.oneOf(
-    jtv.object<Optional<aB2>>({tag: jtv.constant('None'), value: jtv.lazy(() => daml.Unit.decoder())}),
-    jtv.object<Optional<aB2>>({tag: jtv.constant('Some'), value: jtv.lazy(() => aB2.decoder())}),
+  decoder: () => jtv.oneOf<Optional<aB2>>(
+    jtv.object({tag: jtv.constant('None'), value: jtv.lazy(() => daml.Unit.decoder())}),
+    jtv.object({tag: jtv.constant('Some'), value: jtv.lazy(() => aB2.decoder())}),
   )
 });

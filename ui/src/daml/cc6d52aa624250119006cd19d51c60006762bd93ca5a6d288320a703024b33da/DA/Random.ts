@@ -6,8 +6,11 @@ import * as daml from '@digitalasset/daml-json-types';
 
 export type Minstd = 
   |  { tag: 'Minstd'; value: daml.Int }
-export const Minstd: daml.Serializable<Minstd> = ({
-  decoder: () => jtv.oneOf(
-    jtv.object<Minstd>({tag: jtv.constant('Minstd'), value: jtv.lazy(() => daml.Int.decoder())}),
-  )
+export const Minstd:
+  daml.Serializable<Minstd> & {
+  } = ({
+  decoder: () => jtv.oneOf<Minstd>(
+    jtv.object({tag: jtv.constant('Minstd'), value: jtv.lazy(() => daml.Int.decoder())}),
+  ),
 });
+daml.STATIC_IMPLEMENTS_SERIALIZABLE_CHECK<Minstd>(Minstd)

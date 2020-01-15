@@ -11,7 +11,7 @@ export const Product = <a4Dj>(a4Dj: daml.Serializable<a4Dj>): daml.Serializable<
   decoder: () => jtv.object({
     unpack: a4Dj.decoder(),
   }),
-});
+})
 
 export type Sum<a4Dk> = {
   unpack: a4Dk;
@@ -20,7 +20,7 @@ export const Sum = <a4Dk>(a4Dk: daml.Serializable<a4Dk>): daml.Serializable<Sum<
   decoder: () => jtv.object({
     unpack: a4Dk.decoder(),
   }),
-});
+})
 
 export type Any = {
   getAny: boolean;
@@ -29,7 +29,7 @@ export const Any: daml.Serializable<Any> = ({
   decoder: () => jtv.object({
     getAny: daml.Bool.decoder(),
   }),
-});
+})
 
 export type All = {
   getAll: boolean;
@@ -38,4 +38,4 @@ export const All: daml.Serializable<All> = ({
   decoder: () => jtv.object({
     getAll: daml.Bool.decoder(),
   }),
-});
+})
