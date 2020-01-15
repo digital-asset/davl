@@ -11,4 +11,4 @@ export const Map = <a8Om, a8On>(a8Om: daml.Serializable<a8Om>, a8On: daml.Serial
   decoder: () => jtv.object({
     textMap: daml.TextMap(a8On).decoder(),
   }),
-});
+})

@@ -21,7 +21,7 @@ export enum Month {
 daml.STATIC_IMPLEMENTS_SERIALIZABLE_CHECK<Month>(Month)
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Month {
-  export const decoder = () => jtv.oneOf(
+  export const decoder = () => jtv.oneOf<Month>(
     jtv.constant(Month.Jan),
     jtv.constant(Month.Feb),
     jtv.constant(Month.Mar),
@@ -49,7 +49,7 @@ export enum DayOfWeek {
 daml.STATIC_IMPLEMENTS_SERIALIZABLE_CHECK<DayOfWeek>(DayOfWeek)
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace DayOfWeek {
-  export const decoder = () => jtv.oneOf(
+  export const decoder = () => jtv.oneOf<DayOfWeek>(
     jtv.constant(DayOfWeek.Monday),
     jtv.constant(DayOfWeek.Tuesday),
     jtv.constant(DayOfWeek.Wednesday),

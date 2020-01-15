@@ -49,7 +49,7 @@ export const Tuple20 = <a2lA, a2lB, a2lC, a2lD, a2lE, a2lF, a2lG, a2lH, a2lI, a2
     _19: a2lS.decoder(),
     _20: a2lT.decoder(),
   }),
-});
+})
 
 export type Tuple19<a2lU, a2lV, a2lW, a2lX, a2lY, a2lZ, a2m0, a2m1, a2m2, a2m3, a2m4, a2m5, a2m6, a2m7, a2m8, a2m9, a2ma, a2mb, a2mc> = {
   _1: a2lU;
@@ -94,7 +94,7 @@ export const Tuple19 = <a2lU, a2lV, a2lW, a2lX, a2lY, a2lZ, a2m0, a2m1, a2m2, a2
     _18: a2mb.decoder(),
     _19: a2mc.decoder(),
   }),
-});
+})
 
 export type Tuple18<a2md, a2me, a2mf, a2mg, a2mh, a2mi, a2mj, a2mk, a2ml, a2mm, a2mn, a2mo, a2mp, a2mq, a2mr, a2ms, a2mt, a2mu> = {
   _1: a2md;
@@ -137,7 +137,7 @@ export const Tuple18 = <a2md, a2me, a2mf, a2mg, a2mh, a2mi, a2mj, a2mk, a2ml, a2
     _17: a2mt.decoder(),
     _18: a2mu.decoder(),
   }),
-});
+})
 
 export type Tuple17<a2mv, a2mw, a2mx, a2my, a2mz, a2mA, a2mB, a2mC, a2mD, a2mE, a2mF, a2mG, a2mH, a2mI, a2mJ, a2mK, a2mL> = {
   _1: a2mv;
@@ -178,7 +178,7 @@ export const Tuple17 = <a2mv, a2mw, a2mx, a2my, a2mz, a2mA, a2mB, a2mC, a2mD, a2
     _16: a2mK.decoder(),
     _17: a2mL.decoder(),
   }),
-});
+})
 
 export type Tuple16<a2mM, a2mN, a2mO, a2mP, a2mQ, a2mR, a2mS, a2mT, a2mU, a2mV, a2mW, a2mX, a2mY, a2mZ, a2n0, a2n1> = {
   _1: a2mM;
@@ -217,7 +217,7 @@ export const Tuple16 = <a2mM, a2mN, a2mO, a2mP, a2mQ, a2mR, a2mS, a2mT, a2mU, a2
     _15: a2n0.decoder(),
     _16: a2n1.decoder(),
   }),
-});
+})
 
 export type Tuple15<a2n2, a2n3, a2n4, a2n5, a2n6, a2n7, a2n8, a2n9, a2na, a2nb, a2nc, a2nd, a2ne, a2nf, a2ng> = {
   _1: a2n2;
@@ -254,7 +254,7 @@ export const Tuple15 = <a2n2, a2n3, a2n4, a2n5, a2n6, a2n7, a2n8, a2n9, a2na, a2
     _14: a2nf.decoder(),
     _15: a2ng.decoder(),
   }),
-});
+})
 
 export type Tuple14<a2nh, a2ni, a2nj, a2nk, a2nl, a2nm, a2nn, a2no, a2np, a2nq, a2nr, a2ns, a2nt, a2nu> = {
   _1: a2nh;
@@ -289,7 +289,7 @@ export const Tuple14 = <a2nh, a2ni, a2nj, a2nk, a2nl, a2nm, a2nn, a2no, a2np, a2
     _13: a2nt.decoder(),
     _14: a2nu.decoder(),
   }),
-});
+})
 
 export type Tuple13<a2nv, a2nw, a2nx, a2ny, a2nz, a2nA, a2nB, a2nC, a2nD, a2nE, a2nF, a2nG, a2nH> = {
   _1: a2nv;
@@ -322,7 +322,7 @@ export const Tuple13 = <a2nv, a2nw, a2nx, a2ny, a2nz, a2nA, a2nB, a2nC, a2nD, a2
     _12: a2nG.decoder(),
     _13: a2nH.decoder(),
   }),
-});
+})
 
 export type Tuple12<a2nI, a2nJ, a2nK, a2nL, a2nM, a2nN, a2nO, a2nP, a2nQ, a2nR, a2nS, a2nT> = {
   _1: a2nI;
@@ -353,7 +353,7 @@ export const Tuple12 = <a2nI, a2nJ, a2nK, a2nL, a2nM, a2nN, a2nO, a2nP, a2nQ, a2
     _11: a2nS.decoder(),
     _12: a2nT.decoder(),
   }),
-});
+})
 
 export type Tuple11<a2nU, a2nV, a2nW, a2nX, a2nY, a2nZ, a2o0, a2o1, a2o2, a2o3, a2o4> = {
   _1: a2nU;
@@ -382,7 +382,7 @@ export const Tuple11 = <a2nU, a2nV, a2nW, a2nX, a2nY, a2nZ, a2o0, a2o1, a2o2, a2
     _10: a2o3.decoder(),
     _11: a2o4.decoder(),
   }),
-});
+})
 
 export type Tuple10<a2o5, a2o6, a2o7, a2o8, a2o9, a2oa, a2ob, a2oc, a2od, a2oe> = {
   _1: a2o5;
@@ -409,7 +409,7 @@ export const Tuple10 = <a2o5, a2o6, a2o7, a2o8, a2o9, a2oa, a2ob, a2oc, a2od, a2
     _9: a2od.decoder(),
     _10: a2oe.decoder(),
   }),
-});
+})
 
 export type Tuple9<a2of, a2og, a2oh, a2oi, a2oj, a2ok, a2ol, a2om, a2on> = {
   _1: a2of;
@@ -434,7 +434,7 @@ export const Tuple9 = <a2of, a2og, a2oh, a2oi, a2oj, a2ok, a2ol, a2om, a2on>(a2o
     _8: a2om.decoder(),
     _9: a2on.decoder(),
   }),
-});
+})
 
 export type Tuple8<a2oo, a2op, a2oq, a2or, a2os, a2ot, a2ou, a2ov> = {
   _1: a2oo;
@@ -457,7 +457,7 @@ export const Tuple8 = <a2oo, a2op, a2oq, a2or, a2os, a2ot, a2ou, a2ov>(a2oo: dam
     _7: a2ou.decoder(),
     _8: a2ov.decoder(),
   }),
-});
+})
 
 export type Tuple7<a2ow, a2ox, a2oy, a2oz, a2oA, a2oB, a2oC> = {
   _1: a2ow;
@@ -478,7 +478,7 @@ export const Tuple7 = <a2ow, a2ox, a2oy, a2oz, a2oA, a2oB, a2oC>(a2ow: daml.Seri
     _6: a2oB.decoder(),
     _7: a2oC.decoder(),
   }),
-});
+})
 
 export type Tuple6<a2oD, a2oE, a2oF, a2oG, a2oH, a2oI> = {
   _1: a2oD;
@@ -497,7 +497,7 @@ export const Tuple6 = <a2oD, a2oE, a2oF, a2oG, a2oH, a2oI>(a2oD: daml.Serializab
     _5: a2oH.decoder(),
     _6: a2oI.decoder(),
   }),
-});
+})
 
 export type Tuple5<a2oJ, a2oK, a2oL, a2oM, a2oN> = {
   _1: a2oJ;
@@ -514,7 +514,7 @@ export const Tuple5 = <a2oJ, a2oK, a2oL, a2oM, a2oN>(a2oJ: daml.Serializable<a2o
     _4: a2oM.decoder(),
     _5: a2oN.decoder(),
   }),
-});
+})
 
 export type Tuple4<a2oO, a2oP, a2oQ, a2oR> = {
   _1: a2oO;
@@ -529,7 +529,7 @@ export const Tuple4 = <a2oO, a2oP, a2oQ, a2oR>(a2oO: daml.Serializable<a2oO>, a2
     _3: a2oQ.decoder(),
     _4: a2oR.decoder(),
   }),
-});
+})
 
 export type Tuple3<a2oS, a2oT, a2oU> = {
   _1: a2oS;
@@ -542,7 +542,7 @@ export const Tuple3 = <a2oS, a2oT, a2oU>(a2oS: daml.Serializable<a2oS>, a2oT: da
     _2: a2oT.decoder(),
     _3: a2oU.decoder(),
   }),
-});
+})
 
 export type Tuple2<a2oV, a2oW> = {
   _1: a2oV;
@@ -553,14 +553,14 @@ export const Tuple2 = <a2oV, a2oW>(a2oV: daml.Serializable<a2oV>, a2oW: daml.Ser
     _1: a2oV.decoder(),
     _2: a2oW.decoder(),
   }),
-});
+})
 
 export type Either<a2oX, a2oY> = 
   |  { tag: 'Left'; value: a2oX }
   |  { tag: 'Right'; value: a2oY }
 export const Either = <a2oX, a2oY>(a2oX: daml.Serializable<a2oX>, a2oY: daml.Serializable<a2oY>): daml.Serializable<Either<a2oX, a2oY>> => ({
-  decoder: () => jtv.oneOf(
-    jtv.object<Either<a2oX, a2oY>>({tag: jtv.constant('Left'), value: jtv.lazy(() => a2oX.decoder())}),
-    jtv.object<Either<a2oX, a2oY>>({tag: jtv.constant('Right'), value: jtv.lazy(() => a2oY.decoder())}),
+  decoder: () => jtv.oneOf<Either<a2oX, a2oY>>(
+    jtv.object({tag: jtv.constant('Left'), value: jtv.lazy(() => a2oX.decoder())}),
+    jtv.object({tag: jtv.constant('Right'), value: jtv.lazy(() => a2oY.decoder())}),
   )
 });

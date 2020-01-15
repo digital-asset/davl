@@ -11,4 +11,4 @@ export const RelTime: daml.Serializable<RelTime> = ({
   decoder: () => jtv.object({
     microseconds: daml.Int.decoder(),
   }),
-});
+})

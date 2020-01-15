@@ -11,4 +11,4 @@ export const Unit = <a3PX>(a3PX: daml.Serializable<a3PX>): daml.Serializable<Uni
   decoder: () => jtv.object({
     _1: a3PX.decoder(),
   }),
-});
+})

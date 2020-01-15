@@ -13,4 +13,4 @@ export const NonEmpty = <a8wG>(a8wG: daml.Serializable<a8wG>): daml.Serializable
     hd: a8wG.decoder(),
     tl: daml.List(a8wG).decoder(),
   }),
-});
+})
