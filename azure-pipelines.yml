@@ -152,6 +152,14 @@ jobs:
                    $(Slack.URL)
           }
 
+          # Install Terraform, so we pin the version regardless of what Azure
+          # provides; fortunately terraform is a single, self-contained
+          # executable.
+          TF_DIR=$(mktemp -d)
+          wget https://releases.hashicorp.com/terraform/0.12.19/terraform_0.12.19_linux_amd64.zip -O $TF_DIR/tf.zip
+          ( cd $TF_DIR; unzip tf.zip )
+          terraform=$TF_DIR/terraform
+
           # Deploying new code should be a routine change that CI can
           # automate, but changing the shape of the infrastructure should
           # not. Therefore, CI should only attempt to apply the terraform
@@ -165,7 +173,7 @@ jobs:
               git checkout $previous_sha
               set +e
               # returns 0 if no changes to apply, 1 on error and 2 if changes
-              terraform plan -detailed-exitcode -var-file=deployed-versions.tfvars
+              $terraform plan -detailed-exitcode -var-file=deployed-versions.tfvars
               local result=$?
               set -e
               git checkout $current_sha
@@ -194,14 +202,14 @@ jobs:
           gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
 
           cd infra
-          terraform init
+          $terraform init
 
           if previous_commit_reflects_deployment; then
               if current_commit_changes_infra; then
                   tell_slack "<!here> *WARNING*: Latest commit changes infra. Please apply manually."
               else
                   if current_commit_changes_versions; then
-                      if terraform apply -auto-approve -var-file=deployed-versions.tfvars; then
+                      if $terraform apply -auto-approve -var-file=deployed-versions.tfvars; then
                           tell_slack "started deployment of:\n\`\`\`$(cat deployed-versions.tfvars | jq -Rs . | sed 's/^"//' | sed 's/"$//')\`\`\`"
                       else
                           tell_slack "<!here> *ERROR*: failed to deploy"
