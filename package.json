@@ -2,6 +2,7 @@
   "private": true,
   "workspaces": [
     "daml-json-types",
+    "v3-ts",
     "daml-ledger-fetch",
     "ui"
   ]

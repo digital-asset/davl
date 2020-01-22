@@ -2,7 +2,7 @@ import React from 'react'
 import { Button, Form, Grid, Header, Segment } from 'semantic-ui-react'
 import Credentials, { preCheckCredentials } from '../daml-react-hooks/credentials';
 import Ledger from '@digitalasset/daml-ledger-fetch';
-import * as v3 from '../daml/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
+import * as v3 from '@daml2ts/davl-v3/lib/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 
 type Props = {
   onLogin: (credentials: Credentials) => void;
