@@ -140,7 +140,7 @@ docker exec sandbox /bin/sh -c "while ! nc -z localhost:6865; do sleep 1; done"
 # running against an existing database, so we need to manually deploy the DAR
 # file after it has started. Since uploading a DAR file is idempotent, this
 # should not break if/when the sandbox behaviour changes.
-docker exec sandbox /bin/sh -c "for f in /app/released/*; do /root/.daml/bin/daml ledger upload-dar --host=127.0.0.1 --port=6865 \$f; done"
+docker exec sandbox /bin/sh -c "for f in /app/released/*.dar; do /root/.daml/bin/daml ledger upload-dar --host=127.0.0.1 --port=6865 \$f; done"
 # </workaround>
 
 docker run --name json-api -d --link sandbox -p 7575:7575 gcr.io/da-dev-pinacolada/json-api:${var.json} --ledger-host sandbox --ledger-port 6865 --http-port 7575

@@ -15,4 +15,4 @@ RUN curl https://get.daml.com | sh -s 0.13.32
 
 WORKDIR /app
 
-ENTRYPOINT ["java", "-Dlogback.configurationFile=/app/daml-sdk/sandbox-logback.xml", "-jar", "/app/daml-sdk/daml-sdk.jar", "sandbox", "--wall-clock-time", "--ledgerid", "DAVL"]
+ENTRYPOINT ["java", "-Dlogback.configurationFile=/app/daml-sdk/sandbox-logback.xml", "-jar", "/app/daml-sdk/daml-sdk.jar", "sandbox", "--wall-clock-time", "--ledgerid", "DAVL", "--address", "0.0.0.0"]
