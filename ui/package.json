@@ -3,6 +3,7 @@
   "version": "0.0.3",
   "private": true,
   "dependencies": {
+    "@daml2ts/davl-v3": "0.0.1",
     "@digitalasset/daml-json-types": "0.0.1",
     "@digitalasset/daml-ledger-fetch": "0.0.1",
     "@types/jest": "24.0.18",
