@@ -1,0 +1,68 @@
+daml 1.2
+module DavlUpgrade where
+
+import qualified DAVL.V3 as V3
+import qualified DAVL.V4 as V4
+import qualified V3Stdlib
+
+instance HasCreate V4.EmployeeRole where
+  create = GHC.Types.primitive @"UCreate"
+
+instance HasCreate V4.EmployeeProposal where
+  create = GHC.Types.primitive @"UCreate"
+
+instance HasCreate V4.EmployeeVacationAllocation where
+  create = GHC.Types.primitive @"UCreate"
+
+instance HasCreate V4.VacationRequest where
+  create = GHC.Types.primitive @"UCreate"
+
+instance HasCreate V4.Vacation where
+  create = GHC.Types.primitive @"UCreate"
+
+instance HasExercise V3.EmployeeRole V3Stdlib.Archive () where
+  exercise = GHC.Types.primitive @"UExercise"
+
+instance HasExercise V3.EmployeeProposal V3Stdlib.Archive () where
+  exercise = GHC.Types.primitive @"UExercise"
+
+instance HasExercise V3.EmployeeVacationAllocation V3Stdlib.Archive () where
+  exercise = GHC.Types.primitive @"UExercise"
+
+instance HasExercise V3.VacationRequest V3Stdlib.Archive () where
+  exercise = GHC.Types.primitive @"UExercise"
+
+instance HasExercise V3.Vacation V3Stdlib.Archive () where
+  exercise = GHC.Types.primitive @"UExercise"
+
+employeeRoleSignatoryV3 : V3.EmployeeRole -> [Party]
+employeeRoleSignatoryV3 V3.EmployeeRole{..} = [employee, company]
+
+employeeProposalSignatoryV3 : V3.EmployeeProposal -> [Party]
+employeeProposalSignatoryV3 V3.EmployeeProposal{employeeRole = V3.EmployeeRole{..}} = [company]
+
+employeeVacationAllocationSignatoryV3 : V3.EmployeeVacationAllocation -> [Party]
+employeeVacationAllocationSignatoryV3 V3.EmployeeVacationAllocation{employeeRole = V3.EmployeeRole{..}} = [employee, company]
+
+vacationRequestSignatoryV3 : V3.VacationRequest -> [Party]
+vacationRequestSignatoryV3 V3.VacationRequest{vacation = V3.Vacation{..}}
+  | V3.EmployeeRole{..} <- employeeRole = [employee, company]
+
+vacationSignatoryV3 : V3.Vacation -> [Party]
+vacationSignatoryV3 V3.Vacation{employeeRole = V3.EmployeeRole{..}} = [employee, company, boss]
+
+employeeRoleSignatoryV4 : V4.EmployeeRole -> [Party]
+employeeRoleSignatoryV4 V4.EmployeeRole{..} = [employee, company]
+
+employeeProposalSignatoryV4 : V4.EmployeeProposal -> [Party]
+employeeProposalSignatoryV4 V4.EmployeeProposal{employeeRole = V4.EmployeeRole{..}} = [company]
+
+employeeVacationAllocationSignatoryV4 : V4.EmployeeVacationAllocation -> [Party]
+employeeVacationAllocationSignatoryV4 V4.EmployeeVacationAllocation{employeeRole = V4.EmployeeRole{..}} = [employee, company]
+
+vacationRequestSignatoryV4 : V4.VacationRequest -> [Party]
+vacationRequestSignatoryV4 V4.VacationRequest{vacation = V4.Vacation{..}}
+  | V4.EmployeeRole{..} <- employeeRole = [employee, company]
+
+vacationSignatoryV4 : V4.Vacation -> [Party]
+vacationSignatoryV4 V4.Vacation{employeeRole = V4.EmployeeRole{..}} = [employee, company, boss]
