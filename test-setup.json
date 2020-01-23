@@ -1,0 +1,21 @@
+{
+  "ledgerUrl": "http://localhost:7575/",
+  "ledgerId": "DAVL",
+  "applicationId": "DAVL",
+  "secret": "secret",
+  "company": "Digital Asset",
+  "employees": [
+    {
+      "party": "Martin",
+      "boss": "Shaul",
+      "vacationDays": 25,
+      "acceptProposal": false
+    },
+    {
+      "party": "Moritz",
+      "boss": "Martin",
+      "vacationDays": 25,
+      "acceptProposal": true
+    }
+  ]
+}

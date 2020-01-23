@@ -53,6 +53,13 @@ cd ui
 yarn start
 ```
 
+3. Initialize the ledger (optional)
+
+To create a few employees on the running DAVL ledger, run
+```
+yarn run davl-init test-setup.json
+```
+
 ## Production setup
 
 The production setup is very similar to the dev setup; the main difference is
