@@ -4,7 +4,7 @@ import ListActionItem from '../../components/ListActionItem';
 import { DatesRangeInput } from 'semantic-ui-calendar-react';
 import { VacationListItem } from '../../components/VacationListItem';
 import { vacationLength, prettyRequests } from '../../utils/vacation';
-import { useQuery, usePseudoExerciseByKey, useParty } from '../../daml-react-hooks';
+import { useQuery, useExerciseByKey, useParty } from '../../daml-react-hooks';
 import * as v3 from '@daml2ts/davl-v3/lib/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 import { EmployeeSummary } from '../../utils/employee';
 import { toast } from 'react-semantic-toasts';
@@ -23,7 +23,7 @@ const Requests: React.FC<Props> = (props: Props) => {
   const requests = prettyRequests(requestContracts);
 
   const [exerciseRequestVacation, loadingRequestVacation] =
-    usePseudoExerciseByKey(v3.EmployeeRole.EmployeeRole_RequestVacation);
+    useExerciseByKey(v3.EmployeeRole.EmployeeRole_RequestVacation);
 
   const handleCancelRequest = () => alert('Canceling vacation requests is not yet implemented.');
 
@@ -35,10 +35,9 @@ const Requests: React.FC<Props> = (props: Props) => {
       alert('No date range set for the vacation request.');
       return;
     }
-    const key = {employee: party};
     const fromDate = currentRequest.slice(0, 10);
     const toDate = currentRequest.slice(-10);
-    await exerciseRequestVacation(key, {fromDate, toDate});
+    await exerciseRequestVacation(party, {fromDate, toDate});
     setCurrentRequest('');
     toast({
       title: 'Success',

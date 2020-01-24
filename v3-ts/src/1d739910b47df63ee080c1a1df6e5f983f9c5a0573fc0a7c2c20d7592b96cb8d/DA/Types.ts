@@ -562,5 +562,5 @@ export const Either = <a2oX, a2oY>(a2oX: daml.Serializable<a2oX>, a2oY: daml.Ser
   decoder: () => jtv.oneOf<Either<a2oX, a2oY>>(
     jtv.object({tag: jtv.constant('Left'), value: jtv.lazy(() => a2oX.decoder())}),
     jtv.object({tag: jtv.constant('Right'), value: jtv.lazy(() => a2oY.decoder())}),
-  )
+  ),
 });

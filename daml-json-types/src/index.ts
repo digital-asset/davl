@@ -99,18 +99,23 @@ export const Int: Serializable<Int> = {
 }
 
 /**
- * The counterpart of DAML's `Decimal` type. We represent `Decimal`s as string
+ * The counterpart of DAML's `Numeric` type. We represent `Numeric`s as string
  * in order to avoid a loss of precision. The string must match the regular
  * expression `-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?`.
  */
-export type Decimal = string;
+export type Numeric = string;
+export type Decimal = Numeric;
 
 /**
- * Companion object of the `Decimal` type.
+ * Companion function of the `Numeric` type.
  */
-export const Decimal: Serializable<Decimal> = {
-  decoder: jtv.string,
-}
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const Numeric = (_: number): Serializable<Numeric> =>
+  ({
+    decoder: jtv.string,
+  })
+
+export const Decimal: Serializable<Decimal> = Numeric(10)
 
 /**
  * The counterpart of DAML's `Text` type.
@@ -191,17 +196,52 @@ export const ContractId = <T>(_t: Serializable<T>): Serializable<ContractId<T>> 
 });
 
 /**
- * The counterpart of DAML's `Optional T` type. Nested optionals are not yet
- * supported.
+ * The counterpart of DAML's `Optional T` type.
  */
-export type Optional<T> = T | null;
+export type Optional<T> = null | OptionalInner<T>
+
+type OptionalInner<T> = null extends T ? [] | [Exclude<T, null>] : T
 
 /**
- * Companion object of the `Optional` type.
+ * This class does the actual work behind the `Optional` companion function.
+ * In addition to implementing the `Serializable` interface it also stores
+ * the `Serializable` instance of the payload of the `Optional` and uses it to
+ * provide a decoder for the `OptionalInner` type.
  */
-export const Optional = <T>(t: Serializable<T>): Serializable<Optional<T>> => ({
-  decoder: () => jtv.oneOf(jtv.constant(null), t.decoder()),
-});
+class OptionalWorker<T> implements Serializable<Optional<T>> {
+  constructor(private payload: Serializable<T>) { }
+
+  decoder(): jtv.Decoder<Optional<T>> {
+    return jtv.oneOf(jtv.constant(null), this.innerDecoder());
+  }
+
+  private innerDecoder(): jtv.Decoder<OptionalInner<T>> {
+    if (this.payload instanceof OptionalWorker) {
+      // NOTE(MH): `T` is of the form `Optional<U>` for some `U` here, that is
+      // `T = Optional<U> = null | OptionalInner<U>`. Since `null` does not
+      // extend `OptionalInner<V>` for any `V`, this implies
+      // `OptionalInner<U> = Exclude<T, null>`. This also implies
+      // `OptionalInner<T> = [] | [Exclude<T, null>]`.
+      type OptionalInnerU = Exclude<T, null>
+      const payloadInnerDecoder =
+        this.payload.innerDecoder() as jtv.Decoder<unknown> as jtv.Decoder<OptionalInnerU>;
+      return jtv.oneOf<[] | [Exclude<T, null>]>(
+        jtv.constant<[]>([]),
+        jtv.tuple([payloadInnerDecoder]),
+      ) as jtv.Decoder<OptionalInner<T>>;
+    } else {
+      // NOTE(MH): `T` is not of the form `Optional<U>` here and hence `null`
+      // does not extend `T`. Thus, `OptionalInner<T> = T`.
+      return this.payload.decoder() as jtv.Decoder<OptionalInner<T>>;
+    }
+  }
+}
+
+/**
+ * Companion function of the `Optional` type.
+ */
+export const Optional = <T>(t: Serializable<T>): Serializable<Optional<T>> =>
+  new OptionalWorker(t);
 
 /**
  * The counterpart of DAML's `TextMap T` type. We represent `TextMap`s as
@@ -215,7 +255,5 @@ export type TextMap<T> = { [key: string]: T };
 export const TextMap = <T>(t: Serializable<T>): Serializable<TextMap<T>> => ({
   decoder: () => jtv.dict(t.decoder()),
 });
-
-// TODO(MH): `Numeric` type.
 
 // TODO(MH): `Map` type.
