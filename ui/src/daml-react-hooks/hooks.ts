@@ -109,13 +109,13 @@ export const useExercise = <T extends object, C, R>(choice: Choice<T, C, R>): [(
 
 /// React Hook that returns a function to exercise a choice and a boolean
 /// indicator whether the exercise is currently running.
-export const usePseudoExerciseByKey = <T extends object, C, R>(choice: Choice<T, C, R>): [(key: Query<T>, argument: C) => Promise<R>, boolean] => {
+export const useExerciseByKey = <T extends object, C, R, K>(choice: Choice<T, C, R, K>): [(key: K extends undefined ? never : K, argument: C) => Promise<R>, boolean] => {
   const [loading, setLoading] = useState(false);
   const state = useDamlState();
 
-  const exercise = async (key: Query<T>, argument: C) => {
+  const exercise = async (key: K extends undefined ? never : K, argument: C) => {
     setLoading(true);
-    const [result, events] = await state.ledger.pseudoExerciseByKey(choice, key, argument);
+    const [result, events] = await state.ledger.exerciseByKey(choice, key, argument);
     state.dispatch(addEvents(events));
     setLoading(false);
     return result;

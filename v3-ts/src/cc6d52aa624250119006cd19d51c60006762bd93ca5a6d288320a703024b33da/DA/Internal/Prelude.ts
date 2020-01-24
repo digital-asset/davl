@@ -20,5 +20,5 @@ export const Optional = <aB2>(aB2: daml.Serializable<aB2>): daml.Serializable<Op
   decoder: () => jtv.oneOf<Optional<aB2>>(
     jtv.object({tag: jtv.constant('None'), value: jtv.lazy(() => daml.Unit.decoder())}),
     jtv.object({tag: jtv.constant('Some'), value: jtv.lazy(() => aB2.decoder())}),
-  )
+  ),
 });

@@ -13,5 +13,5 @@ export const Validation = <a9s4, a9s5>(a9s4: daml.Serializable<a9s4>, a9s5: daml
   decoder: () => jtv.oneOf<Validation<a9s4, a9s5>>(
     jtv.object({tag: jtv.constant('Errors'), value: jtv.lazy(() => DA_NonEmpty.NonEmpty(a9s4).decoder())}),
     jtv.object({tag: jtv.constant('Success'), value: jtv.lazy(() => a9s5.decoder())}),
-  )
+  ),
 });
