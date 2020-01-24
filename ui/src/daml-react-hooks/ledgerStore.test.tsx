@@ -4,10 +4,7 @@ import * as jtv from '@mojotech/json-type-validation'
 import * as LedgerStore from './ledgerStore'
 
 // mock data
-const templateId = {  packageId: 'A'
-                    , moduleName: 'B'
-                    , entityName : 'C'
-                    }
+const templateId = 'template-id';
 const template = {  templateId: templateId
                   , Archive: {  template: () => template
                               , choiceName: 'Archive'
