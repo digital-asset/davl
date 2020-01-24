@@ -16,7 +16,7 @@
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "react-scripts": "3.3.0",
-    "react-semantic-toasts": "https://github.com/hurryabit/react-semantic-toasts.git#c606bdee68a21b939c5509e6882810431a50222f",
+    "react-semantic-toasts": "^0.6.5",
     "semantic-ui-calendar-react": "^0.15.3",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^0.88.1",
