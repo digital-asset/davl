@@ -29,6 +29,7 @@ jobs:
           yarn --version
           yarn install
           yarn workspaces run build
+          yarn workspaces run lint
           CI=yes yarn workspaces run test --ci --all
         displayName: build-and-test-ts
 
