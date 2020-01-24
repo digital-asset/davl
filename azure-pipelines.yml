@@ -27,7 +27,7 @@ jobs:
           set -euo pipefail
 
           yarn --version
-          yarn install
+          yarn install --frozen-lockfile
           yarn workspaces run build
           yarn workspaces run lint
           CI=yes yarn workspaces run test --ci --all
