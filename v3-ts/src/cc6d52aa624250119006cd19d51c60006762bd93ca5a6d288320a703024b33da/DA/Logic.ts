@@ -15,5 +15,5 @@ export const Formula = <a6PY>(a6PY: daml.Serializable<a6PY>): daml.Serializable<
     jtv.object({tag: jtv.constant('Negation'), value: jtv.lazy(() => Formula(a6PY).decoder())}),
     jtv.object({tag: jtv.constant('Conjunction'), value: jtv.lazy(() => daml.List(Formula(a6PY)).decoder())}),
     jtv.object({tag: jtv.constant('Disjunction'), value: jtv.lazy(() => daml.List(Formula(a6PY)).decoder())}),
-  )
+  ),
 });

@@ -5,7 +5,7 @@ import * as jtv from '@mojotech/json-type-validation';
 import * as daml from '@digitalasset/daml-json-types';
 
 export type MetaSel0 = {
-  mbRecordName: ({} | null);
+  mbRecordName: daml.Optional<{}>;
   sourceUnpackedness: SourceUnpackedness;
   sourceStrictness: SourceStrictness;
 }

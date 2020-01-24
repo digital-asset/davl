@@ -127,7 +127,7 @@ class Ledger {
    * for a description of the query language.
    */
   async query<T extends object, K>(template: Template<T, K>, query: Query<T>): Promise<CreateEvent<T, K>[]> {
-    const payload = {"%templates": [template.templateId], ...query};
+    const payload = {templateIds: [template.templateId], query};
     const json = await this.submit('contracts/search', payload);
     return jtv.Result.withException(jtv.array(decodeCreateEvent(template)).run(json));
   }
@@ -139,6 +139,9 @@ class Ledger {
     return this.query(template, {} as Query<T>);
   }
 
+  /**
+   * Fetch a contract by its key.
+   */
   async lookupByKey<T extends object, K>(template: Template<T, K>, key: K extends undefined ? never : K): Promise<CreateEvent<T, K> | null> {
     const payload = {
       templateId: template.templateId,
@@ -146,30 +149,6 @@ class Ledger {
     };
     const json = await this.submit('contracts/lookup', payload);
     return jtv.Result.withException(jtv.oneOf(jtv.constant(null), decodeCreateEvent(template)).run(json));
-  }
-
-  /**
-   * Mimic DAML's `lookupByKey`. The `key` must be a formulation of the
-   * contract key as a query.
-   */
-  async pseudoLookupByKey<T extends object, K>(template: Template<T, K>, key: Query<T>): Promise<CreateEvent<T, K> | undefined> {
-    const contracts = await this.query(template, key);
-    if (contracts.length > 1) {
-      throw Error("pseudoLookupByKey: query returned multiple contracts");
-    }
-    return contracts[0];
-  }
-
-  /**
-   * Mimic DAML's `fetchByKey`. The `key` must be a formulation of the
-   * contract key as a query.
-   */
-  async pseudoFetchByKey<T extends object, K>(template: Template<T, K>, key: Query<T>): Promise<CreateEvent<T, K>> {
-    const contract = await this.pseudoLookupByKey(template, key);
-    if (contract === undefined) {
-      throw Error("pseudoFetchByKey: query returned no contract");
-    }
-    return contract;
   }
 
   /**
@@ -208,34 +187,34 @@ class Ledger {
    * Exercise a choice on a contract identified by its contract key.
    */
   async exerciseByKey<T extends object, C, R, K>(choice: Choice<T, C, R, K>, key: K extends undefined ? never : K, argument: C): Promise<[R, Event<object>[]]> {
-    const contract = await this.lookupByKey(choice.template(), key);
-    if (contract === null) {
-      throw Error(`exerciseByKey: no contract with key ${JSON.stringify(key)} for template ${choice.template().templateId}`);
-    }
-    return this.exercise(choice, contract.contractId, argument);
+    const payload = {
+      templateId: choice.template().templateId,
+      key,
+      choice: choice.choiceName,
+      argument,
+    };
+    const json = await this.submit('command/exercise', payload);
+    // Decode the server response into a tuple.
+    const responseDecoder: jtv.Decoder<{exerciseResult: R; contracts: Event<object>[]}> = jtv.object({
+      exerciseResult: choice.resultDecoder(),
+      contracts: jtv.array(decodeEventUnknown),
+    });
+    const {exerciseResult, contracts} = jtv.Result.withException(responseDecoder.run(json));
+    return [exerciseResult, contracts];
   }
 
   /**
-   * Mimic DAML's `exerciseByKey`. The `key` must be a formulation of the
-   * contract key as a query.
-   */
-  async pseudoExerciseByKey<T extends object, C, R>(choice: Choice<T, C, R>, key: Query<T>, argument: C): Promise<[R, Event<object>[]]> {
-    const contract = await this.pseudoFetchByKey(choice.template(), key);
-    return this.exercise(choice, contract.contractId, argument);
-  }
-
-  /**
-   * Archive a contract given by its contract id.
+   * Archive a contract.
    */
   async archive<T extends object>(template: Template<T>, contractId: ContractId<T>): Promise<unknown> {
     return this.exercise(template.Archive, contractId, {});
   }
 
   /**
-   * Archive a contract given by its contract id.
+   * Archive a contract identified by its key.
    */
-  async pseudoArchiveByKey<T extends object>(template: Template<T>, key: Query<T>): Promise<unknown> {
-    return this.pseudoExerciseByKey(template.Archive, key, {});
+  async archiveByKey<T extends object>(template: Template<T>, key: Query<T>): Promise<unknown> {
+    return this.exerciseByKey(template.Archive, key, {});
   }
 }
 
