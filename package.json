@@ -5,6 +5,6 @@
     "v3-ts",
     "daml-ledger-fetch",
     "ui",
-    "davl-init"
+    "admin-cli"
   ]
 }

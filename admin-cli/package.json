@@ -1,8 +1,8 @@
 {
   "private": true,
-  "name": "davl-init",
+  "name": "davl-admin-cli",
   "version": "0.0.1",
-  "description": "Init a DAVL ledger.",
+  "description": "Admin tool for DAVL",
   "license": "Apache-2.0",
   "bin": "bin/index.js",
   "scripts": {

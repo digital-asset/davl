@@ -57,7 +57,7 @@ yarn start
 
 To create a few employees on the running DAVL ledger, run
 ```
-yarn run davl-init test-setup.json
+yarn run davl-admin-cli test-setup.json
 ```
 
 ## Production setup
