@@ -63,8 +63,8 @@ http {
     # Disable all forms of caching on all requests.
     # A real production setup would require more granularity, but caching is
     # hard and we currently don't have big enough volumes.
-    add_header Last-Modified $date_gmt;
-    add_header Expires $date_gmt;
+    add_header Last-Modified \$date_gmt;
+    add_header Expires \$date_gmt;
     add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0";
     add_header Pragme "no-cache";
   }
