@@ -15,6 +15,11 @@
       "vacationDays": 25,
       "acceptProposal": true
     },
+    "Shayne": {
+      "boss": "Martin",
+      "vacationDays": 25,
+      "acceptProposal": true
+    },
     "Robin": {
       "boss": "Martin",
       "vacationDays": 25,

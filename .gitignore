@@ -1,3 +1,5 @@
 .daml
 *.log
 node_modules
+v4-ts/lib
+upgrade-v3-v4-ts/lib
