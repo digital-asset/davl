@@ -3,6 +3,8 @@
   "workspaces": [
     "daml-json-types",
     "v3-ts",
+    "v4-ts",
+    "upgrade-v3-v4-ts",
     "daml-ledger-fetch",
     "ui",
     "admin-cli"
