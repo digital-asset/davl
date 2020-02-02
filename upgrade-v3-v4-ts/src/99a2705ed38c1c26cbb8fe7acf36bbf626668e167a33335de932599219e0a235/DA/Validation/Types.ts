@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import * as jtv from '@mojotech/json-type-validation';
-import * as daml from '@digitalasset/daml-json-types';
+import * as daml from '@daml/types';
 
 import * as pkge22bce619ae24ca3b8e6519281cb5a33b64b3190cc763248b4c3f9ad5087a92c_DA_NonEmpty_Types from '../../../e22bce619ae24ca3b8e6519281cb5a33b64b3190cc763248b4c3f9ad5087a92c/DA/NonEmpty/Types';
 

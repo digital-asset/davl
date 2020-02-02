@@ -1,5 +1,5 @@
-import { Template, Choice, ContractId } from "@digitalasset/daml-json-types";
-import { Query, CreateEvent } from '@digitalasset/daml-ledger-fetch';
+import { Template, Choice, ContractId } from '@daml/types'
+import { Query, CreateEvent } from '@daml/ledger';
 import { useEffect, useMemo, useState, useContext } from "react";
 import * as LedgerStore from './ledgerStore';
 import * as TemplateStore from './templateStore';

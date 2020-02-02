@@ -1,6 +1,6 @@
 import * as immutable from 'immutable';
-import { Event, Query, CreateEvent} from '@digitalasset/daml-ledger-fetch';
-import { ContractId } from '@digitalasset/daml-json-types'
+import { Event, Query, CreateEvent} from '@daml/ledger';
+import { ContractId } from '@daml/types';
 
 export type QueryResult<T extends object, K> = {
   contracts: CreateEvent<T, K>[];

@@ -1,5 +1,5 @@
-import {ContractId, registerTemplate} from '@digitalasset/daml-json-types'
-import {Event} from '@digitalasset/daml-ledger-fetch'
+import {ContractId, registerTemplate} from '@daml/types'
+import {Event} from '@daml/ledger'
 import * as jtv from '@mojotech/json-type-validation'
 import * as LedgerStore from './ledgerStore'
 
