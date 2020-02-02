@@ -1,6 +1,6 @@
 import * as immutable from 'immutable';
-import { Template, lookupTemplate } from '@digitalasset/daml-json-types';
-import { CreateEvent, Query, Event } from '@digitalasset/daml-ledger-fetch';
+import { Template, lookupTemplate } from '@daml/types';
+import { CreateEvent, Query, Event } from '@daml/ledger';
 import * as TemplateStore from './templateStore';
 
 export type Store = {

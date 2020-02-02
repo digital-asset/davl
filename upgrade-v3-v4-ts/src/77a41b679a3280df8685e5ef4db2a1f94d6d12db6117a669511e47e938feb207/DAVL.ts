@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import * as jtv from '@mojotech/json-type-validation';
-import * as daml from '@digitalasset/daml-json-types';
+import * as daml from '@daml/types';
 
 import * as pkgd14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662_DA_Internal_Template from './../d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662/DA/Internal/Template';
 
@@ -11,7 +11,7 @@ export type Vacation = {
   fromDate: daml.Date;
   toDate: daml.Date;
 }
-export const Vacation: daml.Template<Vacation, undefined> & {
+export const Vacation: daml.Template<Vacation, undefined, '77a41b679a3280df8685e5ef4db2a1f94d6d12db6117a669511e47e938feb207:DAVL:Vacation'> & {
   Archive: daml.Choice<Vacation, pkgd14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662_DA_Internal_Template.Archive, {}, undefined>;
 } = {
   templateId: '77a41b679a3280df8685e5ef4db2a1f94d6d12db6117a669511e47e938feb207:DAVL:Vacation',
@@ -40,7 +40,7 @@ export const VacationRequest_Accept: daml.Serializable<VacationRequest_Accept> =
 export type VacationRequest = {
   vacation: Vacation;
 }
-export const VacationRequest: daml.Template<VacationRequest, undefined> & {
+export const VacationRequest: daml.Template<VacationRequest, undefined, '77a41b679a3280df8685e5ef4db2a1f94d6d12db6117a669511e47e938feb207:DAVL:VacationRequest'> & {
   VacationRequest_Accept: daml.Choice<VacationRequest, VacationRequest_Accept, daml.ContractId<Vacation>, undefined>;
   Archive: daml.Choice<VacationRequest, pkgd14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662_DA_Internal_Template.Archive, {}, undefined>;
 } = {
@@ -77,9 +77,9 @@ export type EmployeeVacationAllocation = {
   employeeRole: EmployeeRole;
   remainingDays: daml.Int;
 }
-export const EmployeeVacationAllocation: daml.Template<EmployeeVacationAllocation, daml.Party> & {
-  EmployeeVacationAllocation_AddDays: daml.Choice<EmployeeVacationAllocation, EmployeeVacationAllocation_AddDays, {}, daml.Party>;
-  Archive: daml.Choice<EmployeeVacationAllocation, pkgd14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662_DA_Internal_Template.Archive, {}, daml.Party>;
+export const EmployeeVacationAllocation: daml.Template<EmployeeVacationAllocation, EmployeeVacationAllocation.Key, '77a41b679a3280df8685e5ef4db2a1f94d6d12db6117a669511e47e938feb207:DAVL:EmployeeVacationAllocation'> & {
+  EmployeeVacationAllocation_AddDays: daml.Choice<EmployeeVacationAllocation, EmployeeVacationAllocation_AddDays, {}, EmployeeVacationAllocation.Key>;
+  Archive: daml.Choice<EmployeeVacationAllocation, pkgd14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662_DA_Internal_Template.Archive, {}, EmployeeVacationAllocation.Key>;
 } = {
   templateId: '77a41b679a3280df8685e5ef4db2a1f94d6d12db6117a669511e47e938feb207:DAVL:EmployeeVacationAllocation',
   keyDecoder: () => daml.Party.decoder(),
@@ -100,6 +100,10 @@ export const EmployeeVacationAllocation: daml.Template<EmployeeVacationAllocatio
     resultDecoder: () => daml.Unit.decoder(),
   },
 };
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace EmployeeVacationAllocation {
+  export type Key = daml.Party
+}
 daml.registerTemplate(EmployeeVacationAllocation);
 
 export type EmployeeProposal_Accept = {
@@ -113,7 +117,7 @@ export type EmployeeProposal = {
   employeeRole: EmployeeRole;
   vacationDays: daml.Int;
 }
-export const EmployeeProposal: daml.Template<EmployeeProposal, undefined> & {
+export const EmployeeProposal: daml.Template<EmployeeProposal, undefined, '77a41b679a3280df8685e5ef4db2a1f94d6d12db6117a669511e47e938feb207:DAVL:EmployeeProposal'> & {
   Archive: daml.Choice<EmployeeProposal, pkgd14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662_DA_Internal_Template.Archive, {}, undefined>;
   EmployeeProposal_Accept: daml.Choice<EmployeeProposal, EmployeeProposal_Accept, {}, undefined>;
 } = {
@@ -154,9 +158,9 @@ export type EmployeeRole = {
   company: daml.Party;
   boss: daml.Party;
 }
-export const EmployeeRole: daml.Template<EmployeeRole, daml.Party> & {
-  Archive: daml.Choice<EmployeeRole, pkgd14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662_DA_Internal_Template.Archive, {}, daml.Party>;
-  EmployeeRole_RequestVacation: daml.Choice<EmployeeRole, EmployeeRole_RequestVacation, daml.ContractId<VacationRequest>, daml.Party>;
+export const EmployeeRole: daml.Template<EmployeeRole, EmployeeRole.Key, '77a41b679a3280df8685e5ef4db2a1f94d6d12db6117a669511e47e938feb207:DAVL:EmployeeRole'> & {
+  Archive: daml.Choice<EmployeeRole, pkgd14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662_DA_Internal_Template.Archive, {}, EmployeeRole.Key>;
+  EmployeeRole_RequestVacation: daml.Choice<EmployeeRole, EmployeeRole_RequestVacation, daml.ContractId<VacationRequest>, EmployeeRole.Key>;
 } = {
   templateId: '77a41b679a3280df8685e5ef4db2a1f94d6d12db6117a669511e47e938feb207:DAVL:EmployeeRole',
   keyDecoder: () => daml.Party.decoder(),
@@ -178,4 +182,8 @@ export const EmployeeRole: daml.Template<EmployeeRole, daml.Party> & {
     resultDecoder: () => daml.ContractId(VacationRequest).decoder(),
   },
 };
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace EmployeeRole {
+  export type Key = daml.Party
+}
 daml.registerTemplate(EmployeeRole);

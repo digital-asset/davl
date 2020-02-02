@@ -1,5 +1,5 @@
-import { Template } from "@digitalasset/daml-json-types";
-import { CreateEvent, Query, Event } from '@digitalasset/daml-ledger-fetch';
+import { Template } from '@daml/types';
+import { CreateEvent, Query, Event } from '@daml/ledger';
 import * as LedgerStore from './ledgerStore';
 
 enum ActionType {

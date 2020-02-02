@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import * as jtv from '@mojotech/json-type-validation';
-import * as daml from '@digitalasset/daml-json-types';
+import * as daml from '@daml/types';
 
 export type Map<k_a9OV, v_a9OW> = {
   textMap: { [key: string]: v_a9OW };
