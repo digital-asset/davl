@@ -1,11 +1,11 @@
 {
   "private": true,
   "name": "@daml2ts/davl-v4",
-  "version": "0.13.46",
+  "version": "0.13.50",
   "description": "Types used by the DAML JSON API.",
   "license": "Apache-2.0",
   "dependencies": {
-    "@digitalasset/daml-json-types": "0.13.46",
+    "@daml/types": "0.13.50",
     "@mojotech/json-type-validation": "^3.1.0"
   },
   "scripts": {
