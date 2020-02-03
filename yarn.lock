@@ -1078,6 +1078,13 @@
   resolved "https://registry.yarnpkg.com/@csstools/normalize.css/-/normalize.css-10.1.0.tgz#f0950bba18819512d42f7197e56c518aa491cf18"
   integrity sha512-ij4wRiunFfaJxjB0BdrYHIH8FxBJpOwNPhhAcunlmPdXudL1WQV1qoP9un6JsEBAgQH+7UXyyjh0g7jTxXK6tg==
 
+"@daml/types@0.13.50":
+  version "0.13.50"
+  resolved "https://registry.yarnpkg.com/@daml/types/-/types-0.13.50.tgz#a0b651ebf4efadf845f1c2fe748f90f35b90ee19"
+  integrity sha512-9Zh4hhVL2uReB4t6c7KRO7k2Jq/CaaFu6nexpv+VMJMUyEc0WgBExs6f4vLyfFlPFwvCiX2GHOW2Jo/vp54jHw==
+  dependencies:
+    "@mojotech/json-type-validation" "^3.1.0"
+
 "@emotion/cache@^10.0.27":
   version "10.0.27"
   resolved "https://registry.yarnpkg.com/@emotion/cache/-/cache-10.0.27.tgz#7895db204e2c1a991ae33d51262a3a44f6737303"
