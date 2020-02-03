@@ -8,6 +8,7 @@ type EmployeeInfo = {
   boss: string;
   vacationDays: number;
   acceptProposal: boolean;
+  acceptUpgrade: boolean;
 }
 
 type Config = {
@@ -79,7 +80,7 @@ namespace v3v4 {
   }
 
   // "Auto-" accept upgrade proposals.
-  export const accept = async (config: Config) => {
+  export const accept = async ({ledgerId, applicationId}nfig) => {
     // Note : For now, we are using the 'config' parameter for ledger
     // connectivity. This is temporary until we improve command line
     // parsing.
