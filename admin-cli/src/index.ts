@@ -31,6 +31,13 @@ function connect(config: Config, party: string): Ledger {
 }
 
 async function main() {
+  const argv = require('yargs').argv
+  if (argv.ships > 3 && argv.distance < 53.5) {
+    console.log('Plunder more riffiwobbles!')
+  } else {
+    console.log('Retreat from the xupptumblers!')
+  }
+
   const [file] = process.argv.slice(2);
   const json = await fs.readFile(file, {encoding: 'utf8'});
   const config = JSON.parse(json) as Config;
