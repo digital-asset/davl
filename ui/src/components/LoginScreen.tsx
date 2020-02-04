@@ -1,14 +1,37 @@
 import React from 'react'
 import { Button, Form, Grid, Header, Segment } from 'semantic-ui-react'
-import Credentials, { preCheckCredentials } from '../daml-react-hooks/credentials';
 import Ledger from '@daml/ledger';
+import { Party } from '@daml/types';
 import * as v3 from '@daml2ts/davl-v3/lib/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
+import { decode } from 'jwt-simple';
+
+const LEDGER_ID = 'DAVL';
+
+export type Credentials = {
+  party: Party;
+  token: string;
+}
 
 type Props = {
   onLogin: (credentials: Credentials) => void;
 }
 
 enum Status { Normal, LoggingIn, SigningUp }
+
+/**
+ * Check that the party in the token matches the party of the credentials and
+ * that the ledger ID in the token matches the given ledger id.
+ */
+export const preCheckCredentials = ({party, token}: Credentials): string | null => {
+  const decoded = decode(token, '', true);
+  if (!decoded.ledgerId || decoded.ledgerId !== LEDGER_ID) {
+    return 'The password is not valid for the given ledger id.';
+  }
+  if (!decoded.party || decoded.party !== party) {
+    return 'The password is not valid for this user.';
+  }
+  return null;
+}
 
 /**
  * React component for the login screen of the `App`.

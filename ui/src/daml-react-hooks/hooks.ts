@@ -1,4 +1,7 @@
-import { Template, Choice, ContractId } from '@daml/types'
+// Copyright (c) 2020 The DAML Authors. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
+
+import { Template, Choice, ContractId } from "@daml/types";
 import { Query, CreateEvent } from '@daml/ledger';
 import { useEffect, useMemo, useState, useContext } from "react";
 import * as LedgerStore from './ledgerStore';
@@ -25,16 +28,18 @@ const loadQuery = async <T extends object>(state: DamlLedgerState, template: Tem
   state.dispatch(setQueryResult(template, query, contracts));
 }
 
-const emptyQueryFactory = <T extends object>(): Query<T> => ({} as Query<T>);
-
 export type QueryResult<T extends object, K> = {
   contracts: CreateEvent<T, K>[];
   loading: boolean;
 }
 
+// NOTE(MH): Since `{} !== {}`, we need a stable reference to `{}` for `useMemo`
+// to work in `useQuery` when using the default value for `queryFactory`.
+const emptyQuery = {};
+
 /// React Hook for a query against the `/contracts/search` endpoint of the JSON API.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const useQuery = <T extends object, K>(template: Template<T, K>, queryFactory: () => Query<T> = emptyQueryFactory, queryDeps?: readonly any[]): QueryResult<T, K> => {
+export const useQuery = <T extends object, K>(template: Template<T, K>, queryFactory: () => Query<T> = () => emptyQuery as Query<T>, queryDeps?: readonly any[]): QueryResult<T, K> => {
   const state = useDamlState();
   const query = useMemo(queryFactory, queryDeps);
   const contracts = LedgerStore.getQueryResult(state.store, template, query);
@@ -107,20 +112,20 @@ export const useExercise = <T extends object, C, R>(choice: Choice<T, C, R>): [(
   return [exercise, loading];
 }
 
-/// React Hook that returns a function to exercise a choice and a boolean
+/// React Hook that returns a function to exercise a choice by key and a boolean
 /// indicator whether the exercise is currently running.
-export const useExerciseByKey = <T extends object, C, R, K>(choice: Choice<T, C, R, K>): [(key: K extends undefined ? never : K, argument: C) => Promise<R>, boolean] => {
+export const useExerciseByKey = <T extends object, C, R, K>(choice: Choice<T, C, R, K>): [(key: K, argument: C) => Promise<R>, boolean] => {
   const [loading, setLoading] = useState(false);
   const state = useDamlState();
 
-  const exercise = async (key: K extends undefined ? never : K, argument: C) => {
+  const exerciseByKey = async (key: K, argument: C) => {
     setLoading(true);
     const [result, events] = await state.ledger.exerciseByKey(choice, key, argument);
     state.dispatch(addEvents(events));
     setLoading(false);
     return result;
   }
-  return [exercise, loading];
+  return [exerciseByKey, loading];
 }
 
 /// React Hook to reload all queries currently present in the store.
