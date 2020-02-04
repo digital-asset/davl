@@ -1,4 +1,7 @@
-import { Template } from '@daml/types';
+// Copyright (c) 2020 The DAML Authors. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
+
+import { Template } from "@daml/types";
 import { CreateEvent, Query, Event } from '@daml/ledger';
 import * as LedgerStore from './ledgerStore';
 

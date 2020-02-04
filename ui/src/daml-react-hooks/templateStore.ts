@@ -1,6 +1,10 @@
+// Copyright (c) 2020 The DAML Authors. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 import * as immutable from 'immutable';
 import { Event, Query, CreateEvent} from '@daml/ledger';
 import { ContractId } from '@daml/types';
+import deepEqual from 'fast-deep-equal';
 
 export type QueryResult<T extends object, K> = {
   contracts: CreateEvent<T, K>[];
@@ -47,26 +51,6 @@ export const setQueryResult = <T extends object, K>(store: Store<T, K>, query: Q
   queryResults: store.queryResults.set(query, {contracts, loading: false})
 });
 
-// TODO(MH): We need to update the key lookups as well.
-export const addEvents = <T extends object, K>(store: Store<T, K>, events: Event<T, K>[]): Store<T, K> => {
-  const archived: Set<ContractId<T>> = new Set();
-  const created: CreateEvent<T, K>[] = [];
-  for (const event of events) {
-    if ('created' in event) {
-      created.push(event.created);
-    } else {
-      archived.add(event.archived.contractId);
-    }
-  }
-  const queryResults = store.queryResults.map((queryResult, query) => {
-    const contracts = queryResult.contracts
-      .concat(created.filter((event) => payloadMatchesQuery(event.payload, query)))
-      .filter((contract) => !archived.has(contract.contractId));
-    return {...queryResult, contracts};
-  });
-  return {...store, queryResults};
-}
-
 export const payloadMatchesQuery = <T>(payload: T, query: Query<T>): boolean => {
   if (typeof payload === 'object' && typeof query === 'object') {
     const keys = Object.keys(query) as (keyof T & keyof Query<T>)[]
@@ -80,6 +64,64 @@ export const payloadMatchesQuery = <T>(payload: T, query: Query<T>): boolean => 
   } else {
     return typeof payload === typeof query && payload === query
   }
+}
+
+
+export const addEvents = <T extends object, K>(store: Store<T, K>, events: Event<T, K>[]): Store<T, K> => {
+  const archived: Set<ContractId<T>> = new Set();
+  const created: CreateEvent<T, K>[] = [];
+  for (const event of events) {
+    if ('created' in event) {
+      const createEvent = event.created;
+      if (archived.has(createEvent.contractId)) {
+        // NOTE(MH): The handling of contact keys below would do the wrong
+        // thing when the archive event for a contract comes before its create
+        // event. Since the JSON API is not supposed to produce event series
+        // with this property, we fail loudly should it ever do so.
+        throw Error(`TemplateStore.addEvent: bad order of create and archive events for \
+          contract ID ${createEvent.contractId} for template ${createEvent.templateId}.`);
+      } else {
+        created.push(createEvent);
+      }
+    } else { // i.e. 'archived' in event
+      archived.add(event.archived.contractId);
+    }
+  }
+  const queryResults = store.queryResults.map((queryResult, query) => {
+    const contracts = queryResult.contracts
+      .concat(created.filter((event) => payloadMatchesQuery(event.payload, query)))
+      .filter((contract) => !archived.has(contract.contractId));
+    return {...queryResult, contracts};
+  });
+
+  // NOTE(MH): Since `immutable.Map` uses reference equality for keys when they
+  // are regular JavaScript objects, we cannot simply walk over all create
+  // events and use their key as an index into `store.fetchByKeyResults` but
+  // rather have to walk over the whole cross product of
+  // `store.fetchByKeyResults` and `events`.
+  const fetchByKeyResults = store.fetchByKeyResults.map((result, key) => {
+    let contract = result.contract;
+    for (const event of events) {
+      if ('created' in event) {
+        const createEvent = event.created;
+        if (deepEqual(key, createEvent.key)) {
+          // TODO(MH, #4360): If we were sure we never miss any events and
+          // always get them in causality order, `contract` would always be
+          // `null` when we get here and we should throw an exception
+          // otherwise. However, the current impementation does not even
+          // attempt to get all events...
+          contract = createEvent;
+        }
+      } else { // i.e. 'archived' in event
+        if (contract !== null && contract.contractId === event.archived.contractId) {
+          contract = null;
+        }
+      }
+    }
+    return {...result, contract};
+  });
+
+  return {queryResults, fetchByKeyResults};
 }
 
 export const setFetchByKeyLoading = <T extends object, K>(store: Store<T, K>, key: K): Store<T, K> => ({
