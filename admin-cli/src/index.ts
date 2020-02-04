@@ -23,17 +23,7 @@ type Config = LedgerParams & {
   employees: { [party: string]: EmployeeInfo };
 }
 
-function connectByConfig(config: Config, party: string): Ledger {
-  const payload = {
-    ledgerId: config.ledgerId,
-    applicationId: config.applicationId,
-    party,
-  };
-  const token = encode(payload, config.secret, 'HS256');
-  return new Ledger(token, config.ledgerUrl);
-}
-
-function connectByParams(
+function connect(
   { ledgerUrl, ledgerId, applicationId, secret }: LedgerParams,
   party: string
 ): Ledger {
@@ -46,7 +36,7 @@ function connectByParams(
 namespace v3 {
   // Initialize the ledger.
   export const init = async (config: Config) => {
-    const companyLedger = connectByConfig(config, config.company);
+    const companyLedger = connect(config, config.company);
     for (const employee in config.employees) {
       const employeeInfo = config.employees[employee];
       const employeeRole: davl3.EmployeeRole = {
@@ -62,7 +52,7 @@ namespace v3 {
         await companyLedger.create(davl3.EmployeeProposal, employeeProposal);
       console.log(`Created EmployeeProposal for ${employee}.`);
       if (employeeInfo.acceptProposal) {
-        const employeeLedger = connectByConfig(config, employee);
+        const employeeLedger = connect(config, employee);
         await employeeLedger.exercise(
           davl3.EmployeeProposal.EmployeeProposal_Accept,
           employeeProposalContract.contractId,
@@ -78,7 +68,7 @@ namespace v3 {
 namespace v3v4 {
   // Create upgrade proposals.
   export const upgrade = async (config: Config) => {
-    const companyLedger = connectByConfig(config, config.company);
+    const companyLedger = connect(config, config.company);
     const employees = await companyLedger.query(davl3.EmployeeRole, {});
     for (const employeeRole of employees) {
       const employee = employeeRole.key;
@@ -93,11 +83,11 @@ namespace v3v4 {
 
   // "Auto-" accept upgrade proposals.
   export const accept = async (ledgerParams: LedgerParams) => {
-    const companyLedger = connectByParams(ledgerParams, "Digital Asset");
+    const companyLedger = connect(ledgerParams, "Digital Asset");
     const employees = await companyLedger.query(davl3.EmployeeRole, {});
     for (const employeeRole of employees) {
       const employee = employeeRole.key;
-      const employeeLedger = connectByParams(ledgerParams, employee);
+      const employeeLedger = connect(ledgerParams, employee);
       const [upgradeProposal] =
         await employeeLedger.query(davlUpgradev3v4.UpgradeProposal, { employee: employee });
       await employeeLedger.exercise(
@@ -224,11 +214,13 @@ namespace cli {
   export async function run (cli: Cli): Promise<void> {
     switch (cli.command) {
       case 'v3-init': {
-        await v3.init(await config(cli.file));
+        const cfg = await config(cli.file);
+        await v3.init(cfg);
         break;
       }
       case 'v3-v4-upgrade': {
-        await v3v4.upgrade(await config(cli.file));
+        const cfg = await config(cli.file);
+        await v3v4.upgrade(cfg);
         break;
       }
       case 'v3-v4-upgrade-accept': {
