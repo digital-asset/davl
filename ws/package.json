@@ -1,0 +1,49 @@
+{
+  "private": true,
+  "name": "davl-ws",
+  "version": "0.0.1",
+  "description": "Admin tool for DAVL",
+  "license": "Apache-2.0",
+  "bin": "bin/index.js",
+  "scripts": {
+    "build": "tsc --build",
+    "test": "true",
+    "lint": "eslint --ext .js,.ts src/ --max-warnings 0"
+  },
+  "dependencies": {
+    "@daml/ledger": "0.13.50",
+    "@daml2ts/davl-v3": "0.13.50",
+    "@types/jwt-simple": "^0.5.33",
+    "jwt-simple": "^0.5.6",
+    "node": "^13.6.0",
+    "ws": "^7.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^13.1.8",
+    "@types/ws": "^7.2.1",
+    "@typescript-eslint/eslint-plugin": "^2.17.0",
+    "@typescript-eslint/parser": "^2.17.0",
+    "eslint": "^6.8.0",
+    "typescript": "~3.7.5"
+  },
+  "eslintConfig": {
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended",
+      "plugin:@typescript-eslint/recommended-requiring-type-checking"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "project": "./tsconfig.json"
+    },
+    "plugins": [
+      "@typescript-eslint"
+    ],
+    "rules": {
+      "@typescript-eslint/no-floating-promises": "error",
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/no-inferrable-types": "off"
+    }
+  }
+}

@@ -3,18 +3,20 @@
   "compilerOptions": {
     "target": "es5",
     "lib": [
-      "dom"
+      "dom",
+      "es2015",
      ],
     "incremental": true,
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "outDir": "lib",
+    "outDir": "lib/",
     "module": "commonjs",
-    "declaration": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
     "sourceMap": true
-    },
+  },
   "include": ["src/**/*.ts"],
 }

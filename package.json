@@ -7,6 +7,7 @@
     "upgrade-v3-v4-ts",
     "daml-ledger-fetch",
     "ui",
-    "admin-cli"
+    "admin-cli",
+    "ws"
   ]
 }
