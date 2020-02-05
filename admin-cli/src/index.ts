@@ -67,14 +67,14 @@ namespace v3 {
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace v3v4 {
   // Create upgrade proposals.
-  export const upgrade = async (config: Config) => {
-    const companyLedger = connect(config, config.company);
+  export const upgrade = async (ledgerParams: LedgerParams, company: string) => {
+    const companyLedger = connect(ledgerParams, company);
     const employees = await companyLedger.query(davl3.EmployeeRole, {});
     for (const employeeRole of employees) {
       const employee = employeeRole.key;
       const employeeProposal: davlUpgradev3v4.UpgradeProposal = {
         employee: employee,
-        company: config.company,
+        company,
       };
       await companyLedger.create(davlUpgradev3v4.UpgradeProposal, employeeProposal);
       console.log(`Created UpgradeProposal for ${employee}.`);
@@ -82,8 +82,8 @@ namespace v3v4 {
   }
 
   // "Auto-" accept upgrade proposals.
-  export const accept = async (ledgerParams: LedgerParams) => {
-    const companyLedger = connect(ledgerParams, "Digital Asset");
+  export const accept = async (ledgerParams: LedgerParams, company: string) => {
+    const companyLedger = connect(ledgerParams, company);
     const employees = await companyLedger.query(davl3.EmployeeRole, {});
     for (const employeeRole of employees) {
       const employee = employeeRole.key;
@@ -105,8 +105,8 @@ namespace cli {
 
   type Cli =
     | { command: 'v3-init'; file: string }
-    | { command: 'v3-v4-upgrade'; file: string }
-    | { command: 'v3-v4-upgrade-accept'; ledgerParams: LedgerParams }
+    | { command: 'v3-v4-upgrade'; ledgerParams: LedgerParams; company: string }
+    | { command: 'v3-v4-upgrade-accept'; ledgerParams: LedgerParams; company: string }
 
   // The shape of the object returned from yargs.
   type Arguments = {
@@ -115,12 +115,18 @@ namespace cli {
     ledgerUrl: string | null;
     ledgerId: string | null;
     applicationId: string | null;
-    secret: string| null;
+    secret: string | null;
+    company: string | null;
   }
 
-  // eslint-disable-next-line no-inner-declarations
-  function argsToCli(args: Arguments): Cli {
-    const [cmd] = args["_"] as string[]
+  const argsToCli = (args: Arguments): Cli => {
+
+    const mkLedgerParams = (args: Arguments): LedgerParams => (
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      { ledgerUrl: args.ledgerUrl!, ledgerId: args.ledgerId!, applicationId: args.applicationId!, secret: args.secret! }
+    );
+
+    const [cmd] = args["_"] as string[];
     switch (cmd) {
       case 'v3-init': {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -128,22 +134,11 @@ namespace cli {
       }
       case 'v3-v4-upgrade': {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return { command: cmd, file: args.file! };
+        return { command: cmd, ledgerParams: mkLedgerParams(args), company: args.company! };
       }
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       case 'v3-v4-upgrade-accept': {
-        return { command: cmd,
-                 ledgerParams: {
-                   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                   ledgerUrl: args.ledgerUrl!,
-                   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                   ledgerId: args.ledgerId!,
-                   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                   applicationId: args.applicationId!,
-                   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                   secret: args.secret!,
-                 }
-               };
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return { command: cmd, ledgerParams: mkLedgerParams(args), company: args.company! };
       }
       default: {
         console.error('Unrecognized command "' + cmd + '"');
@@ -152,8 +147,15 @@ namespace cli {
     }
   }
 
-  // eslint-disable-next-line no-inner-declarations
-  export function parse (): Cli {
+  export const parse = (): Cli => {
+
+    const ledgerParamsBuilder = (yargs: Argv) => yargs
+      .option('ledger-url', { demandOption: true, describe: 'Ledger URL', type: 'string' })
+      .option('ledger-id', { demandOption: true, describe: 'Ledger ID', type: 'string' })
+      .option('application-id', { demandOption: true, describe: 'Application ID', type: 'string' })
+      .option('secret', { demandOption: true, describe: 'Secret', type: 'string' })
+    ;
+
     const argv: Arguments = require('yargs')
       .usage('Usage $0 <command> [options]')
       .version(false)
@@ -164,37 +166,24 @@ namespace cli {
         desc: 'Initialze a test ledger',
         builder: (yargs: Argv) => {
           yargs.option('f', {
-            alias: 'file',
-            demandOption: true,
-            describe: 'Configuration file',
-            type: 'string',
-          })
-        },
+            alias: 'file', demandOption: true, describe: 'Configuration file', type: 'string'
+          }) },
       })
       .example('$0 v3-init -f test-setup.json', 'Ledger initialization from configuration file.')
       .command({
         command: 'v3-v4-upgrade',
         desc: 'Create v3/v4 upgrade proposals',
-        builder: (yargs: Argv) => {
-          yargs.option('f', {
-            alias: 'file',
-            demandOption: true,
-            describe: 'Configuration file',
-            type: 'string',
-          })
-        }
+        builder: (yargs: Argv) =>
+          ledgerParamsBuilder(yargs)
+          .option('company', { demandOption: true, describe: 'Company', type: 'string' })
       })
       .example('$0 v3-v4-upgrade test-setup.json', 'Creation of v3/v4 upgrade proposal contracts')
       .command({
         command: 'v3-v4-upgrade-accept',
         desc: 'Exercise accepts on v3/v4 upgrade proposals.',
-        builder: (yargs: Argv) => {
-          yargs
-            .option('ledger-url', { demandOption: true, describe: 'Ledger URL', type: 'string' })
-            .option('ledger-id', { demandOption: true, describe: 'Ledger ID', type: 'string' })
-            .option('application-id', { demandOption: true, describe: 'Application ID', type: 'string' })
-            .option('secret', { demandOption: true, describe: 'Secret', type: 'string' })
-        }
+        builder: (yargs: Argv) =>
+          ledgerParamsBuilder(yargs)
+          .option('company', { demandOption: true, describe: 'Company', type: 'string' })
       })
       .example('$0 v3-v4-upgrade-accept --ledger-url ...', 'Exercising accept choices on v3/v4 upgrade proposals')
       .demandCommand(1, 'Missing command')
@@ -204,14 +193,12 @@ namespace cli {
     return argsToCli(argv);
   }
 
-  // eslint-disable-next-line no-inner-declarations
-  async function config(file: string): Promise<Config> {
+  const config = async (file: string): Promise<Config> => {
     const json = await fs.readFile(file, { encoding: 'utf8' });
     return JSON.parse(json) as Config;
   }
 
-  // eslint-disable-next-line no-inner-declarations
-  export async function run (cli: Cli): Promise<void> {
+  export const run = async (cli: Cli): Promise<void> => {
     switch (cli.command) {
       case 'v3-init': {
         const cfg = await config(cli.file);
@@ -219,12 +206,11 @@ namespace cli {
         break;
       }
       case 'v3-v4-upgrade': {
-        const cfg = await config(cli.file);
-        await v3v4.upgrade(cfg);
+        await v3v4.upgrade(cli.ledgerParams, cli.company);
         break;
       }
       case 'v3-v4-upgrade-accept': {
-        await v3v4.accept(cli.ledgerParams);
+        await v3v4.accept(cli.ledgerParams, cli.company);
         break;
       }
     }
