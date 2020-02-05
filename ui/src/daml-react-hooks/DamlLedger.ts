@@ -15,12 +15,13 @@ type Props = {
 
 const DamlLedger: React.FC<Props> = (props) => {
   const [store, dispatch] = useReducer(reducer, LedgerStore.empty());
+  const ledger = useMemo(() => new Ledger(props.token), [props.token]);
   const state = useMemo(() => ({
     store,
     dispatch,
     party: props.party,
-    ledger: new Ledger(props.token),
-  }), [props.party, props.token, store, dispatch]);
+    ledger,
+  }), [props.party, ledger, store, dispatch]);
   return React.createElement(DamlLedgerContext.Provider, {value: state}, props.children);
 }
 

@@ -38,15 +38,32 @@ const decodeCreateEventUnknown: jtv.Decoder<CreateEvent<object>> =
     decodeCreateEvent(lookupTemplate(templateId))
   );
 
-const decodeArchiveEventUnknown: jtv.Decoder<ArchiveEvent<object>> = jtv.object({
-  templateId: jtv.string(),
-  contractId: ContractId({decoder: jtv.unknownJson}).decoder(),
+const decodeArchiveEvent = <T extends object, K, I extends string>(template: Template<T, K, I>): jtv.Decoder<ArchiveEvent<T, I>> => jtv.object({
+  templateId: jtv.constant(template.templateId),
+  contractId: ContractId(template).decoder(),
 });
+
+const decodeArchiveEventUnknown: jtv.Decoder<ArchiveEvent<object>> =
+  jtv.valueAt(['templateId'], jtv.string()).andThen((templateId) =>
+    decodeArchiveEvent(lookupTemplate(templateId))
+  );
+
+const decodeStreamEvent = <T extends object, K, I extends string>(template: Template<T, K, I>): jtv.Decoder<Event<T, K, I>> => jtv.oneOf<Event<T, K, I>>(
+  jtv.object({created: decodeCreateEvent(template)}),
+  jtv.object({archived: ContractId(template).decoder().map(contractId => ({
+    templateId: template.templateId,
+    contractId,
+  }))}),
+);
 
 const decodeEventUnknown: jtv.Decoder<Event<object>> = jtv.oneOf<Event<object>>(
   jtv.object({created: decodeCreateEventUnknown}),
   jtv.object({archived: decodeArchiveEventUnknown}),
 );
+
+function isRecordWith<Field extends string>(field: Field, x: unknown): x is Record<Field, unknown> {
+  return typeof x === "object" && x !== null && field in x;
+}
 
 /**
  * Type for queries against the `/contract/search` endpoint of the JSON API.
@@ -87,16 +104,21 @@ const decodeLedgerError: jtv.Decoder<LedgerError> = jtv.object({
  */
 class Ledger {
   private readonly token: string;
-  private readonly baseUrl: string;
+  private readonly httpBaseUrl: string;
+  private readonly wsBaseUrl: string;
 
   constructor(token: string, baseUrl?: string) {
     this.token = token;
     if (!baseUrl) {
-      this.baseUrl = '';
-    } else if (baseUrl.endsWith('/')) {
-      this.baseUrl = baseUrl;
-    } else {
+      this.httpBaseUrl = '/';
+      this.wsBaseUrl = `ws://${window.location.hostname}:7575/`;
+    } else if (!baseUrl.startsWith('http')) {
+      throw Error(`The ledger base URL must start with 'http'. (${baseUrl})`);
+    } else if (!baseUrl.endsWith('/')) {
       throw Error(`The ledger base URL must end in a '/'. (${baseUrl})`);
+    } else {
+      this.httpBaseUrl = baseUrl;
+      this.wsBaseUrl = 'ws' + baseUrl.slice(4);
     }
   }
 
@@ -104,7 +126,7 @@ class Ledger {
    * Internal function to submit a command to the JSON API.
    */
   private async submit(endpoint: string, payload: unknown): Promise<unknown> {
-    const httpResponse = await fetch(this.baseUrl + endpoint, {
+    const httpResponse = await fetch(this.httpBaseUrl + endpoint, {
       body: JSON.stringify(payload),
       headers: {
         'Authorization': 'Bearer ' + this.token,
@@ -221,6 +243,44 @@ class Ledger {
    */
   async archiveByKey<T extends object>(template: Template<T>, key: Query<T>): Promise<unknown> {
     return this.exerciseByKey(template.Archive, key, {});
+  }
+
+  streamQuery<T extends object, K, I extends string>(
+    template: Template<T, K, I>,
+    onEvents: (events: Event<T, K, I>[]) => void,
+    query?: Query<T>,
+  ): () => void {
+    const protocols = ['jwt.token.' + this.token, 'daml.ws.auth'];
+    const ws = new WebSocket(this.wsBaseUrl + 'contracts/searchForever', protocols);
+    ws.onerror = event => {
+      console.error('/contracts/searchForever error', event);
+      throw Error('/contracts/searchForever error');
+    };
+    ws.onopen = event => {
+      console.log('/contracts/searchForever open', event);
+      const payload = {templateIds: [template.templateId], query};
+      ws.send(JSON.stringify(payload));
+    };
+    ws.onclose = event => {
+      console.error('/contracts/searchForever closed', event);
+      throw Error('/contracts/searchForever closed');
+    };
+    ws.onmessage = event => {
+      console.log('/contracts/searchForever message', event);
+      const json: unknown = JSON.parse(event.data);
+      if (Array.isArray(json)) {
+        onEvents(jtv.Result.withException(jtv.array(decodeStreamEvent(template)).run(json)));
+      } else if (isRecordWith('heartbeat', json)) {
+        // eslint-disable-next-line no-empty
+      } else if (isRecordWith('warnings', json)) {
+        console.warn('/contracts/searchForever warnings', json.warnings);
+      } else if (isRecordWith('errors', json)) {
+        console.error('/contracts/searchForever errors', json.errors);
+      } else {
+        console.error('/contracts/searchForever: unknown message', json);
+      }
+    };
+    return () => ws.close();
   }
 }
 

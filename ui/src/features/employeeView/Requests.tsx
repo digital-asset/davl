@@ -19,7 +19,7 @@ const Requests: React.FC<Props> = (props: Props) => {
 
   const party = useParty();
   const {loading: loadingRequests, contracts: requestContracts} =
-    useQuery(v3.VacationRequest, () => ({vacation: {employeeRole: {employee: party}}}), [party]);
+    useQuery(v3.VacationRequest, () => ({vacation: {employeeRole: {employee: party}}}), []);
   const requests = prettyRequests(requestContracts);
 
   const [exerciseRequestVacation, loadingRequestVacation] =

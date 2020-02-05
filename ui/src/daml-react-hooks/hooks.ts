@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Template, Choice, ContractId } from "@daml/types";
-import { Query, CreateEvent } from '@daml/ledger';
+import { Query, CreateEvent, Event } from '@daml/ledger';
 import { useEffect, useMemo, useState, useContext } from "react";
 import * as LedgerStore from './ledgerStore';
 import * as TemplateStore from './templateStore';
@@ -19,6 +19,10 @@ export const useDamlState = (): DamlLedgerState => {
 
 export const useParty = () => {
   const state = useDamlState();
+  const party = state.party;
+  useEffect(() => {
+    console.log(`useParty has chanded to ${party}`)
+  }, [party]);
   return state.party;
 }
 
@@ -40,16 +44,36 @@ const emptyQuery = {};
 /// React Hook for a query against the `/contracts/search` endpoint of the JSON API.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const useQuery = <T extends object, K>(template: Template<T, K>, queryFactory: () => Query<T> = () => emptyQuery as Query<T>, queryDeps?: readonly any[]): QueryResult<T, K> => {
+  const [result, setResult] = useState<QueryResult<T, K>>({contracts: [], loading: true});
   const state = useDamlState();
-  const query = useMemo(queryFactory, queryDeps);
-  const contracts = LedgerStore.getQueryResult(state.store, template, query);
   useEffect(() => {
-    if (contracts === undefined) {
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      loadQuery(state, template, query);
+    const query = queryFactory();
+    console.log(`useQuery for ${template.templateId} with ${JSON.stringify(query)}`);
+    const onEvents = (events: Event<T, K>[]) => setResult(result => {
+      const archiveEvents: Set<ContractId<T>> = new Set();
+      const createEvents: CreateEvent<T, K>[] = [];
+      for (const event of events) {
+        if ('created' in event) {
+          createEvents.push(event.created);
+        } else { // i.e. 'archived' in event
+          archiveEvents.add(event.archived.contractId);
+        }
+      }
+      const contracts = result.contracts
+        .concat(createEvents)
+        .filter(contract => !archiveEvents.has(contract.contractId));
+      return {contracts, loading: false};
+    });
+    const close = state.ledger.streamQuery(template, onEvents, query);
+    setResult({contracts: [], loading: false});
+    const cleanUp = () => {
+      console.log(`clean up useQuery for ${template.templateId} with ${JSON.stringify(query)}`);
+      close();
+      setResult({contracts: [], loading: true});
     }
-  }, [state, template, query, contracts]);
-  return contracts ?? TemplateStore.emptyQueryResult();
+    return cleanUp;
+  }, [template, state.ledger, ...(queryDeps ?? [])]);
+  return result;
 }
 
 const loadFetchByKey = async <T extends object, K>(state: DamlLedgerState, template: Template<T, K>, key: K) => {
