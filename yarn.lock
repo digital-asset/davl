@@ -1078,6 +1078,22 @@
   resolved "https://registry.yarnpkg.com/@csstools/normalize.css/-/normalize.css-10.1.0.tgz#f0950bba18819512d42f7197e56c518aa491cf18"
   integrity sha512-ij4wRiunFfaJxjB0BdrYHIH8FxBJpOwNPhhAcunlmPdXudL1WQV1qoP9un6JsEBAgQH+7UXyyjh0g7jTxXK6tg==
 
+"@daml/ledger@0.13.51":
+  version "0.13.51"
+  resolved "https://registry.yarnpkg.com/@daml/ledger/-/ledger-0.13.51.tgz#b8f3b1f5cb8b6a4b5c50db2aeef7df231d622e66"
+  integrity sha512-cnRR28HRL82Ab+rKiK4GFIZwC1gHl/IEUBjCYq+UFGHfjEec/p4/PwUmzfV5Cac/gRqVtSG7/zP1aTPnZNgaAA==
+  dependencies:
+    "@daml/types" "0.13.51"
+    "@mojotech/json-type-validation" "^3.1.0"
+    cross-fetch "^3.0.4"
+
+"@daml/types@0.13.51":
+  version "0.13.51"
+  resolved "https://registry.yarnpkg.com/@daml/types/-/types-0.13.51.tgz#3c7e6d7a7790cbce008228a9c3afcd1fdcb14e42"
+  integrity sha512-IVRm5Su5WJ17ReFW17MIUt5HL2iHJSDPrPbXKyHE6mvT1X8TyCYZSKgj1fgBk9AmybaEGrcFcv7WbGHSVYMZYw==
+  dependencies:
+    "@mojotech/json-type-validation" "^3.1.0"
+
 "@emotion/cache@^10.0.27":
   version "10.0.27"
   resolved "https://registry.yarnpkg.com/@emotion/cache/-/cache-10.0.27.tgz#7895db204e2c1a991ae33d51262a3a44f6737303"
