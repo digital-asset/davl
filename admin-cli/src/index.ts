@@ -41,16 +41,15 @@ function connect(
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace v3 {
-  // Populate a ledger.
+
   export const init = async (config: Config) => {
     const companyLedger = connect(config, config.company);
-
     // Create/accept employee proposals.
     for (const employee in config.employees) {
       const employeeInfo = config.employees[employee];
       const employeeRole: davl3.EmployeeRole = {
         company: config.company,
-        employee: employee,
+        employee,
         boss: employeeInfo.boss,
       };
       const employeeProposal: davl3.EmployeeProposal = {
@@ -70,11 +69,12 @@ namespace v3 {
         console.log(`Accepted EmployeeProposal for ${employee}.`);
       }
     }
-
-    // Create/approve employee vacation requests.
+    // Create/approve vacation requests.
     for (const employee in config.employees) {
       const employeeInfo = config.employees[employee];
       for (const vacationRequest of employeeInfo.vacationRequests ?? []) {
+        const fromDate = vacationRequest.fromDate;
+        const toDate = vacationRequest.toDate;
         const employeeLedger = connect(config, employee);
         const employeeRoleContract = await employeeLedger.lookupByKey(davl3.EmployeeRole, employee);
         if (employeeRoleContract) {
@@ -82,12 +82,10 @@ namespace v3 {
             await employeeLedger.exercise(
               davl3.EmployeeRole.EmployeeRole_RequestVacation,
               employeeRoleContract.contractId,
-              { fromDate: vacationRequest.fromDate, toDate: vacationRequest.toDate },
+              { fromDate, toDate },
             );
-          const fromDate = vacationRequest.fromDate;
-          const toDate = vacationRequest.toDate;
-          console.log(`Created VacationRequest [${fromDate} , ${toDate}] for ${employee}`);
-          if (vacationRequest.approved){
+          console.log(`Created VacationRequest [${fromDate} , ${toDate}] for ${employee}.`);
+          if (vacationRequest.approved) {
             const boss = employeeInfo.boss
             const bossLedger = connect(config, boss);
             await bossLedger.exercise(
@@ -95,7 +93,7 @@ namespace v3 {
               vacationRequestContractId,
               {},
             );
-            console.log(`${boss} approved VacationRequest [${fromDate}, ${toDate}] for ${employee}`);
+            console.log(`${boss} approved VacationRequest [${fromDate}, ${toDate}] for ${employee}.`);
           }
         }
       }
@@ -106,8 +104,8 @@ namespace v3 {
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace v3v4 {
-  // Create upgrade proposals.
-  export const upgrade = async (ledgerParams: LedgerParams, company: string) => {
+
+  export const createUpgradeProposals = async (ledgerParams: LedgerParams, company: string) => {
     const companyLedger = connect(ledgerParams, company);
     const employees = await companyLedger.query(davl3.EmployeeRole, {});
     for (const employeeRole of employees) {
@@ -121,23 +119,63 @@ namespace v3v4 {
     }
   }
 
-  // "Auto-" accept upgrade proposals.
-  export const accept = async (ledgerParams: LedgerParams, company: string) => {
+  export const acceptUpgradeProposals = async (ledgerParams: LedgerParams, company: string) => {
     const companyLedger = connect(ledgerParams, company);
-    const employees = await companyLedger.query(davl3.EmployeeRole, {});
-    for (const employeeRole of employees) {
-      const employee = employeeRole.key;
+    const employeeRoleContracts = await companyLedger.query(davl3.EmployeeRole, {});
+    // Create update agreements.
+    for (const employeeRoleContract of employeeRoleContracts) {
+      const employee = employeeRoleContract.key;
       const employeeLedger = connect(ledgerParams, employee);
-      const [upgradeProposal] =
-        await employeeLedger.query(davlUpgradev3v4.UpgradeProposal, { employee: employee });
-      await employeeLedger.exercise(
+      const [upgradeProposalContract] =
+        await employeeLedger.query(davlUpgradev3v4.UpgradeProposal, { employee });
+        await employeeLedger.exercise(
           davlUpgradev3v4.UpgradeProposal.UpgradeProposal_Accept,
-          upgradeProposal.contractId,
+          upgradeProposalContract.contractId,
           {},
         );
       console.log(`Accepted UpgradeProposal for ${employee}.`);
     }
+    for (const employeeRoleContract of employeeRoleContracts) {
+      const employee = employeeRoleContract.key;
+      const employeeRole = employeeRoleContract.payload;
+      const boss = employeeRole.boss;
+      // Upgrade vacations.
+      const vacationContracts =
+        await companyLedger.query(davl3.Vacation, { employeeRole });
+      if (vacationContracts.length) {
+        for (const vacationContract of vacationContracts) {
+          const fromDate = vacationContract.payload.fromDate;
+          const toDate = vacationContract.payload.toDate;
+          const [bossUpgradeAgreementContract] =
+            await companyLedger.query(davlUpgradev3v4.UpgradeAgreement, { employee: boss, company });
+          const [employeeUpgradeAgreementContract] =
+            await companyLedger.query(davlUpgradev3v4.UpgradeAgreement, { employee, company });
+          await companyLedger.exercise(
+            davlUpgradev3v4.UpgradeAgreement.UpgradeAgreement_UpgradeVacation,
+            bossUpgradeAgreementContract.contractId,
+            { employeeAgreementId: employeeUpgradeAgreementContract.contractId, vacationId: vacationContract.contractId });
+          console.log(`Upgraded Vaction [${fromDate}, ${toDate}] for ${employee}.`);
+        }
+      }
+      // Upgrade vacation requests.
+      const vacationRequestContracts =
+        await companyLedger.query(davl3.VacationRequest, { vacation: { employeeRole } });
+      if (vacationRequestContracts.length) {
+        for (const vacationRequestContract of vacationRequestContracts) {
+          const fromDate = vacationRequestContract.payload.vacation.fromDate;
+          const toDate = vacationRequestContract.payload.vacation.toDate;
+          const [employeeUpgradeAgreementContract] =
+            await companyLedger.query(davlUpgradev3v4.UpgradeAgreement, { employee, company });
+          await companyLedger.exercise(
+            davlUpgradev3v4.UpgradeAgreement.UpgradeAgreement_UpgradeVacationRequest,
+            employeeUpgradeAgreementContract.contractId,
+            { requestId: vacationRequestContract.contractId });
+          console.log(`Upgraded VacationRequest [${fromDate}, ${toDate}] for ${employee}.`);
+        }
+      }
+    }
   }
+
 } //namespace v3v4
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -246,11 +284,11 @@ namespace cli {
         break;
       }
       case 'v3-v4-upgrade': {
-        await v3v4.upgrade(cli.ledgerParams, cli.company);
+        await v3v4.createUpgradeProposals(cli.ledgerParams, cli.company);
         break;
       }
       case 'v3-v4-upgrade-accept': {
-        await v3v4.accept(cli.ledgerParams, cli.company);
+        await v3v4.acceptUpgradeProposals(cli.ledgerParams, cli.company);
         break;
       }
     }
