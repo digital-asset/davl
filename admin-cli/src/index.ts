@@ -5,10 +5,17 @@ import * as davl3 from '@daml2ts/davl-v3/lib/edb5e54da44bc80782890de3fc58edb5cc2
 import * as davlUpgradev3v4 from '@daml2ts/davl-upgrade-v3-v4/lib/b31fe1021c80fcd4e0adc3437d24a328f3b721e81c0a158f6c4a94b89cb8ab32/Upgrade';
 import { Argv } from 'yargs'; // Nice docs : http://yargs.js.org/
 
+type Vacation = {
+  fromDate: string;
+  toDate: string;
+  approved: boolean;
+}
+
 type EmployeeInfo = {
   boss: string;
   vacationDays: number;
   acceptProposal: boolean;
+  vacationRequests?: Vacation[];
 }
 
 type LedgerParams = {
@@ -34,9 +41,11 @@ function connect(
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace v3 {
-  // Initialize the ledger.
+  // Populate a ledger.
   export const init = async (config: Config) => {
     const companyLedger = connect(config, config.company);
+
+    // Create/accept employee proposals.
     for (const employee in config.employees) {
       const employeeInfo = config.employees[employee];
       const employeeRole: davl3.EmployeeRole = {
@@ -61,7 +70,38 @@ namespace v3 {
         console.log(`Accepted EmployeeProposal for ${employee}.`);
       }
     }
+
+    // Create/approve employee vacation requests.
+    for (const employee in config.employees) {
+      const employeeInfo = config.employees[employee];
+      for (const vacationRequest of employeeInfo.vacationRequests ?? []) {
+        const employeeLedger = connect(config, employee);
+        const employeeRoleContract = await employeeLedger.lookupByKey(davl3.EmployeeRole, employee);
+        if (employeeRoleContract) {
+          const [vacationRequestContractId] =
+            await employeeLedger.exercise(
+              davl3.EmployeeRole.EmployeeRole_RequestVacation,
+              employeeRoleContract.contractId,
+              { fromDate: vacationRequest.fromDate, toDate: vacationRequest.toDate },
+            );
+          const fromDate = vacationRequest.fromDate;
+          const toDate = vacationRequest.toDate;
+          console.log(`Created VacationRequest [${fromDate} , ${toDate}] for ${employee}`);
+          if (vacationRequest.approved){
+            const boss = employeeInfo.boss
+            const bossLedger = connect(config, boss);
+            await bossLedger.exercise(
+              davl3.VacationRequest.VacationRequest_Accept,
+              vacationRequestContractId,
+              {},
+            );
+            console.log(`${boss} approved VacationRequest [${fromDate}, ${toDate}] for ${employee}`);
+          }
+        }
+      }
+    }
   }
+
 }//namespace v3
 
 // eslint-disable-next-line @typescript-eslint/no-namespace

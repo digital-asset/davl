@@ -18,7 +18,11 @@
     "Shayne": {
       "boss": "Martin",
       "vacationDays": 25,
-      "acceptProposal": true
+      "acceptProposal": true,
+      "vacationRequests": [
+        { "fromDate": "2020-07-01", "toDate": "2020-07-02", "approved": true },
+        { "fromDate": "2020-07-03", "toDate": "2020-07-03", "approved": false }
+      ]
     },
     "Robin": {
       "boss": "Martin",
