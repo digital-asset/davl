@@ -3,7 +3,7 @@ import VacationListSegment from '../../components/VacationListSegment';
 import { Vacation, prettyRequests, splitVacations } from '../../utils/vacation';
 import { Segment } from 'semantic-ui-react';
 import Staff from './Staff';
-import { useQuery, useExercise, useParty } from '../../daml-react-hooks';
+import { useStreamQuery, useExercise, useParty } from '../../daml-react-hooks';
 import * as v3 from '@daml2ts/davl-v3/lib/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 import { toast } from 'react-semantic-toasts';
 
@@ -11,11 +11,11 @@ const BossView: React.FC = () => {
   const party = useParty();
 
   const {loading: loadingVacations, contracts: vacationContracts} =
-    useQuery(v3.Vacation, () => ({employeeRole: {boss: party}}), [party]);
+    useStreamQuery(v3.Vacation, () => ({employeeRole: {boss: party}}), [party]);
   const vacations = splitVacations(vacationContracts);
 
   const {loading: loadingRequests, contracts: requestsContracts} =
-    useQuery(v3.VacationRequest, () => ({vacation: {employeeRole: {boss: party}}}), [party]);
+    useStreamQuery(v3.VacationRequest, () => ({vacation: {employeeRole: {boss: party}}}), [party]);
   const requests = prettyRequests(requestsContracts);
 
   const [exerciseApproveRequest] =

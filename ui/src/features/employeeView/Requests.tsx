@@ -4,7 +4,7 @@ import ListActionItem from '../../components/ListActionItem';
 import { DatesRangeInput } from 'semantic-ui-calendar-react';
 import { VacationListItem } from '../../components/VacationListItem';
 import { vacationLength, prettyRequests } from '../../utils/vacation';
-import { useQuery, useExerciseByKey, useParty } from '../../daml-react-hooks';
+import { useStreamQuery, useExerciseByKey, useParty } from '../../daml-react-hooks';
 import * as v3 from '@daml2ts/davl-v3/lib/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 import { EmployeeSummary } from '../../utils/employee';
 import { toast } from 'react-semantic-toasts';
@@ -19,7 +19,7 @@ const Requests: React.FC<Props> = (props: Props) => {
 
   const party = useParty();
   const {loading: loadingRequests, contracts: requestContracts} =
-    useQuery(v3.VacationRequest, () => ({vacation: {employeeRole: {employee: party}}}), [party]);
+    useStreamQuery(v3.VacationRequest, () => ({vacation: {employeeRole: {employee: party}}}), [party]);
   const requests = prettyRequests(requestContracts);
 
   const [exerciseRequestVacation, loadingRequestVacation] =
