@@ -59,18 +59,25 @@ const LoginScreen: React.FC<Props> = (props) => {
       event.preventDefault();
     }
     await withCredentials(async (credentials) => {
+      // NOTE(MH): We need to make sure to call `setStatus(Status.Normal)`
+      // before `prop.onLogin` since we would otherwise set the state of an
+      // unmounted components. For that reason we record whether we want to
+      // call `props.onLogin` and then do so after the `finally` clause.
+      let login = false;
       try {
         setStatus(Status.LoggingIn);
         const ledger = new Ledger(credentials.token);
         const employeeRole = await ledger.lookupByKey(v3.EmployeeRole, credentials.party);
         if (employeeRole) {
-          setStatus(Status.Normal);
-          props.onLogin(credentials);
+          login = true;
         } else {
           alert("You have not yet signed up.");
         }
       } finally {
         setStatus(Status.Normal);
+      }
+      if (login) {
+        props.onLogin(credentials);
       }
     });
   }
@@ -78,6 +85,8 @@ const LoginScreen: React.FC<Props> = (props) => {
   const handleSignup = async (event: React.FormEvent) => {
     event.preventDefault();
     await withCredentials(async (credentials) => {
+      // NOTE(MH): See `handleLogin` for an explanation of what this is about.
+      let login = false;
       try {
         setStatus(Status.SigningUp)
         const ledger = new Ledger(credentials.token);
@@ -93,11 +102,14 @@ const LoginScreen: React.FC<Props> = (props) => {
           const accept = window.confirm(`You have been invited to work for ${employeeRole.company}.\nBoss: ${employeeRole.boss}\nVacation days: ${employeeProposal.vacationDays}\nDo you accept?`);
           if (accept) {
             await ledger.exercise(v3.EmployeeProposal.EmployeeProposal_Accept, contractId, {});
-            await handleLogin();
+            login = true;
           }
         }
       } finally {
         setStatus(Status.Normal);
+      }
+      if (login) {
+        await handleLogin();
       }
     });
   }
