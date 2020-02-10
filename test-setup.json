@@ -13,7 +13,7 @@
     "Moritz": {
       "boss": "Martin",
       "vacationDays": 25,
-      "acceptProposal": true
+      "acceptProposal": false
     },
     "Shayne": {
       "boss": "Martin",
@@ -27,7 +27,7 @@
     "Robin": {
       "boss": "Martin",
       "vacationDays": 25,
-      "acceptProposal": false
+      "acceptProposal": true
     }
   }
 }
