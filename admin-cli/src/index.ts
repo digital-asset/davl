@@ -1,6 +1,7 @@
 import { promises as fs } from 'fs';
 import { encode } from 'jwt-simple';
 import Ledger from '@daml/ledger';
+import { CreateEvent } from '@daml/ledger';
 import * as davl3 from '@daml2ts/davl-v3/lib/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 import * as davl4 from '@daml2ts/davl-v4/lib/77a41b679a3280df8685e5ef4db2a1f94d6d12db6117a669511e47e938feb207/DAVL';
 import * as davlUpgradev3v4 from '@daml2ts/davl-upgrade-v3-v4/lib/b31fe1021c80fcd4e0adc3437d24a328f3b721e81c0a158f6c4a94b89cb8ab32/Upgrade';
@@ -100,6 +101,68 @@ namespace v3 {
     }
   }
 
+  export const dump = async (ledgerParams: LedgerParams, company: string, file: string) => {
+    const companyLedger = connect(ledgerParams, company);
+
+    const vacationOfVacationContract = (
+      vacationContract: CreateEvent<davl3.Vacation>): Vacation => {
+      const { fromDate, toDate} = vacationContract.payload;
+      return ({fromDate, toDate, approved: true});
+    };
+
+    const vacationOfVacationRequestContract = (
+      vacationRequestContract: CreateEvent<davl3.VacationRequest>): Vacation => {
+      const { fromDate, toDate } = vacationRequestContract.payload.vacation;
+      return ({fromDate, toDate, approved: false});
+    }
+
+    const employeeInfoOfEmployeeRoleContract = async (
+      employeeRoleContract: CreateEvent<davl3.EmployeeRole>): Promise<[string, EmployeeInfo]> => {
+      const employeeRole = employeeRoleContract.payload;
+      const { employee, boss } = employeeRole;
+      const vacationContracts = await companyLedger.query(davl3.Vacation, { employeeRole });
+      const vacationRequestContracts = await companyLedger.query(davl3.VacationRequest, { vacation: { employeeRole } });
+      const signedVacations = vacationContracts.map(vacationOfVacationContract);
+      const unsignedVacations = vacationRequestContracts.map(vacationOfVacationRequestContract);
+      const allVacations = signedVacations.concat(unsignedVacations);
+      const employeeVacationAllocationContract = await companyLedger.lookupByKey(davl3.EmployeeVacationAllocation, employee);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const { remainingDays } = employeeVacationAllocationContract!.payload;
+      return [employee,
+              { boss: boss,
+                vacationDays: Number(remainingDays),
+                acceptProposal: true,
+                vacationRequests: allVacations.length == 0 ? undefined : allVacations
+              }];
+    }
+
+    const employeeInfoOfEmployeeProposalContract = (
+      employeeProposalContract: CreateEvent<davl3.EmployeeProposal>): [string, EmployeeInfo] => {
+      const employeeProposal = employeeProposalContract.payload;
+      const { employeeRole, vacationDays } = employeeProposal;
+      const { employee, boss } = employeeRole;
+      return [employee,
+              { boss: boss,
+                vacationDays: Number(vacationDays),
+                acceptProposal: false,
+                vacationRequests: undefined
+              }];
+    }
+
+    const employeeRoleContracts = await companyLedger.query(davl3.EmployeeRole, {});
+    const employeeProposalContracts = await companyLedger.query(davl3.EmployeeProposal, {});
+    const signedEmployees = await Promise.all(employeeRoleContracts.map(employeeInfoOfEmployeeRoleContract));
+    const unsignedEmployees = employeeProposalContracts.map(employeeInfoOfEmployeeProposalContract);
+    const employees: { [party: string]: EmployeeInfo } = {}
+    signedEmployees
+      .concat(unsignedEmployees)
+      .forEach(([name, info]) => employees[name] = info);
+    const { ledgerUrl, ledgerId, applicationId, secret } = ledgerParams;
+    const config: Config = { ledgerUrl, ledgerId, applicationId, secret, company, employees };
+    await fs.writeFile(file, JSON.stringify(config, null, 2), { encoding: 'utf8' })
+    console.log(`Dump written to '${file}'.`);
+  }
+
 }//namespace v3
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -107,8 +170,8 @@ namespace v3v4 {
 
   export const upgradeInit = async (ledgerParams: LedgerParams, company: string) => {
     const companyLedger = connect(ledgerParams, company);
-    const employees = await companyLedger.query(davl3.EmployeeRole, {});
-    for (const employeeRole of employees) {
+    const employeeRoleContracts = await companyLedger.query(davl3.EmployeeRole, {});
+    for (const employeeRole of employeeRoleContracts) {
       const employee = employeeRole.key;
       const employeeProposal: davlUpgradev3v4.UpgradeProposal = {
         employee: employee,
@@ -184,6 +247,7 @@ namespace cli {
 
   type Cli =
     | { command: 'v3-init'; file: string }
+    | { command: 'v3-dump'; ledgerParams: LedgerParams; company: string; file: string }
     | { command: 'v3-v4-upgrade-init'; ledgerParams: LedgerParams; company: string }
     | { command: 'v3-v4-upgrade-accept'; ledgerParams: LedgerParams; company: string }
     | { command: 'v3-v4-upgrade-finish'; ledgerParams: LedgerParams; company: string }
@@ -211,6 +275,10 @@ namespace cli {
       case 'v3-init': {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return { command: cmd, file: args.file! };
+      }
+      case 'v3-dump': {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return { command: cmd, ledgerParams: mkLedgerParams(args), company: args.company!, file: args.file! };
       }
       case 'v3-v4-upgrade-init': {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -255,6 +323,18 @@ namespace cli {
       })
       .example('$0 v3-init -f test-setup.json',
                'Ledger initialization from configuration file.')
+      .command({
+        command: 'v3-dump',
+        desc: 'Create a v3 ledger dump',
+        builder: (yargs: Argv) => {
+          ledgerParamsBuilder(yargs)
+          .option('company', { demandOption: true, describe: 'Company', type: 'string' })
+          .option('f', {
+            alias: 'file', demandOption: true, describe: 'Filename to dump to', type: 'string'
+          }) },
+      })
+      .example('$0 v3-dump --ledger-params ... -f dump.json',
+               'Dumping the v3 state of a ledger to a file.')
       .command({
         command: 'v3-v4-upgrade-init',
         desc: 'Create v3/v4 upgrade proposals',
@@ -301,6 +381,10 @@ namespace cli {
         await v3.init(cfg);
         break;
       }
+      case 'v3-dump': {
+        await v3.dump(cli.ledgerParams, cli.company, cli.file);
+        break;
+      }
       case 'v3-v4-upgrade-init': {
         await v3v4.upgradeInit(cli.ledgerParams, cli.company);
         break;
@@ -311,7 +395,6 @@ namespace cli {
       }
       case 'v3-v4-upgrade-finish': {
         await v3v4.upgradeFinish(cli.ledgerParams, cli.company);
-
         break;
       }
     }
