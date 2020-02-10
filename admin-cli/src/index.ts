@@ -2,6 +2,7 @@ import { promises as fs } from 'fs';
 import { encode } from 'jwt-simple';
 import Ledger from '@daml/ledger';
 import * as davl3 from '@daml2ts/davl-v3/lib/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
+import * as davl4 from '@daml2ts/davl-v4/lib/77a41b679a3280df8685e5ef4db2a1f94d6d12db6117a669511e47e938feb207/DAVL';
 import * as davlUpgradev3v4 from '@daml2ts/davl-upgrade-v3-v4/lib/b31fe1021c80fcd4e0adc3437d24a328f3b721e81c0a158f6c4a94b89cb8ab32/Upgrade';
 import { Argv } from 'yargs'; // Nice docs : http://yargs.js.org/
 
@@ -41,16 +42,15 @@ function connect(
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace v3 {
-  // Populate a ledger.
+
   export const init = async (config: Config) => {
     const companyLedger = connect(config, config.company);
-
     // Create/accept employee proposals.
     for (const employee in config.employees) {
       const employeeInfo = config.employees[employee];
       const employeeRole: davl3.EmployeeRole = {
         company: config.company,
-        employee: employee,
+        employee,
         boss: employeeInfo.boss,
       };
       const employeeProposal: davl3.EmployeeProposal = {
@@ -70,11 +70,11 @@ namespace v3 {
         console.log(`Accepted EmployeeProposal for ${employee}.`);
       }
     }
-
-    // Create/approve employee vacation requests.
+    // Create/approve vacation requests.
     for (const employee in config.employees) {
       const employeeInfo = config.employees[employee];
       for (const vacationRequest of employeeInfo.vacationRequests ?? []) {
+        const { fromDate, toDate } = vacationRequest;
         const employeeLedger = connect(config, employee);
         const employeeRoleContract = await employeeLedger.lookupByKey(davl3.EmployeeRole, employee);
         if (employeeRoleContract) {
@@ -82,12 +82,10 @@ namespace v3 {
             await employeeLedger.exercise(
               davl3.EmployeeRole.EmployeeRole_RequestVacation,
               employeeRoleContract.contractId,
-              { fromDate: vacationRequest.fromDate, toDate: vacationRequest.toDate },
+              { fromDate, toDate },
             );
-          const fromDate = vacationRequest.fromDate;
-          const toDate = vacationRequest.toDate;
-          console.log(`Created VacationRequest [${fromDate} , ${toDate}] for ${employee}`);
-          if (vacationRequest.approved){
+          console.log(`Created VacationRequest [${fromDate} , ${toDate}] for ${employee}.`);
+          if (vacationRequest.approved) {
             const boss = employeeInfo.boss
             const bossLedger = connect(config, boss);
             await bossLedger.exercise(
@@ -95,7 +93,7 @@ namespace v3 {
               vacationRequestContractId,
               {},
             );
-            console.log(`${boss} approved VacationRequest [${fromDate}, ${toDate}] for ${employee}`);
+            console.log(`${boss} approved VacationRequest [${fromDate}, ${toDate}] for ${employee}.`);
           }
         }
       }
@@ -106,8 +104,8 @@ namespace v3 {
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace v3v4 {
-  // Create upgrade proposals.
-  export const upgrade = async (ledgerParams: LedgerParams, company: string) => {
+
+  export const upgradeInit = async (ledgerParams: LedgerParams, company: string) => {
     const companyLedger = connect(ledgerParams, company);
     const employees = await companyLedger.query(davl3.EmployeeRole, {});
     for (const employeeRole of employees) {
@@ -121,23 +119,64 @@ namespace v3v4 {
     }
   }
 
-  // "Auto-" accept upgrade proposals.
-  export const accept = async (ledgerParams: LedgerParams, company: string) => {
+  export const upgradeAccept = async (ledgerParams: LedgerParams, company: string) => {
     const companyLedger = connect(ledgerParams, company);
-    const employees = await companyLedger.query(davl3.EmployeeRole, {});
-    for (const employeeRole of employees) {
-      const employee = employeeRole.key;
+    const employeeRoleContracts = await companyLedger.query(davl3.EmployeeRole, {});
+    // Create update agreements.
+    for (const employeeRoleContract of employeeRoleContracts) {
+      const employee = employeeRoleContract.key;
       const employeeLedger = connect(ledgerParams, employee);
-      const [upgradeProposal] =
-        await employeeLedger.query(davlUpgradev3v4.UpgradeProposal, { employee: employee });
+      const [upgradeProposalContract] =
+        await employeeLedger.query(davlUpgradev3v4.UpgradeProposal, { employee });
       await employeeLedger.exercise(
-          davlUpgradev3v4.UpgradeProposal.UpgradeProposal_Accept,
-          upgradeProposal.contractId,
-          {},
-        );
+        davlUpgradev3v4.UpgradeProposal.UpgradeProposal_Accept,
+        upgradeProposalContract.contractId,
+        {},
+      );
       console.log(`Accepted UpgradeProposal for ${employee}.`);
     }
   }
+
+  export const upgradeFinish = async (ledgerParams: LedgerParams, company: string) => {
+    const companyLedger = connect(ledgerParams, company);
+    const employeeUpgradeAgreementContracts =
+      await companyLedger.query(davlUpgradev3v4.UpgradeAgreement, { company });
+    for (const employeeUpgradeAgreementContract of employeeUpgradeAgreementContracts) {
+      const employee = employeeUpgradeAgreementContract.payload.employee;
+      const employeeRoleContract = await companyLedger.lookupByKey(davl4.EmployeeRole, employee);
+      if (employeeRoleContract) {
+        const employeeRole = employeeRoleContract.payload;
+        const vacationRequestContracts = await companyLedger.query(davl3.VacationRequest, { vacation: { employeeRole } });
+        if (vacationRequestContracts.length > 0) {
+          for (const vacationRequestContract of vacationRequestContracts) {
+            const { fromDate, toDate } = vacationRequestContract.payload.vacation;
+            await companyLedger.exercise(
+              davlUpgradev3v4.UpgradeAgreement.UpgradeAgreement_UpgradeVacationRequest,
+              employeeUpgradeAgreementContract.contractId,
+              { requestId: vacationRequestContract.contractId });
+            console.log(`Upgraded VacationRequest [${fromDate}, ${toDate}] for ${employee}.`);
+          }
+        }
+        const boss = employeeRole.boss;
+        const [bossUpgradeAgreementContract] =
+          await companyLedger.query(davlUpgradev3v4.UpgradeAgreement, { employee: boss, company });
+        if (bossUpgradeAgreementContract) {
+          const vacationContracts = await companyLedger.query(davl3.Vacation, { employeeRole });
+          if (vacationContracts.length > 0) {
+            for (const vacationContract of vacationContracts) {
+              const { fromDate, toDate } = vacationContract.payload;
+              await companyLedger.exercise(
+                davlUpgradev3v4.UpgradeAgreement.UpgradeAgreement_UpgradeVacation,
+                bossUpgradeAgreementContract.contractId,
+                { employeeAgreementId: employeeUpgradeAgreementContract.contractId, vacationId: vacationContract.contractId });
+              console.log(`Upgraded Vaction [${fromDate}, ${toDate}] for ${employee}.`);
+            }
+          }
+        }
+      }
+    }
+  }
+
 } //namespace v3v4
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -145,8 +184,9 @@ namespace cli {
 
   type Cli =
     | { command: 'v3-init'; file: string }
-    | { command: 'v3-v4-upgrade'; ledgerParams: LedgerParams; company: string }
+    | { command: 'v3-v4-upgrade-init'; ledgerParams: LedgerParams; company: string }
     | { command: 'v3-v4-upgrade-accept'; ledgerParams: LedgerParams; company: string }
+    | { command: 'v3-v4-upgrade-finish'; ledgerParams: LedgerParams; company: string }
 
   // The shape of the object returned from yargs.
   type Arguments = {
@@ -172,11 +212,15 @@ namespace cli {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return { command: cmd, file: args.file! };
       }
-      case 'v3-v4-upgrade': {
+      case 'v3-v4-upgrade-init': {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return { command: cmd, ledgerParams: mkLedgerParams(args), company: args.company! };
       }
       case 'v3-v4-upgrade-accept': {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return { command: cmd, ledgerParams: mkLedgerParams(args), company: args.company! };
+      }
+      case 'v3-v4-upgrade-finish': {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return { command: cmd, ledgerParams: mkLedgerParams(args), company: args.company! };
       }
@@ -209,23 +253,35 @@ namespace cli {
             alias: 'file', demandOption: true, describe: 'Configuration file', type: 'string'
           }) },
       })
-      .example('$0 v3-init -f test-setup.json', 'Ledger initialization from configuration file.')
+      .example('$0 v3-init -f test-setup.json',
+               'Ledger initialization from configuration file.')
       .command({
-        command: 'v3-v4-upgrade',
+        command: 'v3-v4-upgrade-init',
         desc: 'Create v3/v4 upgrade proposals',
         builder: (yargs: Argv) =>
           ledgerParamsBuilder(yargs)
           .option('company', { demandOption: true, describe: 'Company', type: 'string' })
       })
-      .example('$0 v3-v4-upgrade test-setup.json', 'Creation of v3/v4 upgrade proposal contracts')
+      .example('$0 v3-v4-upgrade-init --ledger-url ...',
+               'Creation of v3/v4 upgrade proposal contracts.')
       .command({
         command: 'v3-v4-upgrade-accept',
-        desc: 'Exercise accepts on v3/v4 upgrade proposals.',
+        desc: 'Exercise accepts on v3/v4 upgrade proposals',
         builder: (yargs: Argv) =>
           ledgerParamsBuilder(yargs)
           .option('company', { demandOption: true, describe: 'Company', type: 'string' })
       })
-      .example('$0 v3-v4-upgrade-accept --ledger-url ...', 'Exercising accept choices on v3/v4 upgrade proposals')
+      .example('$0 v3-v4-upgrade-accept --ledger-url ...',
+               'Exercising accept choices on v3/v4 upgrade proposals.')
+      .command({
+        command: 'v3-v4-upgrade-finish',
+        desc: 'Use approved upgrade agreements to complete v3/v4 contract upgrades',
+        builder: (yargs: Argv) =>
+          ledgerParamsBuilder(yargs)
+          .option('company', { demandOption: true, describe: 'Company', type: 'string' })
+      })
+      .example('$0 v3-v4-upgrade-finish --ledger-url ...',
+               'Upgrade v3 vacation and request contracts to v4.')
       .demandCommand(1, 'Missing command')
       .epilogue('$0 is an administration tool - use with caution!')
       .argv;
@@ -245,12 +301,17 @@ namespace cli {
         await v3.init(cfg);
         break;
       }
-      case 'v3-v4-upgrade': {
-        await v3v4.upgrade(cli.ledgerParams, cli.company);
+      case 'v3-v4-upgrade-init': {
+        await v3v4.upgradeInit(cli.ledgerParams, cli.company);
         break;
       }
       case 'v3-v4-upgrade-accept': {
-        await v3v4.accept(cli.ledgerParams, cli.company);
+        await v3v4.upgradeAccept(cli.ledgerParams, cli.company);
+        break;
+      }
+      case 'v3-v4-upgrade-finish': {
+        await v3v4.upgradeFinish(cli.ledgerParams, cli.company);
+
         break;
       }
     }
