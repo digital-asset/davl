@@ -130,6 +130,7 @@ const LoginScreen: React.FC<Props> = (props) => {
               icon='user'
               iconPosition='left'
               placeholder='Username'
+              autoComplete='username'
               value={username}
               onChange={e => setUsername(e.currentTarget.value)}
             />
@@ -139,6 +140,7 @@ const LoginScreen: React.FC<Props> = (props) => {
               iconPosition='left'
               placeholder='Password'
               type='password'
+              autoComplete='current-password'
               value={password}
               onChange={e => setPassword(e.currentTarget.value)}
             />
