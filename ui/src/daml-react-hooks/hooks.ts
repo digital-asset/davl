@@ -107,7 +107,7 @@ export function useStreamQuery<T extends object, K>(template: Template<T, K>, qu
   useEffect(() => {
     setResult({contracts: [], loading: true});
     const query = queryFactory ? queryFactory() : undefined;
-    console.log(`mount useStreamQuery(${template.templateId}, ...)`, query);
+    console.debug(`mount useStreamQuery(${template.templateId}, ...)`, query);
     const onEvents = (events: Event<T, K>[]) => setResult(result => {
       const archiveEvents: Set<ContractId<T>> = new Set();
       const createEvents: CreateEvent<T, K>[] = [];
@@ -123,13 +123,16 @@ export function useStreamQuery<T extends object, K>(template: Template<T, K>, qu
         .filter(contract => !archiveEvents.has(contract.contractId));
       return {...result, contracts};
     });
-    const close = state.ledger.streamQuery(template, onEvents, query);
+    const onClose = (event: CloseEvent) => {
+      console.error('useStreamQuery: web socket closed', event);
+      setResult(result => ({...result, loading: true}));
+    };
+    const close = state.ledger.streamQuery(template, onEvents, onClose, query);
     setResult(result => ({...result, loading: false}));
-    const cleanUp = () => {
-      console.log(`unmount useStreamQuery(${template.templateId}, ...)`, query);
+    return () => {
+      console.debug(`unmount useStreamQuery(${template.templateId}, ...)`, query);
       close();
-    }
-    return cleanUp;
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.ledger, template, ...(queryDeps ?? [])]);
   return result;

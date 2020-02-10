@@ -43,6 +43,7 @@ export default class StreamLedger extends Ledger {
   streamQuery<T extends object, K, I extends string>(
     template: Template<T, K, I>,
     onEvents: (events: Event<T, K, I>[]) => void,
+    onClose: (event: CloseEvent) => void,
     query?: Query<T>,
   ): () => void {
     // TODO(MH): When this moves into the proper `Ledger` class, we should use
@@ -58,10 +59,10 @@ export default class StreamLedger extends Ledger {
       const payload = {templateIds: [template.templateId], query};
       ws.send(JSON.stringify(payload));
     };
-    ws.onclose = event => {
-      console.error('/contracts/searchForever closed', event);
-      throw Error('/contracts/searchForever closed');
-    };
+    // NOTE(MH): We ignore the 'error' event since it is always followed by a
+    // 'close' event, which we need to handle anyway.
+    ws.onerror = null;
+    ws.onclose = onClose;
     ws.onmessage = event => {
       const json: unknown = JSON.parse(event.data);
       if (Array.isArray(json)) {
@@ -76,11 +77,11 @@ export default class StreamLedger extends Ledger {
           onEvents([]);
         }
       } else if (isRecordWith('warnings', json)) {
-        console.warn('/contracts/searchForever: warnings', json.warnings);
+        console.warn('Ledger.streamQuery warnings', json);
       } else if (isRecordWith('errors', json)) {
-        console.error('/contracts/searchForever: errors', json.errors);
+        console.error('Ledger.streamQuery errors', json);
       } else {
-        console.error('/contracts/searchForever: unknown message', json);
+        console.error('Ledger.streamQuery unknown message', json);
       }
     };
     return () => ws.close();
