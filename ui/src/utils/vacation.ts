@@ -1,6 +1,6 @@
 import { Party, ContractId } from '@daml/types';
 import { CreateEvent } from '@daml/ledger';
-import * as v3 from '@daml2ts/davl-v3/lib/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
+import * as v3 from '@daml2ts/davl-v3/lib/davl-v3/DAVL';
 import { contramap, Ord, ordString, getDualOrd } from 'fp-ts/lib/Ord';
 import { partition } from 'fp-ts/lib/Array';
 import moment from 'moment';

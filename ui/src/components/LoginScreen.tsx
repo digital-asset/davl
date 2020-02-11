@@ -2,7 +2,7 @@ import React from 'react'
 import { Button, Form, Grid, Header, Segment } from 'semantic-ui-react'
 import Ledger from '@daml/ledger';
 import { Party } from '@daml/types';
-import * as v3 from '@daml2ts/davl-v3/lib/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
+import * as v3 from '@daml2ts/davl-v3/lib/davl-v3/DAVL';
 import { decode } from 'jwt-simple';
 
 const LEDGER_ID = 'DAVL';
