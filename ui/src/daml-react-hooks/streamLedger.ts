@@ -1,6 +1,7 @@
 import * as jtv from '@mojotech/json-type-validation'
 import Ledger, { Query, Event, CreateEvent } from '@daml/ledger';
 import { Party, Template, List, Text, ContractId } from '@daml/types';
+import { EventEmitter } from 'events';
 
 const decodeCreateEvent = <T extends object, K, I extends string>(template: Template<T, K, I>): jtv.Decoder<CreateEvent<T, K, I>> => jtv.object({
   templateId: jtv.constant(template.templateId),
@@ -22,55 +23,6 @@ const decodeStreamEvent = <T extends object, K, I extends string>(template: Temp
 
 function isRecordWith<Field extends string>(field: Field, x: unknown): x is Record<Field, unknown> {
   return typeof x === "object" && x !== null && field in x;
-}
-
-interface EventEmitter<EventMap> {
-  on<E extends keyof EventMap>(type: E, listener: (ev: EventMap[E]) => void): void;
-  off<E extends keyof EventMap>(type: E, listener: (ev: EventMap[E]) => void): void;
-  allOff<E extends keyof EventMap>(type?: E): void;
-  dispatch<E extends keyof EventMap>(type: E, ev: EventMap[E]): void;
-}
-
-function EventEmitter<EventMap>(): EventEmitter<EventMap> {
-  let listeners: { [E in keyof EventMap]?: ((ev: EventMap[E]) => void)[] } = {};
-
-  const on = <E extends keyof EventMap>(type: E, listener: (ev: EventMap[E]) => void): void => {
-    if (!(type in listeners)) {
-      listeners[type] = []
-    }
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    listeners[type]!.push(listener);
-  }
-
-  const off = <E extends keyof EventMap>(type: E, listener: (ev: EventMap[E]) => void): void => {
-    if (type in listeners) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const typeListeners = listeners[type]!;
-      const index = typeListeners.findIndex(l => l === listener);
-      if (index >= 0) {
-        typeListeners.splice(index, 1);
-      }
-    }
-  }
-
-  const allOff = <E extends keyof EventMap>(type?: E) => {
-    if (type) {
-      listeners[type] = undefined;
-    } else {
-      listeners = {};
-    }
-  }
-
-  const dispatch = <E extends keyof EventMap>(type: E, ev: EventMap[E]): void => {
-    if (type in listeners) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      for (const listener of listeners[type]!) {
-        listener(ev);
-      }
-    }
-  }
-
-  return {on, off, allOff, dispatch};
 }
 
 export type EventStreamCloseEvent = {
@@ -111,11 +63,7 @@ export default class StreamLedger extends Ledger {
     const protocols = ['jwt.token.' + this['token'], 'daml.ws.auth'];
     const ws = new WebSocket(this.wsBaseUrl + 'contracts/searchForever', protocols);
     let haveSeenEvents = false;
-    type EventMap = {
-      events: readonly Event<T, K, I>[];
-      close: EventStreamCloseEvent;
-    }
-    const emitter = EventEmitter<EventMap>();
+    const emitter = new EventEmitter();
     ws.onopen = () => {
       const payload = {templateIds: [template.templateId], query};
       ws.send(JSON.stringify(payload));
@@ -128,14 +76,14 @@ export default class StreamLedger extends Ledger {
       if (Array.isArray(json)) {
         const events = jtv.Result.withException(jtv.array(decodeStreamEvent(template)).run(json));
         haveSeenEvents = true;
-        emitter.dispatch('events', events);
+        emitter.emit('events', events);
       } else if (isRecordWith('heartbeat', json)) {
         // NOTE(MH): If we receive the first heartbeat before any events, then
         // it's very likely nothing in the ACS matches the query. We signal this
         // by sending an empty list of events. This never does harm.
         if (!haveSeenEvents) {
           haveSeenEvents = true;
-          emitter.dispatch('events', []);
+          emitter.emit('events', []);
         }
       } else if (isRecordWith('warnings', json)) {
         console.warn('Ledger.streamQuery warnings', json);
@@ -146,13 +94,16 @@ export default class StreamLedger extends Ledger {
       }
     };
     ws.onclose = ({code, reason}) => {
-      emitter.dispatch('close', {code, reason});
+      emitter.emit('close', {code, reason});
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const on = (type: string, listener: any) => emitter.on(type, listener);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const off = (type: string, listener: any) => emitter.on(type, listener);
     const close = () => {
-      emitter.allOff();
+      emitter.removeAllListeners();
       ws.close();
     }
-    const {on, off} = emitter;
     return {on, off, close};
   }
 }
