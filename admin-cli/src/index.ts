@@ -243,6 +243,66 @@ namespace v3v4 {
 } //namespace v3v4
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
+namespace v4 {
+  export const init = async (config: Config) => {
+    const companyLedger = connect(config, config.company);
+    // Create/accept employee proposals.
+    for (const employee in config.employees) {
+      const employeeInfo = config.employees[employee];
+      const employeeRole: davl4.EmployeeRole = {
+        company: config.company,
+        employee,
+        boss: employeeInfo.boss,
+      };
+      const employeeProposal: davl4.EmployeeProposal = {
+        employeeRole,
+        vacationDays: employeeInfo.vacationDays.toString(),
+      };
+      const employeeProposalContract =
+        await companyLedger.create(davl4.EmployeeProposal, employeeProposal);
+      console.log(`Created EmployeeProposal for ${employee}.`);
+      if (employeeInfo.acceptProposal) {
+        const employeeLedger = connect(config, employee);
+        await employeeLedger.exercise(
+          davl4.EmployeeProposal.EmployeeProposal_Accept,
+          employeeProposalContract.contractId,
+          {},
+        );
+        console.log(`Accepted EmployeeProposal for ${employee}.`);
+      }
+    }
+    // Create/approve vacation requests.
+    for (const employee in config.employees) {
+      const employeeInfo = config.employees[employee];
+      for (const vacationRequest of employeeInfo.vacationRequests ?? []) {
+        const { fromDate, toDate } = vacationRequest;
+        const employeeLedger = connect(config, employee);
+        const employeeRoleContract = await employeeLedger.lookupByKey(davl4.EmployeeRole, employee);
+        if (employeeRoleContract) {
+          const [vacationRequestContractId] =
+            await employeeLedger.exercise(
+              davl4.EmployeeRole.EmployeeRole_RequestVacation,
+              employeeRoleContract.contractId,
+              { fromDate, toDate },
+            );
+          console.log(`Created VacationRequest [${fromDate} , ${toDate}] for ${employee}.`);
+          if (vacationRequest.approved) {
+            const boss = employeeInfo.boss
+            const bossLedger = connect(config, boss);
+            await bossLedger.exercise(
+              davl4.VacationRequest.VacationRequest_Accept,
+              vacationRequestContractId,
+              {},
+            );
+            console.log(`${boss} approved VacationRequest [${fromDate}, ${toDate}] for ${employee}.`);
+          }
+        }
+      }
+    }
+  }
+}//namespace v4
+
+// eslint-disable-next-line @typescript-eslint/no-namespace
 namespace cli {
 
   type Cli =
@@ -251,6 +311,7 @@ namespace cli {
     | { command: 'v3-v4-upgrade-init'; ledgerParams: LedgerParams; company: string }
     | { command: 'v3-v4-upgrade-accept'; ledgerParams: LedgerParams; company: string }
     | { command: 'v3-v4-upgrade-finish'; ledgerParams: LedgerParams; company: string }
+    | { command: 'v4-init'; file: string }
 
   // The shape of the object returned from yargs.
   type Arguments = {
@@ -291,6 +352,10 @@ namespace cli {
       case 'v3-v4-upgrade-finish': {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return { command: cmd, ledgerParams: mkLedgerParams(args), company: args.company! };
+      }
+      case 'v4-init': {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return { command: cmd, file: args.file! };
       }
       default: {
         console.error('Unrecognized command "' + cmd + '"');
@@ -362,6 +427,16 @@ namespace cli {
       })
       .example('$0 v3-v4-upgrade-finish --ledger-url ...',
                'Upgrade v3 vacation and request contracts to v4.')
+      .command({
+        command: 'v4-init',
+        desc: 'Initialze a test ledger',
+        builder: (yargs: Argv) => {
+          yargs.option('f', {
+            alias: 'file', demandOption: true, describe: 'Configuration file', type: 'string'
+          }) },
+      })
+      .example('$0 v4-init -f test-setup.json',
+                'Ledger initialization from configuration file.')
       .demandCommand(1, 'Missing command')
       .epilogue('$0 is an administration tool - use with caution!')
       .argv;
@@ -395,6 +470,11 @@ namespace cli {
       }
       case 'v3-v4-upgrade-finish': {
         await v3v4.upgradeFinish(cli.ledgerParams, cli.company);
+        break;
+      }
+      case 'v4-init': {
+        const cfg = await config(cli.file);
+        await v4.init(cfg);
         break;
       }
     }
