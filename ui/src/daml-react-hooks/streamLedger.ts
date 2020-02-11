@@ -2,6 +2,7 @@ import * as jtv from '@mojotech/json-type-validation'
 import Ledger, { Query, Event, CreateEvent } from '@daml/ledger';
 import { Party, Template, List, Text, ContractId } from '@daml/types';
 import { EventEmitter } from 'events';
+import WebSocket from 'isomorphic-ws';
 
 const decodeCreateEvent = <T extends object, K, I extends string>(template: Template<T, K, I>): jtv.Decoder<CreateEvent<T, K, I>> => jtv.object({
   templateId: jtv.constant(template.templateId),
@@ -68,11 +69,8 @@ export default class StreamLedger extends Ledger {
       const payload = {templateIds: [template.templateId], query};
       ws.send(JSON.stringify(payload));
     };
-    // NOTE(MH): We ignore the 'error' event since it is always followed by a
-    // 'close' event, which we need to handle anyway.
-    ws.onerror = null;
     ws.onmessage = event => {
-      const json: unknown = JSON.parse(event.data);
+      const json: unknown = JSON.parse(event.data.toString());
       if (Array.isArray(json)) {
         const events = jtv.Result.withException(jtv.array(decodeStreamEvent(template)).run(json));
         haveSeenEvents = true;
@@ -93,6 +91,8 @@ export default class StreamLedger extends Ledger {
         console.error('Ledger.streamQuery unknown message', json);
       }
     };
+    // NOTE(MH): We ignore the 'error' event since it is always followed by a
+    // 'close' event, which we need to handle anyway.
     ws.onclose = ({code, reason}) => {
       emitter.emit('close', {code, reason});
     }
