@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Choice, ContractId, Template } from "@daml/types";
-import { CreateEvent, Query, Event } from '@daml/ledger';
+import { CreateEvent, Query } from '@daml/ledger';
 import { useState, useContext, useEffect } from "react";
 import { DamlLedgerState, DamlLedgerContext } from './context'
 
@@ -98,7 +98,6 @@ export const useExerciseByKey = <T extends object, C, R, K>(choice: Choice<T, C,
 }
 
 /// React Hook for a query against the `/contracts/searchForever` endpoint of the JSON API.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useStreamQuery<T extends object, K>(template: Template<T, K>): QueryResult<T, K>
 export function useStreamQuery<T extends object, K>(template: Template<T, K>, queryFactory: () => Query<T>, queryDeps: readonly unknown[]): QueryResult<T, K>
 export function useStreamQuery<T extends object, K>(template: Template<T, K>, queryFactory?: () => Query<T>, queryDeps?: readonly unknown[]): QueryResult<T, K> {
@@ -107,8 +106,9 @@ export function useStreamQuery<T extends object, K>(template: Template<T, K>, qu
   useEffect(() => {
     setResult({contracts: [], loading: true});
     const query = queryFactory ? queryFactory() : undefined;
-    console.log(`mount useStreamQuery(${template.templateId}, ...)`, query);
-    const onEvents = (events: Event<T, K>[]) => setResult(result => {
+    console.debug(`mount useStreamQuery(${template.templateId}, ...)`, query);
+    const stream = state.ledger.streamQuery(template, query);
+    stream.on('events', events => setResult(result => {
       const archiveEvents: Set<ContractId<T>> = new Set();
       const createEvents: CreateEvent<T, K>[] = [];
       for (const event of events) {
@@ -122,14 +122,16 @@ export function useStreamQuery<T extends object, K>(template: Template<T, K>, qu
         .concat(createEvents)
         .filter(contract => !archiveEvents.has(contract.contractId));
       return {...result, contracts};
+    }));
+    stream.on('close', closeEvent => {
+      console.error('useStreamQuery: web socket closed', closeEvent);
+      setResult(result => ({...result, loading: true}));
     });
-    const close = state.ledger.streamQuery(template, onEvents, query);
     setResult(result => ({...result, loading: false}));
-    const cleanUp = () => {
-      console.log(`unmount useStreamQuery(${template.templateId}, ...)`, query);
-      close();
-    }
-    return cleanUp;
+    return () => {
+      console.debug(`unmount useStreamQuery(${template.templateId}, ...)`, query);
+      stream.close();
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.ledger, template, ...(queryDeps ?? [])]);
   return result;
