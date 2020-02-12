@@ -41,6 +41,11 @@ function connect(
   return new Ledger(token, ledgerUrl);
 }
 
+function days(fromDate: string, toDate: string): number {
+  // Holiday date ranges are closed i.e. [from, to].
+  return Math.floor((new Date(toDate)).valueOf() - (new Date(fromDate)).valueOf())/86400000 + 1;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace v3 {
 
@@ -79,6 +84,8 @@ namespace v3 {
         const employeeLedger = connect(config, employee);
         const employeeRoleContract = await employeeLedger.lookupByKey(davl3.EmployeeRole, employee);
         if (employeeRoleContract) {
+          const numDays = days(fromDate, toDate);
+          console.log(`Request of ${numDays} days(s) found for ${employee}.`);
           const [vacationRequestContractId] =
             await employeeLedger.exercise(
               davl3.EmployeeRole.EmployeeRole_RequestVacation,
@@ -110,6 +117,12 @@ namespace v3 {
       return ({fromDate, toDate, approved: true});
     };
 
+    const daysOfVacationContract = (
+      vacationContract: CreateEvent<davl3.Vacation>): number => {
+      const { fromDate, toDate } = vacationContract.payload;
+      return days(fromDate, toDate);
+    };
+
     const vacationOfVacationRequestContract = (
       vacationRequestContract: CreateEvent<davl3.VacationRequest>): Vacation => {
       const { fromDate, toDate } = vacationRequestContract.payload.vacation;
@@ -128,9 +141,11 @@ namespace v3 {
       const employeeVacationAllocationContract = await companyLedger.lookupByKey(davl3.EmployeeVacationAllocation, employee);
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const { remainingDays } = employeeVacationAllocationContract!.payload;
+      const bookedDays = vacationContracts.reduce((total, vacationContract) => total + daysOfVacationContract(vacationContract), 0);
+      const vacationDays = Number(bookedDays) + Number(remainingDays);
       return [employee,
-              { boss: boss,
-                vacationDays: Number(remainingDays),
+              { boss,
+                vacationDays,
                 acceptProposal: true,
                 vacationRequests: allVacations.length == 0 ? undefined : allVacations
               }];
