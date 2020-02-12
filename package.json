@@ -3,7 +3,9 @@
   "workspaces": [
     "v3-ts",
     "v4-ts",
+    "v5-ts",
     "upgrade-v3-v4-ts",
+    "upgrade-v4-v5-ts",
     "ui",
     "admin-cli"
   ]
