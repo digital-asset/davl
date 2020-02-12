@@ -1,4 +1,4 @@
-sdk-version: 0.13.46
+sdk-version: 0.13.51
 name: davl-upgrade-v3-v4
 version: 0.0.4
 source: daml
@@ -21,7 +21,7 @@ build-options:
   - "--package"
   - "daml-prim"
   - "--package"
-  - "daml-stdlib-0.13.46"
+  - "daml-stdlib-0.13.51"
   - "--package"
   - "davl-0.0.3 (DAVL as DAVL.V3)"
   - "--package"
