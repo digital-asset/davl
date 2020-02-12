@@ -2,7 +2,7 @@ import React from 'react'
 import { Button, Form, Grid, Header, Segment } from 'semantic-ui-react'
 import Ledger from '@daml/ledger';
 import { Party } from '@daml/types';
-import * as v3 from '@daml2ts/davl-v3/lib/davl-v3/DAVL';
+import * as v4 from '@daml2ts/davl-v4/lib/davl-v4/DAVL';
 import { decode } from 'jwt-simple';
 
 const LEDGER_ID = 'DAVL';
@@ -68,7 +68,7 @@ const LoginScreen: React.FC<Props> = (props) => {
       try {
         setStatus(Status.LoggingIn);
         const ledger = new Ledger(credentials.token);
-        const employeeRole = await ledger.lookupByKey(v3.EmployeeRole, credentials.party);
+        const employeeRole = await ledger.lookupByKey(v4.EmployeeRole, credentials.party);
         if (employeeRole) {
           login = true;
         } else {
@@ -92,7 +92,7 @@ const LoginScreen: React.FC<Props> = (props) => {
         setStatus(Status.SigningUp)
         const ledger = new Ledger(credentials.token);
         const employeeProposals =
-          await ledger.query(v3.EmployeeProposal, {employeeRole: {employee: credentials.party}});
+          await ledger.query(v4.EmployeeProposal, {employeeRole: {employee: credentials.party}});
         if (employeeProposals.length === 0) {
           alert('There is no invitation for you.');
         } else if(employeeProposals.length > 1) {
@@ -102,7 +102,7 @@ const LoginScreen: React.FC<Props> = (props) => {
           const employeeRole = employeeProposal.employeeRole;
           const accept = window.confirm(`You have been invited to work for ${employeeRole.company}.\nBoss: ${employeeRole.boss}\nVacation days: ${employeeProposal.vacationDays}\nDo you accept?`);
           if (accept) {
-            await ledger.exercise(v3.EmployeeProposal.EmployeeProposal_Accept, contractId, {});
+            await ledger.exercise(v4.EmployeeProposal.EmployeeProposal_Accept, contractId, {});
             login = true;
           }
         }

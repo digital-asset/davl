@@ -4,22 +4,22 @@ import { Vacation, prettyRequests, splitVacations } from '../../utils/vacation';
 import { Segment } from 'semantic-ui-react';
 import Staff from './Staff';
 import { useStreamQuery, useExercise, useParty } from '../../daml-react-hooks';
-import * as v3 from '@daml2ts/davl-v3/lib/davl-v3/DAVL';
+import * as v4 from '@daml2ts/davl-v4/lib/davl-v4/DAVL';
 import { toast } from 'react-semantic-toasts';
 
 const BossView: React.FC = () => {
   const party = useParty();
 
   const {loading: loadingVacations, contracts: vacationContracts} =
-    useStreamQuery(v3.Vacation, () => ({employeeRole: {boss: party}}), [party]);
+    useStreamQuery(v4.Vacation, () => ({employeeRole: {boss: party}}), [party]);
   const vacations = splitVacations(vacationContracts);
 
   const {loading: loadingRequests, contracts: requestsContracts} =
-    useStreamQuery(v3.VacationRequest, () => ({vacation: {employeeRole: {boss: party}}}), [party]);
+    useStreamQuery(v4.VacationRequest, () => ({vacation: {employeeRole: {boss: party}}}), [party]);
   const requests = prettyRequests(requestsContracts);
 
   const [exerciseApproveRequest] =
-    useExercise(v3.VacationRequest.VacationRequest_Accept);
+    useExercise(v4.VacationRequest.VacationRequest_Accept);
 
   const handleApproveRequest = async (vacation: Vacation) => {
     await exerciseApproveRequest(vacation.contractId, {});

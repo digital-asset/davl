@@ -1,14 +1,14 @@
 import React from 'react';
 import { Segment, Header, List } from 'semantic-ui-react';
 import { useStreamQuery, useParty } from '../../daml-react-hooks';
-import * as v3 from '@daml2ts/davl-v3/lib/davl-v3/DAVL';
+import * as v4 from '@daml2ts/davl-v4/lib/davl-v4/DAVL';
 import { prettyEmployeeSummaries } from '../../utils/employee';
 
 const Staff: React.FC = () => {
   const party = useParty();
 
   const {loading, contracts} =
-    useStreamQuery(v3.EmployeeVacationAllocation, () => ({employeeRole: {boss: party}}), [party]);
+    useStreamQuery(v4.EmployeeVacationAllocation, () => ({employeeRole: {boss: party}}), [party]);
   const staff = prettyEmployeeSummaries(contracts);
 
   return (
