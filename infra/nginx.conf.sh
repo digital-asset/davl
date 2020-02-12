@@ -48,7 +48,7 @@ http {
     location /contracts/searchForever {
       proxy_pass http://${LEDGER_IP_PORT};
       proxy_http_version 1.1;
-      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Upgrade \$http_upgrade;
       proxy_set_header Connection "Upgrade";
     }
 
