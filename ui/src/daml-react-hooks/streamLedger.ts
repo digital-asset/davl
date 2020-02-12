@@ -45,7 +45,8 @@ export default class StreamLedger extends Ledger {
   constructor(token: string, baseUrl?: string) {
     super(token, baseUrl);
     if (!baseUrl) {
-      this.wsBaseUrl = `ws://${window.location.hostname}:7575/`;
+      const protocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:';
+      this.wsBaseUrl = `${protocol}//${window.location.host}/`;
     } else if (!baseUrl.startsWith('http')) {
       throw Error(`The ledger base URL must start with 'http'. (${baseUrl})`);
     } else if (!baseUrl.endsWith('/')) {
