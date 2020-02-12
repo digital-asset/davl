@@ -1,0 +1,15 @@
+sdk-version: 0.13.51
+name: davl
+version: 0.0.5
+source: daml
+parties:
+  - Digital Asset
+  - Yuval
+  - Shaul
+  - Bernhard
+  - Martin
+  - Moritz
+  - Rohan
+dependencies:
+  - daml-prim
+  - daml-stdlib

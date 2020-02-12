@@ -1,0 +1,103 @@
+daml 1.2
+module Test where
+
+import DA.Date
+import DA.Optional
+
+import DAVL.V4 qualified as V4
+import DAVL.V5 qualified as V5
+import Upgrade qualified as U
+
+employee = fromSome $ partyFromText "Employee"
+company = fromSome $ partyFromText "Company"
+boss = fromSome $ partyFromText "Boss"
+
+employeeRole = V4.EmployeeRole with employee; company; boss
+employeeProposal = V4.EmployeeProposal with employeeRole; vacationDays = 25
+allocation = V4.EmployeeVacationAllocation with employeeRole; remainingDays = 25
+vacationFromDate = date 2019 Dec 2
+vacationToDate = date 2019 Dec 6
+vacation = V4.Vacation with
+  employeeRole
+  fromDate = vacationFromDate
+  toDate = vacationToDate
+
+createEmployee () = do
+  employeeRoleId <- submit company do create employeeProposal
+  submit employee do exercise employeeRoleId V4.EmployeeProposal_Accept
+
+createVacationRequest: () -> Scenario (ContractId V4.VacationRequest)
+createVacationRequest () = do
+  submit employee do
+    exerciseByKey @V4.EmployeeRole employee V4.EmployeeRole_RequestVacation with
+      fromDate = vacationFromDate
+      toDate = vacationToDate
+
+
+createUpgradeAgreement () = do
+  upgradeProposalId <- submit company do
+    create U.UpgradeProposal with employee; company
+  submit employee do
+    exercise upgradeProposalId U.UpgradeProposal_Accept
+
+-- Check that upgrading an employee role and the corresponding vacation
+-- allocaiton works.
+testUpgradeEmployeeRole = scenario do
+  -- Setup
+  createEmployee ()
+  -- Upgrade
+  upgradeAgreementId <- createUpgradeAgreement ()
+  -- Old contracts are gone
+  submitMustFail company do fetchByKey @V4.EmployeeRole employee
+  submitMustFail company do fetchByKey @V4.EmployeeVacationAllocation employee
+  -- Employee role got upgraded
+  (_, employeeRoleV5) <- submit company do
+    fetchByKey @V5.EmployeeRole employee
+  assert $ U.upgradeEmployeeRole employeeRole == employeeRoleV5
+  -- Vacation allocation got upgraded
+  (_, allocationV5) <- submit company do
+    fetchByKey @V5.EmployeeVacationAllocation employee
+  assert $ U.upgradeEmployeeVacationAllocation allocation == allocationV5
+
+-- Check that upgrading a vacation request works.
+testUpgradeVacationRequest = scenario do
+  -- Setup
+  createEmployee ()
+  requestId <- createVacationRequest ()
+  -- Upgrade
+  upgradeAgreementId <- createUpgradeAgreement ()
+  requestV5Id <- submit company do
+    exercise upgradeAgreementId U.UpgradeAgreement_UpgradeVacationRequest with requestId
+  -- Old request is gone
+  submitMustFail company do fetch requestId
+  -- Request got upgraded
+  requestV5 <- submit company do fetch requestV5Id
+  assert $ U.upgradeVacationRequest (V4.VacationRequest with vacation) == requestV5
+
+-- Check that upgrading an approved vacation works.
+testUpgradeVacation = scenario do
+  -- Setup
+  createEmployee ()
+  let bossEmployeeRole = V4.EmployeeRole with
+        employee = boss; company; boss = company
+  bossEmployeeProposalId <- submit company do
+    create V4.EmployeeProposal with
+      employeeRole = bossEmployeeRole
+      vacationDays = 25
+  submit boss do exercise bossEmployeeProposalId V4.EmployeeProposal_Accept
+  requestId <- createVacationRequest ()
+  vacationId <- submit boss do exercise requestId V4.VacationRequest_Accept
+  -- Upgrade
+  employeeAgreementId <- createUpgradeAgreement ()
+  bossProposalId <- submit company do
+    create U.UpgradeProposal with employee = boss; company
+  bossAgreementId <- submit boss do
+    exercise bossProposalId U.UpgradeProposal_Accept
+  vacationV5Id <- submit company do
+    exercise bossAgreementId U.UpgradeAgreement_UpgradeVacation with
+      employeeAgreementId; vacationId
+  -- Old vacation gone
+  submitMustFail company do fetch vacationId
+  -- Vacation got upgraded
+  vacationV5 <- submit company do fetch vacationV5Id
+  assert $ U.upgradeVacation vacation == vacationV5

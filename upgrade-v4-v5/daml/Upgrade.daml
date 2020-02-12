@@ -1,0 +1,76 @@
+daml 1.2
+module Upgrade where
+
+import DAVL.V4 qualified as V4
+import DAVL.V5 qualified as V5
+
+template UpgradeAgreement with
+    employee: Party
+    company: Party
+  where
+    -- NOTE(MH): We make the company a signatory as well. This stops the
+    -- employee from opting out of the upgrade again once they've opted in.
+    signatory [employee, company]
+
+    nonconsuming choice UpgradeAgreement_UpgradeVacationRequest: ContractId V5.VacationRequest with
+        requestId: ContractId V4.VacationRequest
+      controller company
+      do
+        request <- fetch requestId
+        archive requestId
+        create (upgradeVacationRequest request)
+
+    -- This is an internal choice intended to be called by the next choice.
+    nonconsuming choice UpgradeAgreement_UpgradeVacationInternal: ContractId V5.Vacation with
+        boss: Party
+        vacationId: ContractId V4.Vacation
+      controller boss
+      do
+        vacation <- fetch vacationId
+        archive vacationId
+        create (upgradeVacation vacation)
+
+    -- This choice is intended to be called on the upgrade agreement of the
+    -- boss of the vacation to be upgraded and to be provided with the
+    -- upgrade agreement of the employee of the vacation.
+    nonconsuming choice UpgradeAgreement_UpgradeVacation: ContractId V5.Vacation with
+        employeeAgreementId: ContractId UpgradeAgreement
+        vacationId: ContractId V4.Vacation
+      controller company
+      do
+        exercise employeeAgreementId UpgradeAgreement_UpgradeVacationInternal with
+          boss = employee
+          vacationId
+
+template UpgradeProposal with
+    employee: Party
+    company: Party
+  where
+    signatory company
+    observer employee
+
+    choice UpgradeProposal_Accept: ContractId UpgradeAgreement
+      controller employee
+      do
+        (employeeRoleId, employeeRole) <- fetchByKey @V4.EmployeeRole employee
+        (allocationId, allocation) <- fetchByKey @V4.EmployeeVacationAllocation employee
+        archive employeeRoleId
+        archive allocationId
+        create (upgradeEmployeeRole employeeRole)
+        create (upgradeEmployeeVacationAllocation allocation)
+        create UpgradeAgreement with ..
+
+upgradeEmployeeRole: V4.EmployeeRole -> V5.EmployeeRole
+upgradeEmployeeRole (V4.EmployeeRole with ..) = V5.EmployeeRole with ..
+
+upgradeEmployeeVacationAllocation: V4.EmployeeVacationAllocation -> V5.EmployeeVacationAllocation
+upgradeEmployeeVacationAllocation (V4.EmployeeVacationAllocation with ..) =
+  V5.EmployeeVacationAllocation with employeeRole = upgradeEmployeeRole employeeRole; ..
+
+upgradeVacationRequest: V4.VacationRequest -> V5.VacationRequest
+upgradeVacationRequest (V4.VacationRequest with ..) =
+  V5.VacationRequest with vacation = upgradeVacation vacation; ..
+
+upgradeVacation: V4.Vacation -> V5.Vacation
+upgradeVacation (V4.Vacation with ..) =
+  V5.Vacation with employeeRole = upgradeEmployeeRole employeeRole; ..

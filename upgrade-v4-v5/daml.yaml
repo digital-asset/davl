@@ -1,0 +1,28 @@
+sdk-version: 0.13.51
+name: davl-upgrade-v4-v5
+version: 0.0.5
+source: daml
+parties:
+  - Digital Asset
+  - Yuval
+  - Shaul
+  - Bernhard
+  - Martin
+  - Moritz
+  - Rohan
+dependencies:
+  - daml-prim
+  - daml-stdlib
+  - ../released/davl-v5.dar
+  - ../released/davl-v4.dar
+data-dependencies:
+build-options:
+  - "--hide-all-packages"
+  - "--package"
+  - "daml-prim"
+  - "--package"
+  - "daml-stdlib-0.13.51"
+  - "--package"
+  - "davl-0.0.4 (DAVL as DAVL.V4)"
+  - "--package"
+  - "davl-0.0.5 (DAVL as DAVL.V5)"
