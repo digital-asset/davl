@@ -212,6 +212,14 @@ jobs:
                   if current_commit_changes_versions; then
                       if $terraform apply -auto-approve -var-file=deployed-versions.tfvars; then
                           tell_slack "started deployment of:\n\`\`\`$(cat deployed-versions.tfvars | jq -Rs . | sed 's/^"//' | sed 's/"$//')\`\`\`"
+                          sleep 10
+                          # There is a race condition whereby the ui server
+                          # gets removed from the load balancing pool if its
+                          # name has not changed. Applying the same file again
+                          # gets Terraform to notice and correc tthe
+                          # inconsistency. This is not the most elegant way to
+                          # solve it, but should work for now.
+                          $terraform apply -auto-approve -var-file=deployed-versions.tfvars
                       else
                           tell_slack "<!here> *ERROR*: failed to deploy"
                       fi
