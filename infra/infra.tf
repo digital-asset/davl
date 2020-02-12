@@ -376,7 +376,7 @@ resource "google_compute_backend_service" "ui" {
   # error to clients when the backend doesn't respond, it's also the maximum
   # connection time for _active_ websocket connections, regardless of how much
   # traffic is flowing through them. So we set an unusually large value.
-  timout_sec = 900
+  timeout_sec = 900
 }
 
 // Navigator: serve on 8080. Cannot serve as HTTPS as GCP restricts that to
