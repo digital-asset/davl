@@ -4,4 +4,4 @@ RUN mkdir /app
 COPY daml-sdk /app/daml-sdk
 
 WORKDIR /app
-ENTRYPOINT ["java", "-Dlogback.configurationFile=/app/daml-sdk/json-api-logback.xml", "-jar", "/app/daml-sdk/daml-sdk.jar", "json-api", "--application-id", "DAVL-JSON", "--address", "0.0.0.0", "--websocket-config", "heartBeatPer=2"]
+ENTRYPOINT ["java", "-Dlogback.configurationFile=/app/daml-sdk/json-api-logback.xml", "-jar", "/app/daml-sdk/daml-sdk.jar", "json-api", "--application-id", "DAVL-JSON", "--address", "0.0.0.0"]
