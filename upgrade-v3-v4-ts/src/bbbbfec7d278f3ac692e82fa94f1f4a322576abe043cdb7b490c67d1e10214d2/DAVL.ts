@@ -11,10 +11,10 @@ export type Vacation = {
   fromDate: daml.Date;
   toDate: daml.Date;
 }
-export const Vacation: daml.Template<Vacation, undefined, '77a41b679a3280df8685e5ef4db2a1f94d6d12db6117a669511e47e938feb207:DAVL:Vacation'> & {
+export const Vacation: daml.Template<Vacation, undefined, 'bbbbfec7d278f3ac692e82fa94f1f4a322576abe043cdb7b490c67d1e10214d2:DAVL:Vacation'> & {
   Archive: daml.Choice<Vacation, pkgd14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662_DA_Internal_Template.Archive, {}, undefined>;
 } = {
-  templateId: '77a41b679a3280df8685e5ef4db2a1f94d6d12db6117a669511e47e938feb207:DAVL:Vacation',
+  templateId: 'bbbbfec7d278f3ac692e82fa94f1f4a322576abe043cdb7b490c67d1e10214d2:DAVL:Vacation',
   keyDecoder: () => jtv.constant(undefined),
   decoder: () => jtv.object({
     employeeRole: EmployeeRole.decoder(),
@@ -40,11 +40,11 @@ export const VacationRequest_Accept: daml.Serializable<VacationRequest_Accept> =
 export type VacationRequest = {
   vacation: Vacation;
 }
-export const VacationRequest: daml.Template<VacationRequest, undefined, '77a41b679a3280df8685e5ef4db2a1f94d6d12db6117a669511e47e938feb207:DAVL:VacationRequest'> & {
+export const VacationRequest: daml.Template<VacationRequest, undefined, 'bbbbfec7d278f3ac692e82fa94f1f4a322576abe043cdb7b490c67d1e10214d2:DAVL:VacationRequest'> & {
   VacationRequest_Accept: daml.Choice<VacationRequest, VacationRequest_Accept, daml.ContractId<Vacation>, undefined>;
   Archive: daml.Choice<VacationRequest, pkgd14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662_DA_Internal_Template.Archive, {}, undefined>;
 } = {
-  templateId: '77a41b679a3280df8685e5ef4db2a1f94d6d12db6117a669511e47e938feb207:DAVL:VacationRequest',
+  templateId: 'bbbbfec7d278f3ac692e82fa94f1f4a322576abe043cdb7b490c67d1e10214d2:DAVL:VacationRequest',
   keyDecoder: () => jtv.constant(undefined),
   decoder: () => jtv.object({
     vacation: Vacation.decoder(),
@@ -77,11 +77,11 @@ export type EmployeeVacationAllocation = {
   employeeRole: EmployeeRole;
   remainingDays: daml.Int;
 }
-export const EmployeeVacationAllocation: daml.Template<EmployeeVacationAllocation, EmployeeVacationAllocation.Key, '77a41b679a3280df8685e5ef4db2a1f94d6d12db6117a669511e47e938feb207:DAVL:EmployeeVacationAllocation'> & {
+export const EmployeeVacationAllocation: daml.Template<EmployeeVacationAllocation, EmployeeVacationAllocation.Key, 'bbbbfec7d278f3ac692e82fa94f1f4a322576abe043cdb7b490c67d1e10214d2:DAVL:EmployeeVacationAllocation'> & {
   EmployeeVacationAllocation_AddDays: daml.Choice<EmployeeVacationAllocation, EmployeeVacationAllocation_AddDays, {}, EmployeeVacationAllocation.Key>;
   Archive: daml.Choice<EmployeeVacationAllocation, pkgd14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662_DA_Internal_Template.Archive, {}, EmployeeVacationAllocation.Key>;
 } = {
-  templateId: '77a41b679a3280df8685e5ef4db2a1f94d6d12db6117a669511e47e938feb207:DAVL:EmployeeVacationAllocation',
+  templateId: 'bbbbfec7d278f3ac692e82fa94f1f4a322576abe043cdb7b490c67d1e10214d2:DAVL:EmployeeVacationAllocation',
   keyDecoder: () => daml.Party.decoder(),
   decoder: () => jtv.object({
     employeeRole: EmployeeRole.decoder(),
@@ -117,11 +117,11 @@ export type EmployeeProposal = {
   employeeRole: EmployeeRole;
   vacationDays: daml.Int;
 }
-export const EmployeeProposal: daml.Template<EmployeeProposal, undefined, '77a41b679a3280df8685e5ef4db2a1f94d6d12db6117a669511e47e938feb207:DAVL:EmployeeProposal'> & {
+export const EmployeeProposal: daml.Template<EmployeeProposal, undefined, 'bbbbfec7d278f3ac692e82fa94f1f4a322576abe043cdb7b490c67d1e10214d2:DAVL:EmployeeProposal'> & {
   Archive: daml.Choice<EmployeeProposal, pkgd14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662_DA_Internal_Template.Archive, {}, undefined>;
   EmployeeProposal_Accept: daml.Choice<EmployeeProposal, EmployeeProposal_Accept, {}, undefined>;
 } = {
-  templateId: '77a41b679a3280df8685e5ef4db2a1f94d6d12db6117a669511e47e938feb207:DAVL:EmployeeProposal',
+  templateId: 'bbbbfec7d278f3ac692e82fa94f1f4a322576abe043cdb7b490c67d1e10214d2:DAVL:EmployeeProposal',
   keyDecoder: () => jtv.constant(undefined),
   decoder: () => jtv.object({
     employeeRole: EmployeeRole.decoder(),
@@ -158,11 +158,11 @@ export type EmployeeRole = {
   company: daml.Party;
   boss: daml.Party;
 }
-export const EmployeeRole: daml.Template<EmployeeRole, EmployeeRole.Key, '77a41b679a3280df8685e5ef4db2a1f94d6d12db6117a669511e47e938feb207:DAVL:EmployeeRole'> & {
+export const EmployeeRole: daml.Template<EmployeeRole, EmployeeRole.Key, 'bbbbfec7d278f3ac692e82fa94f1f4a322576abe043cdb7b490c67d1e10214d2:DAVL:EmployeeRole'> & {
   Archive: daml.Choice<EmployeeRole, pkgd14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662_DA_Internal_Template.Archive, {}, EmployeeRole.Key>;
   EmployeeRole_RequestVacation: daml.Choice<EmployeeRole, EmployeeRole_RequestVacation, daml.ContractId<VacationRequest>, EmployeeRole.Key>;
 } = {
-  templateId: '77a41b679a3280df8685e5ef4db2a1f94d6d12db6117a669511e47e938feb207:DAVL:EmployeeRole',
+  templateId: 'bbbbfec7d278f3ac692e82fa94f1f4a322576abe043cdb7b490c67d1e10214d2:DAVL:EmployeeRole',
   keyDecoder: () => daml.Party.decoder(),
   decoder: () => jtv.object({
     employee: daml.Party.decoder(),

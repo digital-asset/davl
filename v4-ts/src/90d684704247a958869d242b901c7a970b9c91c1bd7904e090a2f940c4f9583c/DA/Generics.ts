@@ -116,27 +116,27 @@ export const Fixity:
 });
 daml.STATIC_IMPLEMENTS_SERIALIZABLE_CHECK<Fixity>(Fixity)
 
-export type K1<i_a2CW, c_a2CX, p_a2CY> = {
-  unK1: c_a2CX;
+export type K1<i_a2DX, c_a2DY, p_a2DZ> = {
+  unK1: c_a2DY;
 }
-export const K1 = <i_a2CW, c_a2CX, p_a2CY>(i_a2CW: daml.Serializable<i_a2CW>, c_a2CX: daml.Serializable<c_a2CX>, p_a2CY: daml.Serializable<p_a2CY>): daml.Serializable<K1<i_a2CW, c_a2CX, p_a2CY>> => ({
+export const K1 = <i_a2DX, c_a2DY, p_a2DZ>(i_a2DX: daml.Serializable<i_a2DX>, c_a2DY: daml.Serializable<c_a2DY>, p_a2DZ: daml.Serializable<p_a2DZ>): daml.Serializable<K1<i_a2DX, c_a2DY, p_a2DZ>> => ({
   decoder: () => jtv.object({
-    unK1: c_a2CX.decoder(),
+    unK1: c_a2DY.decoder(),
   }),
 })
 
-export type Par1<p_a2D1> = {
-  unPar1: p_a2D1;
+export type Par1<p_a2E2> = {
+  unPar1: p_a2E2;
 }
-export const Par1 = <p_a2D1>(p_a2D1: daml.Serializable<p_a2D1>): daml.Serializable<Par1<p_a2D1>> => ({
+export const Par1 = <p_a2E2>(p_a2E2: daml.Serializable<p_a2E2>): daml.Serializable<Par1<p_a2E2>> => ({
   decoder: () => jtv.object({
-    unPar1: p_a2D1.decoder(),
+    unPar1: p_a2E2.decoder(),
   }),
 })
 
-export type U1<p_a2D2> = {
+export type U1<p_a2E3> = {
 }
-export const U1 = <p_a2D2>(p_a2D2: daml.Serializable<p_a2D2>): daml.Serializable<U1<p_a2D2>> => ({
+export const U1 = <p_a2E3>(p_a2E3: daml.Serializable<p_a2E3>): daml.Serializable<U1<p_a2E3>> => ({
   decoder: () => jtv.object({
   }),
 })

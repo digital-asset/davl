@@ -4,11 +4,11 @@
 import * as jtv from '@mojotech/json-type-validation';
 import * as daml from '@daml/types';
 
-export type Map<k_a9OV, v_a9OW> = {
-  textMap: { [key: string]: v_a9OW };
+export type Map<k_a9Qi, v_a9Qj> = {
+  textMap: { [key: string]: v_a9Qj };
 }
-export const Map = <k_a9OV, v_a9OW>(k_a9OV: daml.Serializable<k_a9OV>, v_a9OW: daml.Serializable<v_a9OW>): daml.Serializable<Map<k_a9OV, v_a9OW>> => ({
+export const Map = <k_a9Qi, v_a9Qj>(k_a9Qi: daml.Serializable<k_a9Qi>, v_a9Qj: daml.Serializable<v_a9Qj>): daml.Serializable<Map<k_a9Qi, v_a9Qj>> => ({
   decoder: () => jtv.object({
-    textMap: daml.TextMap(v_a9OW).decoder(),
+    textMap: daml.TextMap(v_a9Qj).decoder(),
   }),
 })
