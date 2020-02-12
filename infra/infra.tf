@@ -371,6 +371,12 @@ resource "google_compute_backend_service" "ui" {
   backend {
     group = "${google_compute_instance_group.frontend.self_link}"
   }
+  # Because GCP is... well, GCP, this timeout is not just for failed
+  # connections, i.e. the maximum time the proxy would wait befire returning an
+  # error to clients when the backend doesn't respond, it's also the maximum
+  # connection time for _active_ websocket connections, regardless of how much
+  # traffic is flowing through them. So we set an unusually large value.
+  timout_sec = 900
 }
 
 // Navigator: serve on 8080. Cannot serve as HTTPS as GCP restricts that to
