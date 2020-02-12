@@ -5,7 +5,7 @@
   "dependencies": {
     "@daml/ledger": "0.13.51",
     "@daml/types": "0.13.51",
-    "@daml2ts/davl-v3": "0.13.51",
+    "@daml2ts/davl-v4": "0.13.51",
     "@mojotech/json-type-validation": "^3.1.0",
     "@types/jest": "^24.0.18",
     "@types/node": "^13.5.0",
