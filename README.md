@@ -57,8 +57,21 @@ yarn start
 
 To create a few employees on the running DAVL ledger, run
 ```
-yarn run davl-admin-cli test-setup.json
+yarn run davl-admin-cli v4-init --file test-setup.json
 ```
+
+4. Use the app
+
+In order to log into the initialized ledger, you can use the the
+username/password combinations in the table below.
+
+| Username | Password                                                                                                                                                         |
+|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Martin   | eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsZWRnZXJJZCI6IkRBVkwiLCJhcHBsaWNhdGlvbklkIjoiREFWTCIsInBhcnR5IjoiTWFydGluIn0.iVNloMAzEYklKzxPNajGdiTTRAZkoLv0JPJg2hDXvac |
+| Moritz   | eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsZWRnZXJJZCI6IkRBVkwiLCJhcHBsaWNhdGlvbklkIjoiREFWTCIsInBhcnR5IjoiTW9yaXR6In0.Bg7DvvQT8FOsAPQo7hejwyqAlb1lrxqq4cDm6rhIFLA |
+| Robin    | eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsZWRnZXJJZCI6IkRBVkwiLCJhcHBsaWNhdGlvbklkIjoiREFWTCIsInBhcnR5IjoiUm9iaW4ifQ.SvH81YSQIKw0cl4dEyTYBemu-UANkJbYB1huqrIOL28  |
+
+Once you're logged in, the app hopefully self-explanatory.
 
 ## Production setup
 
