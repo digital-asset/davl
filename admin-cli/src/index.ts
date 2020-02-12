@@ -43,7 +43,7 @@ function connect(
 
 function days(fromDate: string, toDate: string): number {
   // Holiday date ranges are closed i.e. [from, to].
-  return Math.floor((new Date(toDate)).valueOf() - (new Date(fromDate)).valueOf())/86400000 + 1;
+  return Math.floor(Date.parse(toDate).valueOf() - Date.parse(fromDate).valueOf())/86400000 + 1;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -142,7 +142,7 @@ namespace v3 {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const { remainingDays } = employeeVacationAllocationContract!.payload;
       const bookedDays = vacationContracts.reduce((total, vacationContract) => total + daysOfVacationContract(vacationContract), 0);
-      const vacationDays = Number(bookedDays) + Number(remainingDays);
+      const vacationDays = bookedDays + Number.parseInt(remainingDays);
       return [employee,
               { boss,
                 vacationDays,
@@ -158,7 +158,7 @@ namespace v3 {
       const { employee, boss } = employeeRole;
       return [employee,
               { boss: boss,
-                vacationDays: Number(vacationDays),
+                vacationDays: Number.parseInt(vacationDays),
                 acceptProposal: false,
                 vacationRequests: undefined
               }];
