@@ -1,0 +1,19 @@
+sdk-version: 0.13.51
+name: upgrade-init
+version: 0.0.5
+source: daml
+dependencies:
+  - daml-prim
+  - daml-stdlib
+  - daml-script
+  - ../../../released/davl-v4.dar
+  - ../../../released/davl-v5.dar
+  - ../../../released/davl-upgrade-v4-v5.dar
+build-options:
+  - "--hide-all-packages"
+  - "--package=daml-prim"
+  - "--package=daml-stdlib-0.13.51"
+  - "--package=daml-script-0.13.51"
+  - "--package=davl-0.0.4 (DAVL as DAVL.V4)"
+  - "--package=davl-0.0.5 (DAVL as DAVL.V5)"
+  - "--package=davl-upgrade-v4-v5-0.0.5"
