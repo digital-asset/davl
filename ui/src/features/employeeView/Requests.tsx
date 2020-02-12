@@ -5,7 +5,7 @@ import { DatesRangeInput } from 'semantic-ui-calendar-react';
 import { VacationListItem } from '../../components/VacationListItem';
 import { vacationLength, prettyRequests } from '../../utils/vacation';
 import { useStreamQuery, useExerciseByKey, useParty } from '../../daml-react-hooks';
-import * as v3 from '@daml2ts/davl-v3/lib/davl-v3/DAVL';
+import * as v4 from '@daml2ts/davl-v4/lib/davl-v4/DAVL';
 import { EmployeeSummary } from '../../utils/employee';
 import { toast } from 'react-semantic-toasts';
 
@@ -19,11 +19,11 @@ const Requests: React.FC<Props> = (props: Props) => {
 
   const party = useParty();
   const {loading: loadingRequests, contracts: requestContracts} =
-    useStreamQuery(v3.VacationRequest, () => ({vacation: {employeeRole: {employee: party}}}), [party]);
+    useStreamQuery(v4.VacationRequest, () => ({vacation: {employeeRole: {employee: party}}}), [party]);
   const requests = prettyRequests(requestContracts);
 
   const [exerciseRequestVacation, loadingRequestVacation] =
-    useExerciseByKey(v3.EmployeeRole.EmployeeRole_RequestVacation);
+    useExerciseByKey(v4.EmployeeRole.EmployeeRole_RequestVacation);
 
   const handleCancelRequest = () => alert('Canceling vacation requests is not yet implemented.');
 

@@ -5,14 +5,14 @@ import { Segment } from 'semantic-ui-react';
 import VacationListSegment from '../../components/VacationListSegment';
 import { toast } from 'react-semantic-toasts';
 import { useStreamQuery, useParty, useFetchByKey } from '../../daml-react-hooks';
-import * as v3 from '@daml2ts/davl-v3/lib/davl-v3/DAVL';
+import * as v4 from '@daml2ts/davl-v4/lib/davl-v4/DAVL';
 import { splitVacations } from '../../utils/vacation';
 import { EmployeeSummary } from '../../utils/employee';
 
 
 const EmployeeView: React.FC = () => {
   const party = useParty();
-  const allocation = useFetchByKey(v3.EmployeeVacationAllocation, () => party, [party]);
+  const allocation = useFetchByKey(v4.EmployeeVacationAllocation, () => party, [party]);
   let summary: EmployeeSummary | null = null;
   if (allocation.contract) {
     const {payload: {employeeRole: {employee, boss}, remainingDays}} = allocation.contract;
@@ -24,7 +24,7 @@ const EmployeeView: React.FC = () => {
   }
 
   const {loading: loadingVacations, contracts: vacationContracts} =
-    useStreamQuery(v3.Vacation, () => ({employeeRole: {employee: party}}), [party]);
+    useStreamQuery(v4.Vacation, () => ({employeeRole: {employee: party}}), [party]);
   const vacations = splitVacations(vacationContracts);
 
   const handleCancelVacation = () => toast({
