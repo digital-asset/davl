@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
 # Utility script for testing v3/v4 upgrades. Works in combination with
 # 'daml_platform.sh'.
