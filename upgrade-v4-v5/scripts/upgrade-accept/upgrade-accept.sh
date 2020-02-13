@@ -12,4 +12,4 @@ daml script \
      --dar .daml/dist/upgrade-accept.dar \
      --script-name UpgradeAccept:main \
      --ledger-host $LEDGER_HOST --ledger-port $LEDGER_PORT --wall-clock-time \
-     --input-file ./test-setup.json
+     --input-file $1

@@ -1,0 +1,40 @@
+{-# LANGUAGE ApplicativeDo #-}
+
+-- Use update agreements to upgrade v4 contracts.
+
+daml 1.2
+module UpgradeFinish where
+
+import DAVL.V4 qualified as V4
+import Upgrade qualified as V4V5
+
+import Daml.Trigger
+import DA.Next.Map qualified as Map
+import DA.Foldable qualified as F
+import DA.Action
+
+main : Trigger ()
+main  =
+  Trigger {
+    initialize = \_ -> ()
+  , updateState = \_ _ _ -> ()
+  , rule = upgradeRule
+  , registeredTemplates = AllInDar
+  , heartbeat = None
+  }
+
+upgradeRule : Party -> ACS -> Time -> Map.Map CommandId [Command] -> () -> TriggerA ()
+upgradeRule party acs _ _ _ = do
+  let upgradeAgreements = getContracts @V4V5.UpgradeAgreement acs
+  F.forA_ upgradeAgreements $ \(upgradeAgreementId,  V4V5.UpgradeAgreement {employee, ..}) -> do
+      let vacationRequests =
+            [r | r@(_, s) <- getContracts @V4.VacationRequest acs
+               , s.vacation.employeeRole.employee == employee
+               ]
+      F.forA_ vacationRequests $ \(requestId, request) -> do
+        debug ("Upgrading vacation request [" <>
+               show request.vacation.fromDate <> ", " <> show request.vacation.toDate <>
+               "] for " <> show request.vacation.employeeRole.employee
+              )
+        void $ emitCommands [exerciseCmd upgradeAgreementId V4V5.UpgradeAgreement_UpgradeVacationRequest {requestId}] [toAnyContractId requestId]
+        pure ()

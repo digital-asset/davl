@@ -11,24 +11,22 @@ import Daml.Script
 import DAVL.V4 qualified as V4
 import Upgrade qualified as V4V5
 import DA.Foldable qualified as F
+import DA.Action
 
 data LedgerParties = LedgerParties {company : Party}
 
 main : LedgerParties -> Script ()
 main LedgerParties {company} = do
   employeeRoles <- fmap snd <$> query @V4.EmployeeRole company
-  F.mapA_ createUpgradeProposal employeeRoles
-  where
-    createUpgradeProposal
-      : V4.EmployeeRole -> Script (Optional (ContractId V4V5.UpgradeProposal))
-    createUpgradeProposal V4.EmployeeRole {employee, company, ..} = do
-      existingProposal <- query @V4V5.UpgradeProposal employee
-      if null existingProposal
-      then do
-        Some <$> (submit company $ do
-           debug ("Creating upgrade proposal for " <> show employee)
-           createCmd (V4V5.UpgradeProposal employee company))
-      else do
-        debug ("Skip creating upgrade proposal for " <> show employee <>
-               " (a proposal already exists)")
-        pure None
+  F.forA_ employeeRoles $
+   \V4.EmployeeRole {employee, company, ..} -> do
+     existingProposal <- query @V4V5.UpgradeProposal employee
+     if null existingProposal
+       then do
+        void $ (submit company $ do
+          debug ("Creating upgrade proposal for " <> show employee)
+          createCmd (V4V5.UpgradeProposal {employee,  company}))
+       else do
+         debug ("Skip creating upgrade proposal for " <> show employee <>
+                " (a proposal already exists)")
+         pure ()
