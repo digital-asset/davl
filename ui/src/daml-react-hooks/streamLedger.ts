@@ -46,7 +46,14 @@ export default class StreamLedger extends Ledger {
     super(token, baseUrl);
     if (!baseUrl) {
       const protocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:';
-      this.wsBaseUrl = `${protocol}//${window.location.host}/`;
+      // NOTE(MH): Since the `create-react-app`'s dev server does not properly
+      // proxy websockets, we need to connect to the JSON API directly without
+      // going through its proxy. This proxy avoiding behaviour is triggered
+      // by setting the `REACT_APP_JSON_API_PORT` environment variable in
+      // `.env.development`.
+      const port = process.env.REACT_APP_JSON_API_PORT;
+      const host = port ? `${window.location.hostname}:${port}` : window.location.host;
+      this.wsBaseUrl = `${protocol}//${host}/`;
     } else if (!baseUrl.startsWith('http')) {
       throw Error(`The ledger base URL must start with 'http'. (${baseUrl})`);
     } else if (!baseUrl.endsWith('/')) {
