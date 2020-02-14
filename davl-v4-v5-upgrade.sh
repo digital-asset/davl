@@ -7,11 +7,7 @@ set -eou pipefail
 #   - Create a test v4 ledger;
 #   - Issue v4/v5 upgrade proposals;
 #   - Accept upgrade proposals.
-#   - Upgrade vacation requests.
-
-# The last part,
-#   - Upgrade vacations
-# still neds to be implemented.
+#   - Upgrade vacations and requests.
 
 test_setup="`pwd`/test-setup.json"
 test_party="`pwd`/test-party.json"
