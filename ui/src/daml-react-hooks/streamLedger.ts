@@ -39,28 +39,38 @@ export interface EventStream<T extends object, K, I extends string> {
   close(): void;
 }
 
-// TODO(MH): Move the `streamQuery` method into upstream `Ledger`.
+type LedgerOptions = {
+  token: string;
+  httpBaseUrl?: string;
+  wsBaseUrl?: string;
+}
+
+// TODO(MH): Remove this class when we switch to `@daml/ledger-0.13.53`.
 export default class StreamLedger extends Ledger {
   private readonly wsBaseUrl: string;
-  constructor(token: string, baseUrl?: string) {
-    super(token, baseUrl);
-    if (!baseUrl) {
-      const protocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:';
-      // NOTE(MH): Since the `create-react-app`'s dev server does not properly
-      // proxy websockets, we need to connect to the JSON API directly without
-      // going through its proxy. This proxy avoiding behaviour is triggered
-      // by setting the `REACT_APP_JSON_API_PORT` environment variable in
-      // `.env.development`.
-      const port = process.env.REACT_APP_JSON_API_PORT;
-      const host = port ? `${window.location.hostname}:${port}` : window.location.host;
-      this.wsBaseUrl = `${protocol}//${host}/`;
-    } else if (!baseUrl.startsWith('http')) {
-      throw Error(`The ledger base URL must start with 'http'. (${baseUrl})`);
-    } else if (!baseUrl.endsWith('/')) {
-      throw Error(`The ledger base URL must end in a '/'. (${baseUrl})`);
-    } else {
-      this.wsBaseUrl = 'ws' + baseUrl.slice(4);
+
+  constructor({token, httpBaseUrl, wsBaseUrl}: LedgerOptions) {
+    if (!httpBaseUrl) {
+      httpBaseUrl = `${window.location.protocol}//${window.location.host}/`;
     }
+    if (!(httpBaseUrl.startsWith('http://') || httpBaseUrl.startsWith('https://'))) {
+      throw Error(`Ledger: httpBaseUrl must start with 'http://' or 'https://'. (${httpBaseUrl})`);
+    }
+    if (!httpBaseUrl.endsWith('/')) {
+      throw Error(`Ledger: httpBaseUrl must end with '/'. (${httpBaseUrl})`);
+    }
+    if (!wsBaseUrl) {
+      wsBaseUrl = 'ws' + httpBaseUrl.slice(4);
+    }
+    if (!(wsBaseUrl.startsWith('ws://') || wsBaseUrl.startsWith('wss://'))) {
+      throw Error(`Ledger: wsBaseUrl must start with 'ws://' or 'wss://'. (${wsBaseUrl})`);
+    }
+    if (!wsBaseUrl.endsWith('/')) {
+      throw Error(`Ledger: wsBaseUrl must end with '/'. (${wsBaseUrl})`);
+    }
+
+    super(token, httpBaseUrl);
+    this.wsBaseUrl = wsBaseUrl;
   }
 
   streamQuery<T extends object, K, I extends string>(
