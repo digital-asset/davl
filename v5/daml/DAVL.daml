@@ -3,6 +3,9 @@ module DAVL where
 
 import DA.Date qualified as Date
 
+-- Prevent package hash collision with V4.
+version="v5"
+
 template EmployeeRole with
     employee: Party
     company: Party

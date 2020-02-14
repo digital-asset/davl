@@ -1,0 +1,24 @@
+{-# LANGUAGE ApplicativeDo #-}
+
+-- Auto-accept v4-v5 upgrade proposals for v4 employees.
+
+daml 1.2
+module UpgradeAccept where
+
+import Prelude hiding (submit, submitMustFail)
+import Daml.Script
+
+import Upgrade qualified as V4V5
+import DA.Foldable qualified as F
+import DA.Action
+
+data LedgerParties = LedgerParties {company : Party}
+
+main : LedgerParties -> Script ()
+main LedgerParties {company} = do
+  upgradeProposals <- query @V4V5.UpgradeProposal company
+  F.forA_ upgradeProposals $
+    \(proposalId, V4V5.UpgradeProposal {employee, company}) -> do
+      void $ (submit employee $ do
+        debug ("Accepting upgrade proposal for " <> show employee)
+        exerciseCmd proposalId V4V5.UpgradeProposal_Accept)
