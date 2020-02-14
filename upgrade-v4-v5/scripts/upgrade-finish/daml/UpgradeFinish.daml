@@ -10,6 +10,7 @@ import Upgrade qualified as V4V5
 
 import Daml.Trigger
 import DA.Next.Map qualified as Map
+import DA.Optional
 import DA.Foldable qualified as F
 import DA.Action
 
@@ -26,7 +27,8 @@ main  =
 upgradeRule : Party -> ACS -> Time -> Map.Map CommandId [Command] -> () -> TriggerA ()
 upgradeRule party acs _ _ _ = do
   let upgradeAgreements = getContracts @V4V5.UpgradeAgreement acs
-  F.forA_ upgradeAgreements $ \(upgradeAgreementId,  V4V5.UpgradeAgreement {employee, ..}) -> do
+  F.forA_ upgradeAgreements $
+    \(employeeAgreementId, V4V5.UpgradeAgreement {employee, ..}) -> do
       let vacationRequests =
             [r | r@(_, s) <- getContracts @V4.VacationRequest acs
                , s.vacation.employeeRole.employee == employee
@@ -36,5 +38,24 @@ upgradeRule party acs _ _ _ = do
                show request.vacation.fromDate <> ", " <> show request.vacation.toDate <>
                "] for " <> show request.vacation.employeeRole.employee
               )
-        void $ emitCommands [exerciseCmd upgradeAgreementId V4V5.UpgradeAgreement_UpgradeVacationRequest {requestId}] [toAnyContractId requestId]
-        pure ()
+        void $ emitCommands [
+          exerciseCmd employeeAgreementId
+            V4V5.UpgradeAgreement_UpgradeVacationRequest {..}
+          ] [toAnyContractId requestId]
+      let vacations =
+            [r | r@(_, s) <- getContracts @V4.Vacation acs
+               , s.employeeRole.employee == employee
+               ]
+      F.forA_ vacations $ \(vacationId, vacation) -> do
+        optional (pure ())
+          (\bossAgreementId  -> do
+             debug ("Upgrading vacation [" <>
+                     show vacation.fromDate <> ", " <> show vacation.toDate <>
+                     "] for " <> show employee)
+             void $ emitCommands [
+               exerciseCmd bossAgreementId
+                 V4V5.UpgradeAgreement_UpgradeVacation {..}
+               ] [toAnyContractId vacationId]
+            )
+          (listToOptional [id | (id, s) <- upgradeAgreements
+                              , s.employee == vacation.employeeRole.boss])
