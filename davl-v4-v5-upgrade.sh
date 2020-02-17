@@ -17,28 +17,21 @@ test_party="`pwd`/test-party.json"
 yarn install && \
  (cd admin-cli && yarn workspaces run build)
 yarn run davl-admin-cli v4-init -f $test_setup
-(cd upgrade-v4-v5-automation && \
- daml build -o .daml/dist/automation.dar \
-)
-
-(cd upgrade-v4-v5-automation && \
-  daml script \
-    --dar .daml/dist/automation.dar \
-    --script-name Automation:init \
-    --ledger-host $ledger_host --ledger-port $ledger_port --wall-clock-time \
-    --input-file $test_party \
-)
-(cd upgrade-v4-v5-automation && \
-  daml script \
-    --dar .daml/dist/automation.dar \
-    --script-name Automation:accept \
-    --ledger-host $ledger_host --ledger-port $ledger_port --wall-clock-time \
-    --input-file $test_party \
- )
-(cd upgrade-v4-v5-automation && \
-  daml trigger \
-    --dar .daml/dist/automation.dar \
-    --trigger-name Automation:finish \
-    --ledger-host $ledger_host --ledger-port $ledger_port --wall-clock-time \
-    --ledger-party "Digital Asset" \
-)
+pushd upgrade-v4-v5-automation
+daml build -o .daml/dist/automation.dar
+daml script \
+  --dar .daml/dist/automation.dar \
+  --script-name Automation:init \
+  --ledger-host $ledger_host --ledger-port $ledger_port --wall-clock-time \
+  --input-file $test_party
+daml script \
+  --dar .daml/dist/automation.dar \
+  --script-name Automation:accept \
+  --ledger-host $ledger_host --ledger-port $ledger_port --wall-clock-time \
+  --input-file $test_party
+daml trigger \
+  --dar .daml/dist/automation.dar \
+  --trigger-name Automation:finish \
+  --ledger-host $ledger_host --ledger-port $ledger_port --wall-clock-time \
+  --ledger-party "Digital Asset"
+popd
