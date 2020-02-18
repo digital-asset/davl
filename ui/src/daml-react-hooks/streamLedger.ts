@@ -26,16 +26,16 @@ function isRecordWith<Field extends string>(field: Field, x: unknown): x is Reco
   return typeof x === "object" && x !== null && field in x;
 }
 
-export type EventStreamCloseEvent = {
+export type StreamCloseEvent = {
   code: number;
   reason: string;
 }
 
-export interface EventStream<T extends object, K, I extends string> {
-  on(type: 'events', listener: (events: readonly Event<T,K, I>[]) => void): void;
-  on(type: 'close', listener: (closeEvent: EventStreamCloseEvent) => void): void;
-  off(type: 'events', listener: (events: readonly Event<T,K, I>[]) => void): void;
-  off(type: 'close', listener: (closeEvent: EventStreamCloseEvent) => void): void;
+export interface Stream<T extends object, K, I extends string, State> {
+  on(type: 'change', listener: (state: State, events: readonly Event<T, K, I>[]) => void): void;
+  on(type: 'close', listener: (closeEvent: StreamCloseEvent) => void): void;
+  off(type: 'change', listener: (state: State, events: readonly Event<T, K, I>[]) => void): void;
+  off(type: 'close', listener: (closeEvent: StreamCloseEvent) => void): void;
   close(): void;
 }
 
@@ -73,33 +73,36 @@ export default class StreamLedger extends Ledger {
     this.wsBaseUrl = wsBaseUrl;
   }
 
-  streamQuery<T extends object, K, I extends string>(
+  private streamSubmit<T extends object, K, I extends string, State>(
     template: Template<T, K, I>,
-    query?: Query<T>,
-  ): EventStream<T, K, I> {
-    // TODO(MH): When this moves into the proper `Ledger` class, we should use
-    // `this.token` instead of this hack around privacy using `this['token']`.
+    endpoint: string,
+    request: unknown,
+    init: State,
+    change: (state: State, events: readonly Event<T, K, I>[]) => State,
+  ): Stream<T, K, I, State> {
     const protocols = ['jwt.token.' + this['token'], 'daml.ws.auth'];
-    const ws = new WebSocket(this.wsBaseUrl + 'contracts/searchForever', protocols);
+    const ws = new WebSocket(this.wsBaseUrl + endpoint, protocols);
     let haveSeenEvents = false;
+    let state = init;
     const emitter = new EventEmitter();
     ws.onopen = () => {
-      const payload = {templateIds: [template.templateId], query};
-      ws.send(JSON.stringify(payload));
+      ws.send(JSON.stringify(request));
     };
     ws.onmessage = event => {
       const json: unknown = JSON.parse(event.data.toString());
       if (Array.isArray(json)) {
         const events = jtv.Result.withException(jtv.array(decodeStreamEvent(template)).run(json));
+        state = change(state, events);
         haveSeenEvents = true;
-        emitter.emit('events', events);
+        emitter.emit('change', state, events);
       } else if (isRecordWith('heartbeat', json)) {
         // NOTE(MH): If we receive the first heartbeat before any events, then
         // it's very likely nothing in the ACS matches the query. We signal this
-        // by sending an empty list of events. This never does harm.
+        // by pretending we received an empty list of events. This never does
+        // any harm.
         if (!haveSeenEvents) {
           haveSeenEvents = true;
-          emitter.emit('events', []);
+          emitter.emit('change', state, []);
         }
       } else if (isRecordWith('warnings', json)) {
         console.warn('Ledger.streamQuery warnings', json);
@@ -114,6 +117,7 @@ export default class StreamLedger extends Ledger {
     ws.onclose = ({code, reason}) => {
       emitter.emit('close', {code, reason});
     }
+    // TODO(MH): Make types stricter.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const on = (type: string, listener: any) => emitter.on(type, listener);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -123,5 +127,37 @@ export default class StreamLedger extends Ledger {
       ws.close();
     }
     return {on, off, close};
+  }
+
+  /**
+   * Retrieve a consolidated stream of events for a given template and query.
+   * The accumulated state is the current set of active contracts matching the
+   * query.
+   * When no `query` argument is
+   * given, all events visible to the submitting party are returned. When a
+   * `query` argument is given, only those create events matching the query are
+   * returned. See https://docs.daml.com/json-api/search-query-language.html
+   * for a description of the query language.
+   */
+  streamQuery<T extends object, K, I extends string>(
+    template: Template<T, K, I>,
+    query?: Query<T>,
+  ): Stream<T, K, I, readonly CreateEvent<T, K, I>[]> {
+    const request = {templateIds: [template.templateId], query};
+    const change = (contracts: readonly CreateEvent<T, K, I>[], events: readonly Event<T, K, I>[]) => {
+      const archiveEvents: Set<ContractId<T>> = new Set();
+      const createEvents: CreateEvent<T, K, I>[] = [];
+      for (const event of events) {
+        if ('created' in event) {
+          createEvents.push(event.created);
+        } else { // i.e. 'archived' in event
+          archiveEvents.add(event.archived.contractId);
+        }
+      }
+      return contracts
+        .concat(createEvents)
+        .filter(contract => !archiveEvents.has(contract.contractId));
+    };
+    return this.streamSubmit(template, 'contracts/searchForever', request, [], change);
   }
 }
