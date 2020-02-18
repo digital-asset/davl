@@ -35,7 +35,7 @@ export const emptyVacations: Vacations = {
   past: [],
 }
 
-export const prettyRequests = (requestContracts: CreateEvent<v4.VacationRequest>[]): Vacation[] => {
+export const prettyRequests = (requestContracts: readonly CreateEvent<v4.VacationRequest>[]): Vacation[] => {
   const requests: Vacation[] =
     requestContracts.map(({contractId, payload}) => makeVacation(contractId, payload.vacation));
   requests.sort(ordVacationOnFromDate.compare);
@@ -43,7 +43,7 @@ export const prettyRequests = (requestContracts: CreateEvent<v4.VacationRequest>
 }
 
 
-export const splitVacations = (vacationContracts: CreateEvent<v4.Vacation>[]) => {
+export const splitVacations = (vacationContracts: readonly CreateEvent<v4.Vacation>[]) => {
   const today = moment().format('YYYY-MM-DD');
   const vacations = vacationContracts.map((vacation) => makeVacation(vacation.contractId, vacation.payload))
   const {left: upcoming, right: past} =

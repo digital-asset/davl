@@ -20,7 +20,7 @@ export const useParty = () => {
 }
 
 export type QueryResult<T extends object, K> = {
-  contracts: CreateEvent<T, K>[];
+  contracts: readonly CreateEvent<T, K>[];
   loading: boolean;
 }
 
@@ -108,21 +108,7 @@ export function useStreamQuery<T extends object, K>(template: Template<T, K>, qu
     const query = queryFactory ? queryFactory() : undefined;
     console.debug(`mount useStreamQuery(${template.templateId}, ...)`, query);
     const stream = state.ledger.streamQuery(template, query);
-    stream.on('events', events => setResult(result => {
-      const archiveEvents: Set<ContractId<T>> = new Set();
-      const createEvents: CreateEvent<T, K>[] = [];
-      for (const event of events) {
-        if ('created' in event) {
-          createEvents.push(event.created);
-        } else { // i.e. 'archived' in event
-          archiveEvents.add(event.archived.contractId);
-        }
-      }
-      const contracts = result.contracts
-        .concat(createEvents)
-        .filter(contract => !archiveEvents.has(contract.contractId));
-      return {...result, contracts};
-    }));
+    stream.on('change', contracts => setResult(result => ({...result, contracts})));
     stream.on('close', closeEvent => {
       console.error('useStreamQuery: web socket closed', closeEvent);
       setResult(result => ({...result, loading: true}));
