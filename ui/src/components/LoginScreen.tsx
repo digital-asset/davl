@@ -2,7 +2,7 @@ import React from 'react'
 import { Button, Form, Grid, Header, Segment } from 'semantic-ui-react'
 import Ledger from '@daml/ledger';
 import { Party } from '@daml/types';
-import * as v4 from '@daml2ts/davl-v4/lib/davl-v4/DAVL';
+import * as v4 from '@daml2ts/davl/lib/davl-0.0.4/DAVL';
 import { decode } from 'jwt-simple';
 
 const LEDGER_ID = 'DAVL';
@@ -67,7 +67,7 @@ const LoginScreen: React.FC<Props> = (props) => {
       let login = false;
       try {
         setStatus(Status.LoggingIn);
-        const ledger = new Ledger(credentials.token);
+        const ledger = new Ledger({token: credentials.token});
         const employeeRole = await ledger.lookupByKey(v4.EmployeeRole, credentials.party);
         if (employeeRole) {
           login = true;
@@ -90,7 +90,7 @@ const LoginScreen: React.FC<Props> = (props) => {
       let login = false;
       try {
         setStatus(Status.SigningUp)
-        const ledger = new Ledger(credentials.token);
+        const ledger = new Ledger({token: credentials.token});
         const employeeProposals =
           await ledger.query(v4.EmployeeProposal, {employeeRole: {employee: credentials.party}});
         if (employeeProposals.length === 0) {

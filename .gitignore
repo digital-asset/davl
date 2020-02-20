@@ -1,10 +1,8 @@
 .daml
 *.log
 node_modules
-v4-ts/lib
-v5-ts/lib
-upgrade-v3-v4-ts/lib
-upgrade-v4-v5-ts/lib
+/daml2ts/lib
+/daml2ts/src
 \#*\#
 .\#*\#
 *~

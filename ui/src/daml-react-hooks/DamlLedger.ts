@@ -3,7 +3,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { DamlLedgerContext, DamlLedgerState } from './context';
-import Ledger from './streamLedger';
+import Ledger from '@daml/ledger';
 import { Party } from '@daml/types';
 
 type Props = {

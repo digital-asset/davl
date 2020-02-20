@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React from 'react';
-import Ledger from './streamLedger';
+import Ledger from '@daml/ledger';
 import { Party } from '@daml/types';
 
 export type DamlLedgerState = {

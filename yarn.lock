@@ -1078,19 +1078,22 @@
   resolved "https://registry.yarnpkg.com/@csstools/normalize.css/-/normalize.css-10.1.0.tgz#f0950bba18819512d42f7197e56c518aa491cf18"
   integrity sha512-ij4wRiunFfaJxjB0BdrYHIH8FxBJpOwNPhhAcunlmPdXudL1WQV1qoP9un6JsEBAgQH+7UXyyjh0g7jTxXK6tg==
 
-"@daml/ledger@0.13.51":
-  version "0.13.51"
-  resolved "https://registry.yarnpkg.com/@daml/ledger/-/ledger-0.13.51.tgz#b8f3b1f5cb8b6a4b5c50db2aeef7df231d622e66"
-  integrity sha512-cnRR28HRL82Ab+rKiK4GFIZwC1gHl/IEUBjCYq+UFGHfjEec/p4/PwUmzfV5Cac/gRqVtSG7/zP1aTPnZNgaAA==
+"@daml/ledger@0.13.53":
+  version "0.13.53"
+  resolved "https://registry.yarnpkg.com/@daml/ledger/-/ledger-0.13.53.tgz#0402f0994961e92aa61faed9c3610f30fc867d87"
+  integrity sha512-nqHLiahkjoazwACwN1cSm0SqHsYs9T7aVfAkysXBHAP03cy3e9DUGRdi2qdl9oK3FKeTvEx0ZdaEx6fsuurs1A==
   dependencies:
-    "@daml/types" "0.13.51"
+    "@daml/types" "0.13.53"
     "@mojotech/json-type-validation" "^3.1.0"
     cross-fetch "^3.0.4"
+    events "^3.1.0"
+    isomorphic-ws "^4.0.1"
+    ws "^7.2.1"
 
-"@daml/types@0.13.51":
-  version "0.13.51"
-  resolved "https://registry.yarnpkg.com/@daml/types/-/types-0.13.51.tgz#3c7e6d7a7790cbce008228a9c3afcd1fdcb14e42"
-  integrity sha512-IVRm5Su5WJ17ReFW17MIUt5HL2iHJSDPrPbXKyHE6mvT1X8TyCYZSKgj1fgBk9AmybaEGrcFcv7WbGHSVYMZYw==
+"@daml/types@0.13.53":
+  version "0.13.53"
+  resolved "https://registry.yarnpkg.com/@daml/types/-/types-0.13.53.tgz#61f680a181e120320e629aff81ed1c9830fe1db8"
+  integrity sha512-xYRdGngEOnG0kz1KT4vZ0lLewAufR/dvVG8jvAnlRUM7j/wzSGLeizNEz+jy0UbTQ55iF6dkrqrBOhFpShjiug==
   dependencies:
     "@mojotech/json-type-validation" "^3.1.0"
 
@@ -13085,6 +13088,11 @@ ws@^6.1.2, ws@^6.2.1:
   integrity sha512-GIyAXC2cB7LjvpgMt9EKS2ldqr0MTrORaleiOno6TweZ6r3TKtoFQWay/2PceJ3RuBasOHzXNn5Lrw1X0bEjqA==
   dependencies:
     async-limiter "~1.0.0"
+
+ws@^7.2.1:
+  version "7.2.1"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-7.2.1.tgz#03ed52423cd744084b2cf42ed197c8b65a936b8e"
+  integrity sha512-sucePNSafamSKoOqoNfBd8V0StlkzJKL2ZAhGQinCfNQ+oacw+Pk7lcdAElecBF2VkLNZRiIb5Oi1Q5lVUVt2A==
 
 xml-name-validator@^3.0.0:
   version "3.0.0"

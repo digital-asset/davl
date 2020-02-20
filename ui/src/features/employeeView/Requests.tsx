@@ -5,7 +5,7 @@ import { DatesRangeInput } from 'semantic-ui-calendar-react';
 import { VacationListItem } from '../../components/VacationListItem';
 import { vacationLength, prettyRequests } from '../../utils/vacation';
 import { useStreamQuery, useExerciseByKey, useParty } from '../../daml-react-hooks';
-import * as v4 from '@daml2ts/davl-v4/lib/davl-v4/DAVL';
+import * as v4 from '@daml2ts/davl/lib/davl-0.0.4/DAVL';
 import { EmployeeSummary } from '../../utils/employee';
 import { toast } from 'react-semantic-toasts';
 
