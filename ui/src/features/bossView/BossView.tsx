@@ -3,7 +3,7 @@ import VacationListSegment from '../../components/VacationListSegment';
 import { Vacation, prettyRequests, splitVacations } from '../../utils/vacation';
 import { Segment } from 'semantic-ui-react';
 import Staff from './Staff';
-import { useStreamQuery, useExercise, useParty } from '../../daml-react-hooks';
+import { useStreamQuery, useExercise, useParty } from '@daml/react';
 import * as v4 from '@daml2ts/davl/lib/davl-0.0.4/DAVL';
 import { toast } from 'react-semantic-toasts';
 

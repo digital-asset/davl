@@ -1090,6 +1090,18 @@
     isomorphic-ws "^4.0.1"
     ws "^7.2.1"
 
+"@daml/react@0.13.53":
+  version "0.13.53"
+  resolved "https://registry.yarnpkg.com/@daml/react/-/react-0.13.53.tgz#6caacd4b8bcf33d8608a5a11a651fc4fc0fa2254"
+  integrity sha512-IfTmsw87Fr0Po8EVxYS6mm0mXVPR7v8AS+C08SBWEW+O+RA2Pp7g/hWvY8XogWAVCwSOUfPLC7a2VNPndkLbog==
+  dependencies:
+    "@daml/ledger" "0.13.53"
+    "@daml/types" "0.13.53"
+    "@types/react" "^16.9.16"
+    immutable "^4.0.0-rc.12"
+    jwt-simple "^0.5.6"
+    react "^16.12.0"
+
 "@daml/types@0.13.53":
   version "0.13.53"
   resolved "https://registry.yarnpkg.com/@daml/types/-/types-0.13.53.tgz#61f680a181e120320e629aff81ed1c9830fe1db8"

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import LoginScreen, { Credentials } from '../components/LoginScreen';
 import MainScreen from '../components/MainScreen';
-import DamlLedger from '../daml-react-hooks';
+import DamlLedger from '@daml/react';
 
 // NOTE(MH): Unfortunately, the development server of `create-react-app` does
 // not proxy websockets propert. Thus, we need to bypass it and talk to the

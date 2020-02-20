@@ -1,6 +1,6 @@
 import React from 'react';
 import { Segment, Header, List } from 'semantic-ui-react';
-import { useStreamQuery, useParty } from '../../daml-react-hooks';
+import { useStreamQuery, useParty } from '@daml/react';
 import * as v4 from '@daml2ts/davl/lib/davl-0.0.4/DAVL';
 import { prettyEmployeeSummaries } from '../../utils/employee';
 
