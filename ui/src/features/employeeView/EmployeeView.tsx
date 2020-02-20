@@ -4,7 +4,7 @@ import SummaryView from './SummaryView';
 import { Segment } from 'semantic-ui-react';
 import VacationListSegment from '../../components/VacationListSegment';
 import { toast } from 'react-semantic-toasts';
-import { useStreamQuery, useParty, useFetchByKey } from '@daml/react';
+import { useStreamQuery, useParty, useStreamFetchByKey } from '@daml/react';
 import * as v4 from '@daml2ts/davl/lib/davl-0.0.4/DAVL';
 import { splitVacations } from '../../utils/vacation';
 import { EmployeeSummary } from '../../utils/employee';
@@ -12,7 +12,7 @@ import { EmployeeSummary } from '../../utils/employee';
 
 const EmployeeView: React.FC = () => {
   const party = useParty();
-  const allocation = useFetchByKey(v4.EmployeeVacationAllocation, () => party, [party]);
+  const allocation = useStreamFetchByKey(v4.EmployeeVacationAllocation, () => party, [party]);
   let summary: EmployeeSummary | null = null;
   if (allocation.contract) {
     const {payload: {employeeRole: {employee, boss}, remainingDays}} = allocation.contract;
