@@ -45,20 +45,14 @@ http {
     listen 80;
     server_name davl.da-ext.net;
 
-    location /contracts/searchForever {
+    location /v1/stream {
       proxy_pass http://${LEDGER_IP_PORT};
       proxy_http_version 1.1;
       proxy_set_header Upgrade \$http_upgrade;
       proxy_set_header Connection "Upgrade";
     }
 
-    location /contracts {
-      proxy_pass http://${LEDGER_IP_PORT};
-    }
-    location /command {
-      proxy_pass http://${LEDGER_IP_PORT};
-    }
-    location /parties {
+    location /v1 {
       proxy_pass http://${LEDGER_IP_PORT};
     }
 
