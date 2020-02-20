@@ -22,17 +22,6 @@ jobs:
     steps:
       - checkout: self
 
-      # Build and test TypeScript
-      - bash: |
-          set -euo pipefail
-
-          yarn --version
-          yarn install --frozen-lockfile
-          yarn workspaces run build
-          yarn workspaces run lint
-          CI=yes yarn workspaces run test --ci --all
-        displayName: build-and-test-ts
-
       # Install DAML SDK, possibly from cache
       - bash: |
           set -euo pipefail
@@ -62,6 +51,19 @@ jobs:
           tar xzf /tmp/daml/sdk.tar.gz
         condition: eq(variables.DAML_CACHE_HIT, 'true')
         displayName: daml-cache-hit
+
+      # Build and test TypeScript
+      - bash: |
+          set -euo pipefail
+
+          yarn --version
+          export PATH=$HOME/.daml/bin:$PATH
+          daml codegen ts -o daml2ts/src released/*.dar
+          yarn install --frozen-lockfile
+          yarn workspaces run build
+          yarn workspaces run lint
+          CI=yes yarn workspaces run test --ci --all
+        displayName: build-and-test-ts
 
       # Deploy
       - bash: |
