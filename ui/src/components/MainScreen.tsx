@@ -2,7 +2,7 @@ import React from 'react'
 import { Image, Menu, Container, Grid } from 'semantic-ui-react'
 import EmployeeView from '../features/employeeView/EmployeeView';
 import BossView from '../features/bossView/BossView';
-import { useParty, useReload } from '../daml-react-hooks';
+import { useParty, useReload } from '@daml/react';
 
 type Props = {
   onLogout: () => void;

@@ -3,8 +3,7 @@
   "version": "0.0.3",
   "private": true,
   "dependencies": {
-    "@daml/ledger": "0.13.53",
-    "@daml/types": "0.13.53",
+    "@daml/react": "0.13.53",
     "@daml2ts/davl": "0.13.53",
     "@mojotech/json-type-validation": "^3.1.0",
     "@types/jest": "^24.0.18",
