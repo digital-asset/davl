@@ -40,9 +40,12 @@ To shut down the DAML Platform, press `Ctrl-C`.
 
 2. Frontend dev server
 
-When working with a fresh checkout of the repo, you need to install the
+When working with a fresh checkout of the repo or the first time after a,
+the version in `SDK_VERSION` has been bumped, you need to (re)generate
+the TypeScript bindings for the DARs and install the
 dependencies of the TypeScript frontend by running
 ```
+DAML_SDK_VERSION=$(cat SDK_VERSION) daml codegen ts -o daml2ts/src released/*.dar
 yarn install
 yarn workspaces run build
 ```
