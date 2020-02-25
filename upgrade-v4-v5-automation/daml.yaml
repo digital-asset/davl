@@ -17,5 +17,5 @@ build-options:
   - "--package=daml-script-0.13.51"
   - "--package=daml-trigger-0.13.51"
   - "--package=davl-0.0.4 (DAVL as DAVL.V4)"
-  - "--package=davl-0.0.5 (DAVL as DAVL.V5)"
+  - "--package=davl-0.0.5"
   - "--package=davl-upgrade-v4-v5-0.0.5"
