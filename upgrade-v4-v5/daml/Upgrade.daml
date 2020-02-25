@@ -12,6 +12,9 @@ template UpgradeAgreement with
     -- employee from opting out of the upgrade again once they've opted in.
     signatory [employee, company]
 
+    key (employee, company): (Party, Party)
+    maintainer key._2
+
     nonconsuming choice UpgradeAgreement_UpgradeVacationRequest: ContractId V5.VacationRequest with
         requestId: ContractId V4.VacationRequest
       controller company
@@ -48,6 +51,9 @@ template UpgradeProposal with
   where
     signatory company
     observer employee
+
+    key (employee, company): (Party, Party)
+    maintainer key._2
 
     choice UpgradeProposal_Accept: ContractId UpgradeAgreement
       controller employee
