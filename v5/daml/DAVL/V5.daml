@@ -1,10 +1,7 @@
 daml 1.2
-module DAVL where
+module DAVL.V5 where
 
 import DA.Date qualified as Date
-
--- Prevent package hash collision with V4.
-version="v5"
 
 template EmployeeRole with
     employee: Party
@@ -90,6 +87,11 @@ template VacationRequest with
         archive self
         create vacation
 
+    nonconsuming choice VacationRequest_Cancel: ()
+      controller employee
+      do
+        archive self
+
 template Vacation with
     employeeRole: EmployeeRole
     fromDate: Date
@@ -136,6 +138,18 @@ test = scenario do
   assert $ vacation.employeeRole == shaulEmployee
 
   assertRemainingDays shaul 20
+
+  let dd2020 = Date.date 2020 Date.Apr 3
+  requestId <- submit shaul do
+    exerciseByKey @EmployeeRole shaul EmployeeRole_RequestVacation with
+      fromDate = dd2020
+      toDate = dd2020
+  submit shaul do
+    exercise requestId VacationRequest_Cancel
+  submitMustFail yuval do
+    exercise requestId VacationRequest_Accept
+  assertRemainingDays shaul 20
+
   submit da do
     exerciseByKey @EmployeeVacationAllocation shaul EmployeeVacationAllocation_AddDays with days = 2
   assertRemainingDays shaul 22

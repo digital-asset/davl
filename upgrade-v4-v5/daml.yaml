@@ -25,4 +25,4 @@ build-options:
   - "--package"
   - "davl-0.0.4 (DAVL as DAVL.V4)"
   - "--package"
-  - "davl-0.0.5 (DAVL as DAVL.V5)"
+  - "davl-0.0.5"
