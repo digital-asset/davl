@@ -69,6 +69,8 @@ jobs:
       - bash: |
           set -euo pipefail
 
+          export PATH=$HOME/.daml/bin:$PATH
+
           get_tag () {
               TZ=UTC git log -n1 --date=format-local:%Y%m%d%H%M --format=format:%cd-%h --abbrev=6 -- $@
           }
