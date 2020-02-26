@@ -8,6 +8,7 @@ terraform {
 variable "sandbox" {}
 variable "ui" {}
 variable "json" {}
+variable "trigger" {}
 
 provider "google" {
   project = "da-dev-pinacolada"
@@ -157,6 +158,9 @@ users {
   }
 }
 EOF
+
+docker run --name automation -d --link sandbox gcr.io/da-dev-pinacolada/trigger:${var.trigger} --ledger-host sandbox --ledger-port 6865
+
 /root/.daml/bin/daml navigator server --port 4000 --config-file /app/navigator.conf sandbox 6865"
 # </workaround>
 STARTUP
