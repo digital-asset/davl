@@ -105,7 +105,7 @@ jobs:
               DOCKER_DIR=$(mktemp -d)
               cp -r released $DOCKER_DIR/released
               cp -r $HOME/.daml/sdk/$SDK_VERSION/daml-sdk $DOCKER_DIR/daml-sdk
-              docker build -t $SANDBOX_IMAGE -f docker/sandbox.docker $DOCKER_DIR
+              docker build -t $SANDBOX_IMAGE -f docker/sandbox.docker --build-arg sdk_version=$(cat SDK_VERSION) $DOCKER_DIR
               docker push $SANDBOX_IMAGE
               echo "Done building $SANDBOX_IMAGE."
               tell_slack sandbox:$SANDBOX_TAG
@@ -148,7 +148,6 @@ jobs:
               echo "Building trigger image version $TRIGGER_TAG..."
               TRIGGER_IMAGE=gcr.io/da-dev-pinacolada/trigger:$TRIGGER_TAG
               DOCKER_DIR=$(mktemp -d)
-              echo '{"company": "Digital Asset"}' > $DOCKER_DIR/init.json
               (cd upgrade-v4-v5-automation && daml build -o $DOCKER_DIR/automation.dar)
               cp -r $HOME/.daml/sdk/$SDK_VERSION/daml-sdk $DOCKER_DIR/daml-sdk
               docker build -t $TRIGGER_IMAGE -f docker/trigger.docker $DOCKER_DIR
@@ -177,7 +176,7 @@ jobs:
           # provides; fortunately terraform is a single, self-contained
           # executable.
           TF_DIR=$(mktemp -d)
-          wget https://releases.hashicorp.com/terraform/0.12.19/terraform_0.12.19_linux_amd64.zip -O $TF_DIR/tf.zip
+          wget https://releases.hashicorp.com/terraform/0.12.21/terraform_0.12.21_linux_amd64.zip -O $TF_DIR/tf.zip
           ( cd $TF_DIR; unzip tf.zip )
           terraform=$TF_DIR/terraform
 
