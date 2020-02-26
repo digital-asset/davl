@@ -1,0 +1,10 @@
+FROM openjdk:8-alpine
+
+RUN mkdir /app
+COPY daml-sdk /app/daml-sdk
+COPY automation.dar /app/automation.dar
+COPY init.json /app/init.json
+
+WORKDIR /app
+
+ENTRYPOINT ["java", "-Dlogback.configurationFile=/app/daml-sdk/trigger-logback.xml", "-jar", "/app/daml-sdk/daml-sdk.jar", "trigger", "--dar", "/app/automation.dar", "--trigger-name", "Automation:finish", "--ledger-party", "Digital Asset", "--static-time", "--init-file", "/app/init.json"]
