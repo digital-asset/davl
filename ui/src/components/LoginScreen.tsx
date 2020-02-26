@@ -65,66 +65,72 @@ const LoginScreen: React.FC<Props> = props => {
     await cont(credentials);
   };
 
+  const canLogin = async (credentials: Credentials): Promise<boolean> => {
+    const ledger = new Ledger({ token: credentials.token });
+    const employeeRoleV5 = await ledger.fetchByKey(
+      v5.EmployeeRole,
+      credentials.party,
+    );
+    if (employeeRoleV5) {
+      return true;
+    }
+
+    const employeeRoleV4 = await ledger.fetchByKey(
+      v4.EmployeeRole,
+      credentials.party,
+    );
+    if (!employeeRoleV4) {
+      alert("You have not yet signed up.");
+      return false;
+    }
+
+    const upkradeProposalKey = {
+      _1: credentials.party,
+      _2: employeeRoleV4.payload.company,
+    };
+    const upgradeProposal = await ledger.fetchByKey(
+      upgrade.UpgradeProposal,
+      upkradeProposalKey,
+    );
+    if (!upgradeProposal) {
+      alert("You have not been invited to upgrade to DAVL v5.");
+      return false;
+    }
+
+    const accept = window.confirm(
+      [
+        "Do you agree to upgrade to DAVL v5? The only change compared to",
+        "DAVL v4 is that you can cancel your pending vacation requests now.",
+        "If you do not accept, you cannot use DAVL anymore.",
+      ].join(" "),
+    );
+    if (!accept) {
+      return false;
+    }
+
+    await ledger.exercise(
+      upgrade.UpgradeProposal.UpgradeProposal_Accept,
+      upgradeProposal.contractId,
+      {},
+    );
+    return true;
+  };
+
   const handleLogin = async (event?: React.FormEvent) => {
     if (event) {
       event.preventDefault();
     }
     await withCredentials(async credentials => {
-      // NOTE(MH): We need to make sure we never call `setStatus` after
-      // `prop.onLogin`. Otherwise, we would set the state of an unmounted
-      // component and React would warn us about a potential space leak.
-      // For that reason we record whether we want to call `props.onLogin`
-      // and then do so after the `finally` clause.
-      let login = false;
       try {
         setStatus(Status.LoggingIn);
-        const ledger = new Ledger({ token: credentials.token });
-        const employeeRoleV5 = await ledger.fetchByKey(
-          v5.EmployeeRole,
-          credentials.party,
-        );
-        if (employeeRoleV5) {
-          login = true;
-        } else {
-          const employeeRoleV4 = await ledger.fetchByKey(
-            v4.EmployeeRole,
-            credentials.party,
-          );
-          if (employeeRoleV4) {
-            const upgradeProposal = await ledger.fetchByKey(
-              upgrade.UpgradeProposal,
-              { _1: credentials.party, _2: employeeRoleV4.payload.company },
-            );
-            if (upgradeProposal) {
-              const accept = window.confirm(
-                [
-                  "Do you agree to upgrade to DAVL v5? The only change",
-                  "compared to DAVL v4 is that you can cancel your pending",
-                  "vacation requests now. If you do not accept, you cannot",
-                  "use DAVL anymore.",
-                ].join(),
-              );
-              if (accept) {
-                await ledger.exercise(
-                  upgrade.UpgradeProposal.UpgradeProposal_Accept,
-                  upgradeProposal.contractId,
-                  {},
-                );
-                login = true;
-              }
-            } else {
-              alert("You have not been invited to upgrade to DAVL v5.");
-            }
-          } else {
-            alert("You have not yet signed up.");
-          }
+        const login = await canLogin(credentials);
+        if (!login) {
+          return;
         }
       } finally {
         setStatus(Status.Normal);
       }
-      if (login) {
-        props.onLogin(credentials);
-      }
+      props.onLogin(credentials);
     });
   };
 
