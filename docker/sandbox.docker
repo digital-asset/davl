@@ -1,5 +1,7 @@
 FROM openjdk:8-alpine
 
+ARG sdk_version
+
 RUN mkdir /app
 COPY daml-sdk /app/daml-sdk
 COPY released /app/released
@@ -10,7 +12,7 @@ COPY released /app/released
 # file after it has started. Since uploading a DAR file is idempotent, this
 # should not break if/when the sandbox behaviour changes.
 RUN apk add curl bash
-RUN curl https://get.daml.com | sh -s 0.13.32
+RUN curl https://get.daml.com | sh -s ${sdk_version}
 # </workaround>
 
 WORKDIR /app
