@@ -146,6 +146,8 @@ docker exec sandbox /bin/sh -c "for f in /app/released/*.dar; do /root/.daml/bin
 
 docker run --name json-api -d --link sandbox -p 7575:7575 gcr.io/da-dev-pinacolada/json-api:${var.json} --ledger-host sandbox --ledger-port 6865 --http-port 7575
 
+docker run --name automation -d --link sandbox gcr.io/da-dev-pinacolada/trigger:${var.trigger} --ledger-host sandbox --ledger-port 6865
+
 # <workaround>
 # The UI currently does not support signing up, so we add a running Navigator
 # to our setup. It will be served on 8080, so we also need to expose that port.
@@ -158,8 +160,6 @@ users {
   }
 }
 EOF
-
-docker run --name automation -d --link sandbox gcr.io/da-dev-pinacolada/trigger:${var.trigger} --ledger-host sandbox --ledger-port 6865
 
 /root/.daml/bin/daml navigator server --port 4000 --config-file /app/navigator.conf sandbox 6865"
 # </workaround>
