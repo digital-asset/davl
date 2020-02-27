@@ -4,7 +4,8 @@
   "private": true,
   "dependencies": {
     "@daml/react": "0.13.53",
-    "@daml2ts/davl": "0.13.53",
+    "@daml2ts/davl-0.0.4": "0.13.53",
+    "@daml2ts/davl-0.0.5": "0.13.53",
     "@mojotech/json-type-validation": "^3.1.0",
     "@types/jest": "^24.0.18",
     "@types/node": "^13.5.0",

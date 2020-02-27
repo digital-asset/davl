@@ -4,7 +4,7 @@ import { Vacation, prettyRequests, splitVacations } from "../../utils/vacation";
 import { Segment } from "semantic-ui-react";
 import Staff from "./Staff";
 import { useStreamQuery, useExercise, useParty } from "@daml/react";
-import * as v4 from "@daml2ts/davl/lib/davl-0.0.4/DAVL";
+import * as v4 from "@daml2ts/davl-0.0.4/lib/DAVL";
 import { toast } from "react-semantic-toasts";
 
 const BossView: React.FC = () => {

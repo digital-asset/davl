@@ -5,7 +5,7 @@ import { Segment } from "semantic-ui-react";
 import VacationListSegment from "../../components/VacationListSegment";
 import { toast } from "react-semantic-toasts";
 import { useStreamQuery, useParty, useStreamFetchByKey } from "@daml/react";
-import * as v4 from "@daml2ts/davl/lib/davl-0.0.4/DAVL";
+import * as v4 from "@daml2ts/davl-0.0.4/lib/DAVL";
 import { splitVacations } from "../../utils/vacation";
 import { EmployeeSummary } from "../../utils/employee";
 

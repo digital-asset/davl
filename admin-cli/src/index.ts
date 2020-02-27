@@ -2,9 +2,9 @@ import { promises as fs } from 'fs';
 import { encode } from 'jwt-simple';
 import Ledger from '@daml/ledger';
 import { CreateEvent } from '@daml/ledger';
-import * as davl3 from '@daml2ts/davl/lib/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
-import * as davl4 from '@daml2ts/davl/lib/davl-0.0.4/DAVL';
-import * as davlUpgradev3v4 from '@daml2ts/davl/lib/davl-upgrade-v3-v4-0.0.4/Upgrade';
+import * as davl3 from '@daml2ts/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/lib/DAVL';
+import * as davl4 from '@daml2ts/davl-0.0.4/lib/DAVL';
+import * as davlUpgradev3v4 from '@daml2ts/davl-upgrade-v3-v4-0.0.4/lib/Upgrade';
 import { Argv } from 'yargs'; // Nice docs : http://yargs.js.org/
 
 type Vacation = {

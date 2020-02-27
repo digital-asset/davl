@@ -1,8 +1,7 @@
 {
   "private": true,
   "workspaces": [
-    "daml2ts",
-    "ui",
-    "admin-cli"
+    "admin-cli",
+    "ui"
   ]
 }
