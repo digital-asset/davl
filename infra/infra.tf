@@ -146,6 +146,18 @@ docker exec sandbox /bin/sh -c "for f in /app/released/*.dar; do /root/.daml/bin
 
 docker run --name json-api -d --link sandbox -p 7575:7575 gcr.io/da-dev-pinacolada/json-api:${var.json} --ledger-host sandbox --ledger-port 6865 --http-port 7575
 
+docker run --name script --link sandbox --entrypoint="java" gcr.io/da-dev-pinacolada/trigger:${var.trigger} \
+     -Dlogback.configurationFile=/app/daml-sdk/script-logback.xml \
+     -jar \
+     /app/daml-sdk/daml-sdk.jar \
+     script \
+     --dar \
+     /app/automation.dar \
+     --script-name "Automation:init" \
+     --input-file /app/init.json \
+     --wall-clock-time \
+     --ledger-host sandbox\
+     --ledger-port 6865
 docker run --name automation -d --link sandbox gcr.io/da-dev-pinacolada/trigger:${var.trigger} --ledger-host sandbox --ledger-port 6865
 
 # <workaround>
