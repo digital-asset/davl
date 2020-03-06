@@ -9,9 +9,14 @@ import {
 import ListActionItem from "../../components/ListActionItem";
 import { DatesRangeInput } from "semantic-ui-calendar-react";
 import { VacationListItem } from "../../components/VacationListItem";
-import { vacationLength, prettyRequests } from "../../utils/vacation";
-import { useStreamQuery, useExerciseByKey, useParty } from "@daml/react";
-import * as v4 from "@daml2ts/davl/lib/davl-0.0.4/DAVL";
+import { vacationLength, prettyRequests, Vacation } from "../../utils/vacation";
+import {
+  useStreamQuery,
+  useExerciseByKey,
+  useParty,
+  useExercise,
+} from "@daml/react";
+import * as v5 from "@daml2ts/davl/lib/davl-0.0.5/DAVL/V5";
 import { EmployeeSummary } from "../../utils/employee";
 import { toast } from "react-semantic-toasts";
 
@@ -28,18 +33,28 @@ const Requests: React.FC<Props> = (props: Props) => {
     loading: loadingRequests,
     contracts: requestContracts,
   } = useStreamQuery(
-    v4.VacationRequest,
+    v5.VacationRequest,
     () => ({ vacation: { employeeRole: { employee: party } } }),
     [party],
   );
   const requests = prettyRequests(requestContracts);
 
   const [exerciseRequestVacation, loadingRequestVacation] = useExerciseByKey(
-    v4.EmployeeRole.EmployeeRole_RequestVacation,
+    v5.EmployeeRole.EmployeeRole_RequestVacation,
+  );
+  const [exerciseCancelVacationRequest] = useExercise(
+    v5.VacationRequest.VacationRequest_Cancel,
   );
 
-  const handleCancelRequest = () =>
-    alert("Canceling vacation requests is not yet implemented.");
+  const handleCancelRequest = async (vacation: Vacation) => {
+    await exerciseCancelVacationRequest(vacation.contractId, {});
+    toast({
+      title: "Success",
+      type: "success",
+      description: "Request successfully canceled.",
+      time: 3000,
+    });
+  };
 
   const handleAddRequest = async (event?: React.FormEvent) => {
     if (event) {
@@ -83,7 +98,7 @@ const Requests: React.FC<Props> = (props: Props) => {
             vacation={vacation}
             viewer="employee"
             icon="cancel"
-            onClickIcon={() => handleCancelRequest}
+            onClickIcon={() => handleCancelRequest(vacation)}
           />
         ))}
         <ListActionItem
