@@ -19,7 +19,7 @@ const Staff: React.FC = () => {
     [party],
   );
   const loading = allocationsV4.loading || allocationsV5.loading;
-  const contracts = allocationsV4.contracts || allocationsV5.contracts;
+  const contracts = allocationsV4.contracts.concat(allocationsV5.contracts);
   const staff = prettyEmployeeSummaries(contracts);
 
   return (
