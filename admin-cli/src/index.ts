@@ -4,6 +4,7 @@ import Ledger from '@daml/ledger';
 import { CreateEvent } from '@daml/ledger';
 import * as davl3 from '@daml2ts/davl/lib/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
 import * as davl4 from '@daml2ts/davl/lib/davl-0.0.4/DAVL';
+import * as davl5 from '@daml2ts/davl/lib/davl-0.0.5/DAVL/V5';
 import * as davlUpgradev3v4 from '@daml2ts/davl/lib/davl-upgrade-v3-v4-0.0.4/Upgrade';
 import { Argv } from 'yargs'; // Nice docs : http://yargs.js.org/
 
@@ -391,14 +392,151 @@ namespace v4 {
 
 }//namespace v4
 
+
+// eslint-disable-next-line @typescript-eslint/no-namespace
+namespace v5 {
+  export const init = async (config: Config) => {
+    const companyLedger = connect(config, config.company);
+    // Create/accept employee proposals.
+    for (const employee in config.employees) {
+      const employeeInfo = config.employees[employee];
+      const employeeRole: davl5.EmployeeRole = {
+        company: config.company,
+        employee,
+        boss: employeeInfo.boss,
+      };
+      const employeeProposal: davl5.EmployeeProposal = {
+        employeeRole,
+        vacationDays: employeeInfo.vacationDays.toString(),
+      };
+      const employeeProposalContract =
+        await companyLedger.create(davl5.EmployeeProposal, employeeProposal);
+      console.log(`Created EmployeeProposal for ${employee}.`);
+      if (employeeInfo.acceptProposal) {
+        const employeeLedger = connect(config, employee);
+        await employeeLedger.exercise(
+          davl5.EmployeeProposal.EmployeeProposal_Accept,
+          employeeProposalContract.contractId,
+          {},
+        );
+        console.log(`Accepted EmployeeProposal for ${employee}.`);
+      }
+    }
+    // Create/approve vacation requests.
+    for (const employee in config.employees) {
+      const employeeInfo = config.employees[employee];
+      for (const vacationRequest of employeeInfo.vacationRequests ?? []) {
+        const { fromDate, toDate } = vacationRequest;
+        const employeeLedger = connect(config, employee);
+        const employeeRoleContract = await employeeLedger.lookupByKey(davl5.EmployeeRole, employee);
+        if (employeeRoleContract) {
+          const numDays = days(fromDate, toDate);
+          console.log(`Request of ${numDays} days(s) found for ${employee}.`);
+          const [vacationRequestContractId] =
+            await employeeLedger.exercise(
+              davl5.EmployeeRole.EmployeeRole_RequestVacation,
+              employeeRoleContract.contractId,
+              { fromDate, toDate },
+            );
+          console.log(`Created VacationRequest [${fromDate} , ${toDate}] for ${employee}.`);
+          if (vacationRequest.approved) {
+            const boss = employeeInfo.boss
+            const bossLedger = connect(config, boss);
+            await bossLedger.exercise(
+              davl5.VacationRequest.VacationRequest_Accept,
+              vacationRequestContractId,
+              {},
+            );
+            console.log(`${boss} approved VacationRequest [${fromDate}, ${toDate}] for ${employee}.`);
+          }
+        }
+      }
+    }
+  }
+
+  export const dump = async (ledgerParams: LedgerParams, company: string, file: string) => {
+    const companyLedger = connect(ledgerParams, company);
+
+    const vacationOfVacationContract = (
+      vacationContract: CreateEvent<davl5.Vacation>): Vacation => {
+      const { fromDate, toDate} = vacationContract.payload;
+      return ({fromDate, toDate, approved: true});
+    };
+
+    const daysOfVacationContract = (
+      vacationContract: CreateEvent<davl5.Vacation>): number => {
+      const { fromDate, toDate } = vacationContract.payload;
+      return days(fromDate, toDate);
+    };
+
+    const vacationOfVacationRequestContract = (
+      vacationRequestContract: CreateEvent<davl5.VacationRequest>): Vacation => {
+      const { fromDate, toDate } = vacationRequestContract.payload.vacation;
+      return ({fromDate, toDate, approved: false});
+    }
+
+    const employeeInfoOfEmployeeRoleContract = async (
+      employeeRoleContract: CreateEvent<davl5.EmployeeRole>): Promise<[string, EmployeeInfo]> => {
+      const employeeRole = employeeRoleContract.payload;
+      const { employee, boss } = employeeRole;
+      const vacationContracts = await companyLedger.query(davl5.Vacation, { employeeRole });
+      const vacationRequestContracts = await companyLedger.query(davl5.VacationRequest, { vacation: { employeeRole } });
+      const signedVacations = vacationContracts.map(vacationOfVacationContract);
+      const unsignedVacations = vacationRequestContracts.map(vacationOfVacationRequestContract);
+      const allVacations = signedVacations.concat(unsignedVacations);
+      const employeeVacationAllocationContract = await companyLedger.lookupByKey(davl5.EmployeeVacationAllocation, employee);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const { remainingDays } = employeeVacationAllocationContract!.payload;
+      const bookedDays = vacationContracts.reduce((total, vacationContract) => total + daysOfVacationContract(vacationContract), 0);
+      const vacationDays = bookedDays + Number.parseInt(remainingDays);
+      return [employee,
+              { boss,
+                vacationDays,
+                acceptProposal: true,
+                vacationRequests: allVacations.length == 0 ? undefined : allVacations
+              }];
+    }
+
+    const employeeInfoOfEmployeeProposalContract = (
+      employeeProposalContract: CreateEvent<davl5.EmployeeProposal>): [string, EmployeeInfo] => {
+      const employeeProposal = employeeProposalContract.payload;
+      const { employeeRole, vacationDays } = employeeProposal;
+      const { employee, boss } = employeeRole;
+      return [employee,
+              { boss: boss,
+                vacationDays: Number.parseInt(vacationDays),
+                acceptProposal: false,
+                vacationRequests: undefined
+              }];
+    }
+
+    const employeeRoleContracts = await companyLedger.query(davl5.EmployeeRole, {});
+    const employeeProposalContracts = await companyLedger.query(davl5.EmployeeProposal, {});
+    const signedEmployees = await Promise.all(employeeRoleContracts.map(employeeInfoOfEmployeeRoleContract));
+    const unsignedEmployees = employeeProposalContracts.map(employeeInfoOfEmployeeProposalContract);
+    const employees: { [party: string]: EmployeeInfo } = {}
+    signedEmployees
+      .concat(unsignedEmployees)
+      .forEach(([name, info]) => employees[name] = info);
+    const { ledgerUrl, ledgerId, applicationId, secret } = ledgerParams;
+    const config: Config = { ledgerUrl, ledgerId, applicationId, secret, company, employees };
+    await fs.writeFile(file, JSON.stringify(config, null, 2), { encoding: 'utf8' })
+    console.log(`Dump written to '${file}'.`);
+  }
+
+} //namespace v5
+
+
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace cli {
 
   type Cli =
     | { command: 'v3-init'; file: string }
     | { command: 'v4-init'; file: string }
+    | { command: 'v5-init'; file: string }
     | { command: 'v3-dump'; ledgerParams: LedgerParams; company: string; file: string }
     | { command: 'v4-dump'; ledgerParams: LedgerParams; company: string; file: string }
+    | { command: 'v5-dump'; ledgerParams: LedgerParams; company: string; file: string }
     | { command: 'v3-v4-upgrade-init'; ledgerParams: LedgerParams; company: string }
     | { command: 'v3-v4-upgrade-accept'; ledgerParams: LedgerParams; company: string }
     | { command: 'v3-v4-upgrade-finish'; ledgerParams: LedgerParams; company: string }
@@ -436,6 +574,14 @@ namespace cli {
         return { command: cmd, file: args.file! };
       }
       case 'v4-dump': {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return { command: cmd, ledgerParams: mkLedgerParams(args), company: args.company!, file: args.file! };
+      }
+      case 'v5-init': {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return { command: cmd, file: args.file! };
+      }
+      case 'v5-dump': {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return { command: cmd, ledgerParams: mkLedgerParams(args), company: args.company!, file: args.file! };
       }
@@ -493,6 +639,16 @@ namespace cli {
       .example('$0 v4-init -f test-setup.json',
                'Ledger initialization from configuration file.')
       .command({
+        command: 'v5-init',
+        desc: 'Initialze a test ledger',
+        builder: (yargs: Argv) => {
+          yargs.option('f', {
+            alias: 'file', demandOption: true, describe: 'Configuration file', type: 'string'
+          }) },
+      })
+      .example('$0 v5-init -f test-setup.json',
+               'Ledger initialization from configuration file.')
+      .command({
         command: 'v3-dump',
         desc: 'Create a v3 ledger dump',
         builder: (yargs: Argv) => {
@@ -516,6 +672,18 @@ namespace cli {
       })
       .example('$0 v4-dump --ledger-params ... -f dump.json',
                'Dumping the v4 state of a ledger to a file.')
+      .command({
+        command: 'v5-dump',
+        desc: 'Create a v5 ledger dump',
+        builder: (yargs: Argv) => {
+          ledgerParamsBuilder(yargs)
+          .option('company', { demandOption: true, describe: 'Company', type: 'string' })
+          .option('f', {
+            alias: 'file', demandOption: true, describe: 'Filename to dump to', type: 'string'
+          }) },
+      })
+      .example('$0 v5-dump --ledger-params ... -f dump.json',
+               'Dumping the v5 state of a ledger to a file.')
       .command({
         command: 'v3-v4-upgrade-init',
         desc: 'Create v3/v4 upgrade proposals',
@@ -585,6 +753,15 @@ namespace cli {
       }
       case 'v4-dump': {
         await v4.dump(cli.ledgerParams, cli.company, cli.file);
+        break;
+      }
+      case 'v5-init': {
+        const cfg = await config(cli.file);
+        await v5.init(cfg);
+        break;
+      }
+      case 'v5-dump': {
+        await v5.dump(cli.ledgerParams, cli.company, cli.file);
         break;
       }
     }
