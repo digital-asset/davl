@@ -12,8 +12,11 @@
     "lint": "eslint --ext .js,.ts src/ --max-warnings 0"
   },
   "dependencies": {
-    "@daml2ts/davl": "0.13.53",
-    "@daml/ledger": "0.13.53",
+    "@daml.js/davl-0.0.4": "0.13.56-snapshot.20200318.3529.0.6ea118d6",
+    "@daml.js/davl-0.0.5": "0.13.56-snapshot.20200318.3529.0.6ea118d6",
+    "@daml.js/davl-upgrade-v3-v4-0.0.4": "0.13.56-snapshot.20200318.3529.0.6ea118d6",
+    "@daml.js/davl-upgrade-v4-v5-0.0.5": "0.13.56-snapshot.20200318.3529.0.6ea118d6",
+    "@daml/ledger": "0.13.56-snapshot.20200318.3529.0.6ea118d6",
     "@types/jwt-simple": "^0.5.33",
     "jwt-simple": "^0.5.6",
     "node": "^13.6.0"

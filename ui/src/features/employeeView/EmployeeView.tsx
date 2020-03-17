@@ -5,15 +5,15 @@ import { Segment } from "semantic-ui-react";
 import VacationListSegment from "../../components/VacationListSegment";
 import { toast } from "react-semantic-toasts";
 import { useStreamQuery, useParty, useStreamFetchByKey } from "@daml/react";
-import * as v4 from "@daml2ts/davl/lib/davl-0.0.4/DAVL";
-import * as v5 from "@daml2ts/davl/lib/davl-0.0.5/DAVL/V5";
-import { splitVacations } from "../../utils/vacation";
+import v4 from "@daml.js/davl-0.0.4";
+import v5 from "@daml.js/davl-0.0.5";
+import { VacationCreateEvent, splitVacations } from "../../utils/vacation";
 import { EmployeeSummary } from "../../utils/employee";
 
 const EmployeeView: React.FC = () => {
   const party = useParty();
   const allocation = useStreamFetchByKey(
-    v5.EmployeeVacationAllocation,
+    v5.DAVL.V5.EmployeeVacationAllocation,
     () => party,
     [party],
   );
@@ -36,7 +36,7 @@ const EmployeeView: React.FC = () => {
     loading: loadingVacationsV4,
     contracts: vacationContractsV4,
   } = useStreamQuery(
-    v4.Vacation,
+    v4.DAVL.Vacation,
     () => ({ employeeRole: { employee: party } }),
     [party],
   );
@@ -44,14 +44,13 @@ const EmployeeView: React.FC = () => {
     loading: loadingVacationsV5,
     contracts: vacationContractsV5,
   } = useStreamQuery(
-    v5.Vacation,
+    v5.DAVL.V5.Vacation,
     () => ({ employeeRole: { employee: party } }),
     [party],
   );
   const loadingVacations = loadingVacationsV4 || loadingVacationsV5;
-  const vacations = splitVacations(
-    vacationContractsV4.concat(vacationContractsV5),
-  );
+  const contracts = (vacationContractsV4 as VacationCreateEvent[]).concat(vacationContractsV5 as VacationCreateEvent[]);
+  const vacations = splitVacations(contracts);
 
   const handleCancelVacation = () =>
     toast({

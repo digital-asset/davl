@@ -34,11 +34,9 @@ jobs:
       - bash: |
           set -euo pipefail
           DIR=$(pwd)
-
           # Install DAML SDK
           SDK_VERSION=$(cat SDK_VERSION)
           curl https://get.daml.com | sh -s $SDK_VERSION
-
           mkdir -p /tmp/daml
           cd $HOME/.daml
           tar czf /tmp/daml/sdk.tar.gz *
@@ -58,11 +56,9 @@ jobs:
 
           yarn --version
           export PATH=$HOME/.daml/bin:$PATH
-          daml codegen ts -o daml2ts/src released/*.dar
+          daml codegen ts -o daml2ts released/*.dar
           yarn install --frozen-lockfile
           yarn workspaces run build
-          yarn workspaces run lint
-          CI=yes yarn workspaces run test --ci --all
         displayName: build-and-test-ts
 
       # Deploy

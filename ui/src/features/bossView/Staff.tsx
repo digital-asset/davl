@@ -1,25 +1,27 @@
 import React from "react";
 import { Segment, Header, List } from "semantic-ui-react";
 import { useStreamQuery, useParty } from "@daml/react";
-import * as v4 from "@daml2ts/davl/lib/davl-0.0.4/DAVL";
-import * as v5 from "@daml2ts/davl/lib/davl-0.0.5/DAVL/V5";
+import v4 from "@daml.js/davl-0.0.4";
+import v5 from "@daml.js/davl-0.0.5";
 import { prettyEmployeeSummaries } from "../../utils/employee";
 
 const Staff: React.FC = () => {
   const party = useParty();
 
   const allocationsV4 = useStreamQuery(
-    v4.EmployeeVacationAllocation,
+    v4.DAVL.EmployeeVacationAllocation,
     () => ({ employeeRole: { boss: party } }),
     [party],
   );
   const allocationsV5 = useStreamQuery(
-    v5.EmployeeVacationAllocation,
+    v5.DAVL.V5.EmployeeVacationAllocation,
     () => ({ employeeRole: { boss: party } }),
     [party],
   );
   const loading = allocationsV4.loading || allocationsV5.loading;
-  const contracts = allocationsV4.contracts.concat(allocationsV5.contracts);
+  //Hack!
+  //const contracts = allocationsV4.contracts.concat(allocationsV5.contracts);
+  const contracts = allocationsV5.contracts;
   const staff = prettyEmployeeSummaries(contracts);
 
   return (

@@ -2,10 +2,10 @@ import { promises as fs } from 'fs';
 import { encode } from 'jwt-simple';
 import Ledger from '@daml/ledger';
 import { CreateEvent } from '@daml/ledger';
-import * as davl3 from '@daml2ts/davl/lib/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7/DAVL';
-import * as davl4 from '@daml2ts/davl/lib/davl-0.0.4/DAVL';
-import * as davl5 from '@daml2ts/davl/lib/davl-0.0.5/DAVL/V5';
-import * as davlUpgradev3v4 from '@daml2ts/davl/lib/davl-upgrade-v3-v4-0.0.4/Upgrade';
+import davl3 from '@daml.js/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7';
+import davl4 from '@daml.js/davl-0.0.4';
+import davl5 from '@daml.js/davl-0.0.5';
+import davlUpgradev3v4 from '@daml.js/davl-upgrade-v3-v4-0.0.4';
 import { Argv } from 'yargs'; // Nice docs : http://yargs.js.org/
 
 type Vacation = {
@@ -55,22 +55,22 @@ namespace v3 {
     // Create/accept employee proposals.
     for (const employee in config.employees) {
       const employeeInfo = config.employees[employee];
-      const employeeRole: davl3.EmployeeRole = {
+      const employeeRole: davl3.DAVL.EmployeeRole = {
         company: config.company,
         employee,
         boss: employeeInfo.boss,
       };
-      const employeeProposal: davl3.EmployeeProposal = {
+      const employeeProposal: davl3.DAVL.EmployeeProposal = {
         employeeRole,
         vacationDays: employeeInfo.vacationDays.toString(),
       };
       const employeeProposalContract =
-        await companyLedger.create(davl3.EmployeeProposal, employeeProposal);
+        await companyLedger.create(davl3.DAVL.EmployeeProposal, employeeProposal);
       console.log(`Created EmployeeProposal for ${employee}.`);
       if (employeeInfo.acceptProposal) {
         const employeeLedger = connect(config, employee);
         await employeeLedger.exercise(
-          davl3.EmployeeProposal.EmployeeProposal_Accept,
+          davl3.DAVL.EmployeeProposal.EmployeeProposal_Accept,
           employeeProposalContract.contractId,
           {},
         );
@@ -83,13 +83,13 @@ namespace v3 {
       for (const vacationRequest of employeeInfo.vacationRequests ?? []) {
         const { fromDate, toDate } = vacationRequest;
         const employeeLedger = connect(config, employee);
-        const employeeRoleContract = await employeeLedger.lookupByKey(davl3.EmployeeRole, employee);
+        const employeeRoleContract = await employeeLedger.lookupByKey(davl3.DAVL.EmployeeRole, employee);
         if (employeeRoleContract) {
           const numDays = days(fromDate, toDate);
           console.log(`Request of ${numDays} days(s) found for ${employee}.`);
           const [vacationRequestContractId] =
             await employeeLedger.exercise(
-              davl3.EmployeeRole.EmployeeRole_RequestVacation,
+              davl3.DAVL.EmployeeRole.EmployeeRole_RequestVacation,
               employeeRoleContract.contractId,
               { fromDate, toDate },
             );
@@ -98,7 +98,7 @@ namespace v3 {
             const boss = employeeInfo.boss
             const bossLedger = connect(config, boss);
             await bossLedger.exercise(
-              davl3.VacationRequest.VacationRequest_Accept,
+              davl3.DAVL.VacationRequest.VacationRequest_Accept,
               vacationRequestContractId,
               {},
             );
@@ -113,33 +113,33 @@ namespace v3 {
     const companyLedger = connect(ledgerParams, company);
 
     const vacationOfVacationContract = (
-      vacationContract: CreateEvent<davl3.Vacation>): Vacation => {
+      vacationContract: CreateEvent<davl3.DAVL.Vacation>): Vacation => {
       const { fromDate, toDate} = vacationContract.payload;
       return ({fromDate, toDate, approved: true});
     };
 
     const daysOfVacationContract = (
-      vacationContract: CreateEvent<davl3.Vacation>): number => {
+      vacationContract: CreateEvent<davl3.DAVL.Vacation>): number => {
       const { fromDate, toDate } = vacationContract.payload;
       return days(fromDate, toDate);
     };
 
     const vacationOfVacationRequestContract = (
-      vacationRequestContract: CreateEvent<davl3.VacationRequest>): Vacation => {
+      vacationRequestContract: CreateEvent<davl3.DAVL.VacationRequest>): Vacation => {
       const { fromDate, toDate } = vacationRequestContract.payload.vacation;
       return ({fromDate, toDate, approved: false});
     }
 
     const employeeInfoOfEmployeeRoleContract = async (
-      employeeRoleContract: CreateEvent<davl3.EmployeeRole>): Promise<[string, EmployeeInfo]> => {
+      employeeRoleContract: CreateEvent<davl3.DAVL.EmployeeRole>): Promise<[string, EmployeeInfo]> => {
       const employeeRole = employeeRoleContract.payload;
       const { employee, boss } = employeeRole;
-      const vacationContracts = await companyLedger.query(davl3.Vacation, { employeeRole });
-      const vacationRequestContracts = await companyLedger.query(davl3.VacationRequest, { vacation: { employeeRole } });
+      const vacationContracts = await companyLedger.query(davl3.DAVL.Vacation, { employeeRole });
+      const vacationRequestContracts = await companyLedger.query(davl3.DAVL.VacationRequest, { vacation: { employeeRole } });
       const signedVacations = vacationContracts.map(vacationOfVacationContract);
       const unsignedVacations = vacationRequestContracts.map(vacationOfVacationRequestContract);
       const allVacations = signedVacations.concat(unsignedVacations);
-      const employeeVacationAllocationContract = await companyLedger.lookupByKey(davl3.EmployeeVacationAllocation, employee);
+      const employeeVacationAllocationContract = await companyLedger.lookupByKey(davl3.DAVL.EmployeeVacationAllocation, employee);
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const { remainingDays } = employeeVacationAllocationContract!.payload;
       const bookedDays = vacationContracts.reduce((total, vacationContract) => total + daysOfVacationContract(vacationContract), 0);
@@ -153,7 +153,7 @@ namespace v3 {
     }
 
     const employeeInfoOfEmployeeProposalContract = (
-      employeeProposalContract: CreateEvent<davl3.EmployeeProposal>): [string, EmployeeInfo] => {
+      employeeProposalContract: CreateEvent<davl3.DAVL.EmployeeProposal>): [string, EmployeeInfo] => {
       const employeeProposal = employeeProposalContract.payload;
       const { employeeRole, vacationDays } = employeeProposal;
       const { employee, boss } = employeeRole;
@@ -165,8 +165,8 @@ namespace v3 {
               }];
     }
 
-    const employeeRoleContracts = await companyLedger.query(davl3.EmployeeRole, {});
-    const employeeProposalContracts = await companyLedger.query(davl3.EmployeeProposal, {});
+    const employeeRoleContracts = await companyLedger.query(davl3.DAVL.EmployeeRole, {});
+    const employeeProposalContracts = await companyLedger.query(davl3.DAVL.EmployeeProposal, {});
     const signedEmployees = await Promise.all(employeeRoleContracts.map(employeeInfoOfEmployeeRoleContract));
     const unsignedEmployees = employeeProposalContracts.map(employeeInfoOfEmployeeProposalContract);
     const employees: { [party: string]: EmployeeInfo } = {}
@@ -186,29 +186,29 @@ namespace v3v4 {
 
   export const upgradeInit = async (ledgerParams: LedgerParams, company: string) => {
     const companyLedger = connect(ledgerParams, company);
-    const employeeRoleContracts = await companyLedger.query(davl3.EmployeeRole, {});
+    const employeeRoleContracts = await companyLedger.query(davl3.DAVL.EmployeeRole, {});
     for (const employeeRole of employeeRoleContracts) {
       const employee = employeeRole.key;
-      const employeeProposal: davlUpgradev3v4.UpgradeProposal = {
+      const employeeProposal: davlUpgradev3v4.Upgrade.UpgradeProposal = {
         employee: employee,
         company,
       };
-      await companyLedger.create(davlUpgradev3v4.UpgradeProposal, employeeProposal);
+      await companyLedger.create(davlUpgradev3v4.Upgrade.UpgradeProposal, employeeProposal);
       console.log(`Created UpgradeProposal for ${employee}.`);
     }
   }
 
   export const upgradeAccept = async (ledgerParams: LedgerParams, company: string) => {
     const companyLedger = connect(ledgerParams, company);
-    const employeeRoleContracts = await companyLedger.query(davl3.EmployeeRole, {});
+    const employeeRoleContracts = await companyLedger.query(davl3.DAVL.EmployeeRole, {});
     // Create update agreements.
     for (const employeeRoleContract of employeeRoleContracts) {
       const employee = employeeRoleContract.key;
       const employeeLedger = connect(ledgerParams, employee);
       const [upgradeProposalContract] =
-        await employeeLedger.query(davlUpgradev3v4.UpgradeProposal, { employee });
+        await employeeLedger.query(davlUpgradev3v4.Upgrade.UpgradeProposal, { employee });
       await employeeLedger.exercise(
-        davlUpgradev3v4.UpgradeProposal.UpgradeProposal_Accept,
+        davlUpgradev3v4.Upgrade.UpgradeProposal.UpgradeProposal_Accept,
         upgradeProposalContract.contractId,
         {},
       );
@@ -219,18 +219,18 @@ namespace v3v4 {
   export const upgradeFinish = async (ledgerParams: LedgerParams, company: string) => {
     const companyLedger = connect(ledgerParams, company);
     const employeeUpgradeAgreementContracts =
-      await companyLedger.query(davlUpgradev3v4.UpgradeAgreement, { company });
+      await companyLedger.query(davlUpgradev3v4.Upgrade.UpgradeAgreement, { company });
     for (const employeeUpgradeAgreementContract of employeeUpgradeAgreementContracts) {
       const employee = employeeUpgradeAgreementContract.payload.employee;
-      const employeeRoleContract = await companyLedger.lookupByKey(davl4.EmployeeRole, employee);
+      const employeeRoleContract = await companyLedger.lookupByKey(davl4.DAVL.EmployeeRole, employee);
       if (employeeRoleContract) {
         const employeeRole = employeeRoleContract.payload;
-        const vacationRequestContracts = await companyLedger.query(davl3.VacationRequest, { vacation: { employeeRole } });
+        const vacationRequestContracts = await companyLedger.query(davl3.DAVL.VacationRequest, { vacation: { employeeRole } });
         if (vacationRequestContracts.length > 0) {
           for (const vacationRequestContract of vacationRequestContracts) {
             const { fromDate, toDate } = vacationRequestContract.payload.vacation;
             await companyLedger.exercise(
-              davlUpgradev3v4.UpgradeAgreement.UpgradeAgreement_UpgradeVacationRequest,
+              davlUpgradev3v4.Upgrade.UpgradeAgreement.UpgradeAgreement_UpgradeVacationRequest,
               employeeUpgradeAgreementContract.contractId,
               { requestId: vacationRequestContract.contractId });
             console.log(`Upgraded VacationRequest [${fromDate}, ${toDate}] for ${employee}.`);
@@ -238,14 +238,14 @@ namespace v3v4 {
         }
         const boss = employeeRole.boss;
         const [bossUpgradeAgreementContract] =
-          await companyLedger.query(davlUpgradev3v4.UpgradeAgreement, { employee: boss, company });
+          await companyLedger.query(davlUpgradev3v4.Upgrade.UpgradeAgreement, { employee: boss, company });
         if (bossUpgradeAgreementContract) {
-          const vacationContracts = await companyLedger.query(davl3.Vacation, { employeeRole });
+          const vacationContracts = await companyLedger.query(davl3.DAVL.Vacation, { employeeRole });
           if (vacationContracts.length > 0) {
             for (const vacationContract of vacationContracts) {
               const { fromDate, toDate } = vacationContract.payload;
               await companyLedger.exercise(
-                davlUpgradev3v4.UpgradeAgreement.UpgradeAgreement_UpgradeVacation,
+                davlUpgradev3v4.Upgrade.UpgradeAgreement.UpgradeAgreement_UpgradeVacation,
                 bossUpgradeAgreementContract.contractId,
                 { employeeAgreementId: employeeUpgradeAgreementContract.contractId, vacationId: vacationContract.contractId });
               console.log(`Upgraded Vaction [${fromDate}, ${toDate}] for ${employee}.`);
@@ -266,22 +266,22 @@ namespace v4 {
     // Create/accept employee proposals.
     for (const employee in config.employees) {
       const employeeInfo = config.employees[employee];
-      const employeeRole: davl4.EmployeeRole = {
+      const employeeRole: davl4.DAVL.EmployeeRole = {
         company: config.company,
         employee,
         boss: employeeInfo.boss,
       };
-      const employeeProposal: davl4.EmployeeProposal = {
+      const employeeProposal: davl4.DAVL.EmployeeProposal = {
         employeeRole,
         vacationDays: employeeInfo.vacationDays.toString(),
       };
       const employeeProposalContract =
-        await companyLedger.create(davl4.EmployeeProposal, employeeProposal);
+        await companyLedger.create(davl4.DAVL.EmployeeProposal, employeeProposal);
       console.log(`Created EmployeeProposal for ${employee}.`);
       if (employeeInfo.acceptProposal) {
         const employeeLedger = connect(config, employee);
         await employeeLedger.exercise(
-          davl4.EmployeeProposal.EmployeeProposal_Accept,
+          davl4.DAVL.EmployeeProposal.EmployeeProposal_Accept,
           employeeProposalContract.contractId,
           {},
         );
@@ -294,13 +294,13 @@ namespace v4 {
       for (const vacationRequest of employeeInfo.vacationRequests ?? []) {
         const { fromDate, toDate } = vacationRequest;
         const employeeLedger = connect(config, employee);
-        const employeeRoleContract = await employeeLedger.lookupByKey(davl4.EmployeeRole, employee);
+        const employeeRoleContract = await employeeLedger.lookupByKey(davl4.DAVL.EmployeeRole, employee);
         if (employeeRoleContract) {
           const numDays = days(fromDate, toDate);
           console.log(`Request of ${numDays} days(s) found for ${employee}.`);
           const [vacationRequestContractId] =
             await employeeLedger.exercise(
-              davl4.EmployeeRole.EmployeeRole_RequestVacation,
+              davl4.DAVL.EmployeeRole.EmployeeRole_RequestVacation,
               employeeRoleContract.contractId,
               { fromDate, toDate },
             );
@@ -309,7 +309,7 @@ namespace v4 {
             const boss = employeeInfo.boss
             const bossLedger = connect(config, boss);
             await bossLedger.exercise(
-              davl4.VacationRequest.VacationRequest_Accept,
+              davl4.DAVL.VacationRequest.VacationRequest_Accept,
               vacationRequestContractId,
               {},
             );
@@ -324,33 +324,33 @@ namespace v4 {
     const companyLedger = connect(ledgerParams, company);
 
     const vacationOfVacationContract = (
-      vacationContract: CreateEvent<davl4.Vacation>): Vacation => {
+      vacationContract: CreateEvent<davl4.DAVL.Vacation>): Vacation => {
       const { fromDate, toDate} = vacationContract.payload;
       return ({fromDate, toDate, approved: true});
     };
 
     const daysOfVacationContract = (
-      vacationContract: CreateEvent<davl4.Vacation>): number => {
+      vacationContract: CreateEvent<davl4.DAVL.Vacation>): number => {
       const { fromDate, toDate } = vacationContract.payload;
       return days(fromDate, toDate);
     };
 
     const vacationOfVacationRequestContract = (
-      vacationRequestContract: CreateEvent<davl4.VacationRequest>): Vacation => {
+      vacationRequestContract: CreateEvent<davl4.DAVL.VacationRequest>): Vacation => {
       const { fromDate, toDate } = vacationRequestContract.payload.vacation;
       return ({fromDate, toDate, approved: false});
     }
 
     const employeeInfoOfEmployeeRoleContract = async (
-      employeeRoleContract: CreateEvent<davl4.EmployeeRole>): Promise<[string, EmployeeInfo]> => {
+      employeeRoleContract: CreateEvent<davl4.DAVL.EmployeeRole>): Promise<[string, EmployeeInfo]> => {
       const employeeRole = employeeRoleContract.payload;
       const { employee, boss } = employeeRole;
-      const vacationContracts = await companyLedger.query(davl4.Vacation, { employeeRole });
-      const vacationRequestContracts = await companyLedger.query(davl4.VacationRequest, { vacation: { employeeRole } });
+      const vacationContracts = await companyLedger.query(davl4.DAVL.Vacation, { employeeRole });
+      const vacationRequestContracts = await companyLedger.query(davl4.DAVL.VacationRequest, { vacation: { employeeRole } });
       const signedVacations = vacationContracts.map(vacationOfVacationContract);
       const unsignedVacations = vacationRequestContracts.map(vacationOfVacationRequestContract);
       const allVacations = signedVacations.concat(unsignedVacations);
-      const employeeVacationAllocationContract = await companyLedger.lookupByKey(davl4.EmployeeVacationAllocation, employee);
+      const employeeVacationAllocationContract = await companyLedger.lookupByKey(davl4.DAVL.EmployeeVacationAllocation, employee);
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const { remainingDays } = employeeVacationAllocationContract!.payload;
       const bookedDays = vacationContracts.reduce((total, vacationContract) => total + daysOfVacationContract(vacationContract), 0);
@@ -364,7 +364,7 @@ namespace v4 {
     }
 
     const employeeInfoOfEmployeeProposalContract = (
-      employeeProposalContract: CreateEvent<davl4.EmployeeProposal>): [string, EmployeeInfo] => {
+      employeeProposalContract: CreateEvent<davl4.DAVL.EmployeeProposal>): [string, EmployeeInfo] => {
       const employeeProposal = employeeProposalContract.payload;
       const { employeeRole, vacationDays } = employeeProposal;
       const { employee, boss } = employeeRole;
@@ -376,8 +376,8 @@ namespace v4 {
               }];
     }
 
-    const employeeRoleContracts = await companyLedger.query(davl4.EmployeeRole, {});
-    const employeeProposalContracts = await companyLedger.query(davl4.EmployeeProposal, {});
+    const employeeRoleContracts = await companyLedger.query(davl4.DAVL.EmployeeRole, {});
+    const employeeProposalContracts = await companyLedger.query(davl4.DAVL.EmployeeProposal, {});
     const signedEmployees = await Promise.all(employeeRoleContracts.map(employeeInfoOfEmployeeRoleContract));
     const unsignedEmployees = employeeProposalContracts.map(employeeInfoOfEmployeeProposalContract);
     const employees: { [party: string]: EmployeeInfo } = {}
@@ -400,22 +400,22 @@ namespace v5 {
     // Create/accept employee proposals.
     for (const employee in config.employees) {
       const employeeInfo = config.employees[employee];
-      const employeeRole: davl5.EmployeeRole = {
+      const employeeRole: davl5.DAVL.V5.EmployeeRole = {
         company: config.company,
         employee,
         boss: employeeInfo.boss,
       };
-      const employeeProposal: davl5.EmployeeProposal = {
+      const employeeProposal: davl5.DAVL.V5.EmployeeProposal = {
         employeeRole,
         vacationDays: employeeInfo.vacationDays.toString(),
       };
       const employeeProposalContract =
-        await companyLedger.create(davl5.EmployeeProposal, employeeProposal);
+        await companyLedger.create(davl5.DAVL.V5.EmployeeProposal, employeeProposal);
       console.log(`Created EmployeeProposal for ${employee}.`);
       if (employeeInfo.acceptProposal) {
         const employeeLedger = connect(config, employee);
         await employeeLedger.exercise(
-          davl5.EmployeeProposal.EmployeeProposal_Accept,
+          davl5.DAVL.V5.EmployeeProposal.EmployeeProposal_Accept,
           employeeProposalContract.contractId,
           {},
         );
@@ -428,13 +428,13 @@ namespace v5 {
       for (const vacationRequest of employeeInfo.vacationRequests ?? []) {
         const { fromDate, toDate } = vacationRequest;
         const employeeLedger = connect(config, employee);
-        const employeeRoleContract = await employeeLedger.lookupByKey(davl5.EmployeeRole, employee);
+        const employeeRoleContract = await employeeLedger.lookupByKey(davl5.DAVL.V5.EmployeeRole, employee);
         if (employeeRoleContract) {
           const numDays = days(fromDate, toDate);
           console.log(`Request of ${numDays} days(s) found for ${employee}.`);
           const [vacationRequestContractId] =
             await employeeLedger.exercise(
-              davl5.EmployeeRole.EmployeeRole_RequestVacation,
+              davl5.DAVL.V5.EmployeeRole.EmployeeRole_RequestVacation,
               employeeRoleContract.contractId,
               { fromDate, toDate },
             );
@@ -443,7 +443,7 @@ namespace v5 {
             const boss = employeeInfo.boss
             const bossLedger = connect(config, boss);
             await bossLedger.exercise(
-              davl5.VacationRequest.VacationRequest_Accept,
+              davl5.DAVL.V5.VacationRequest.VacationRequest_Accept,
               vacationRequestContractId,
               {},
             );
@@ -458,33 +458,33 @@ namespace v5 {
     const companyLedger = connect(ledgerParams, company);
 
     const vacationOfVacationContract = (
-      vacationContract: CreateEvent<davl5.Vacation>): Vacation => {
+      vacationContract: CreateEvent<davl5.DAVL.V5.Vacation>): Vacation => {
       const { fromDate, toDate} = vacationContract.payload;
       return ({fromDate, toDate, approved: true});
     };
 
     const daysOfVacationContract = (
-      vacationContract: CreateEvent<davl5.Vacation>): number => {
+      vacationContract: CreateEvent<davl5.DAVL.V5.Vacation>): number => {
       const { fromDate, toDate } = vacationContract.payload;
       return days(fromDate, toDate);
     };
 
     const vacationOfVacationRequestContract = (
-      vacationRequestContract: CreateEvent<davl5.VacationRequest>): Vacation => {
+      vacationRequestContract: CreateEvent<davl5.DAVL.V5.VacationRequest>): Vacation => {
       const { fromDate, toDate } = vacationRequestContract.payload.vacation;
       return ({fromDate, toDate, approved: false});
     }
 
     const employeeInfoOfEmployeeRoleContract = async (
-      employeeRoleContract: CreateEvent<davl5.EmployeeRole>): Promise<[string, EmployeeInfo]> => {
+      employeeRoleContract: CreateEvent<davl5.DAVL.V5.EmployeeRole>): Promise<[string, EmployeeInfo]> => {
       const employeeRole = employeeRoleContract.payload;
       const { employee, boss } = employeeRole;
-      const vacationContracts = await companyLedger.query(davl5.Vacation, { employeeRole });
-      const vacationRequestContracts = await companyLedger.query(davl5.VacationRequest, { vacation: { employeeRole } });
+      const vacationContracts = await companyLedger.query(davl5.DAVL.V5.Vacation, { employeeRole });
+      const vacationRequestContracts = await companyLedger.query(davl5.DAVL.V5.VacationRequest, { vacation: { employeeRole } });
       const signedVacations = vacationContracts.map(vacationOfVacationContract);
       const unsignedVacations = vacationRequestContracts.map(vacationOfVacationRequestContract);
       const allVacations = signedVacations.concat(unsignedVacations);
-      const employeeVacationAllocationContract = await companyLedger.lookupByKey(davl5.EmployeeVacationAllocation, employee);
+      const employeeVacationAllocationContract = await companyLedger.lookupByKey(davl5.DAVL.V5.EmployeeVacationAllocation, employee);
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const { remainingDays } = employeeVacationAllocationContract!.payload;
       const bookedDays = vacationContracts.reduce((total, vacationContract) => total + daysOfVacationContract(vacationContract), 0);
@@ -498,7 +498,7 @@ namespace v5 {
     }
 
     const employeeInfoOfEmployeeProposalContract = (
-      employeeProposalContract: CreateEvent<davl5.EmployeeProposal>): [string, EmployeeInfo] => {
+      employeeProposalContract: CreateEvent<davl5.DAVL.V5.EmployeeProposal>): [string, EmployeeInfo] => {
       const employeeProposal = employeeProposalContract.payload;
       const { employeeRole, vacationDays } = employeeProposal;
       const { employee, boss } = employeeRole;
@@ -510,8 +510,8 @@ namespace v5 {
               }];
     }
 
-    const employeeRoleContracts = await companyLedger.query(davl5.EmployeeRole, {});
-    const employeeProposalContracts = await companyLedger.query(davl5.EmployeeProposal, {});
+    const employeeRoleContracts = await companyLedger.query(davl5.DAVL.V5.EmployeeRole, {});
+    const employeeProposalContracts = await companyLedger.query(davl5.DAVL.V5.EmployeeProposal, {});
     const signedEmployees = await Promise.all(employeeRoleContracts.map(employeeInfoOfEmployeeRoleContract));
     const unsignedEmployees = employeeProposalContracts.map(employeeInfoOfEmployeeProposalContract);
     const employees: { [party: string]: EmployeeInfo } = {}
