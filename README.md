@@ -55,7 +55,7 @@ the version in `SDK_VERSION` has been bumped, you need to (re)generate
 the TypeScript bindings for the DARs and install the
 dependencies of the TypeScript frontend by running
 ```
-DAML_SDK_VERSION=$(cat SDK_VERSION) daml codegen ts -o daml2ts/src released/*.dar
+DAML_SDK_VERSION=$(cat SDK_VERSION) daml codegen ts -o daml2ts released/*.dar
 yarn install
 yarn workspaces run build
 ```
