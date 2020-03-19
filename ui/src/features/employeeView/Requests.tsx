@@ -48,7 +48,10 @@ const Requests: React.FC<Props> = (props: Props) => {
   );
 
   const handleCancelRequest = async (vacation: Vacation) => {
-    await exerciseCancelVacationRequest(vacation.contractId as ContractId<v5.DAVL.V5.VacationRequest>, {});
+    await exerciseCancelVacationRequest(
+      vacation.contractId as ContractId<v5.DAVL.V5.VacationRequest>,
+      {},
+    );
     toast({
       title: "Success",
       type: "success",

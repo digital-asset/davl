@@ -44,7 +44,7 @@ const BossView: React.FC = () => {
   ]);
   const loadingRequests = requestsV4.loading || requestsV5.loading;
 
-  const exerciseApproveRequestV4  = useExercise(
+  const exerciseApproveRequestV4 = useExercise(
     v4.DAVL.VacationRequest.VacationRequest_Accept,
   );
   const exerciseApproveRequestV5 = useExercise(
@@ -54,10 +54,16 @@ const BossView: React.FC = () => {
   const handleApproveRequest = async (vacation: Vacation) => {
     switch (vacation.version) {
       case "v4":
-        await exerciseApproveRequestV4(vacation.contractId as ContractId<v4.DAVL.VacationRequest>, {});
+        await exerciseApproveRequestV4(
+          vacation.contractId as ContractId<v4.DAVL.VacationRequest>,
+          {},
+        );
         break;
       case "v5":
-        await exerciseApproveRequestV5(vacation.contractId as ContractId<v5.DAVL.V5.VacationRequest>, {});
+        await exerciseApproveRequestV5(
+          vacation.contractId as ContractId<v5.DAVL.V5.VacationRequest>,
+          {},
+        );
         break;
     }
     toast({

@@ -142,9 +142,12 @@ const LoginScreen: React.FC<Props> = props => {
       try {
         setStatus(Status.SigningUp);
         const ledger = new Ledger({ token: credentials.token });
-        const employeeProposals = await ledger.query(v5.DAVL.V5.EmployeeProposal, {
-          employeeRole: { employee: credentials.party },
-        });
+        const employeeProposals = await ledger.query(
+          v5.DAVL.V5.EmployeeProposal,
+          {
+            employeeRole: { employee: credentials.party },
+          },
+        );
         if (employeeProposals.length === 0) {
           alert("There is no invitation for you.");
         } else if (employeeProposals.length > 1) {

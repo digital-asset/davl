@@ -12,7 +12,7 @@ export type EmployeeSummary = {
 
 export type EmployeeVacationAllocation =
   | CreateEvent<v4.DAVL.EmployeeVacationAllocation>
-  | CreateEvent<v5.DAVL.V5.EmployeeVacationAllocation>
+  | CreateEvent<v5.DAVL.V5.EmployeeVacationAllocation>;
 
 export const ordEmployeeSummaryOnName: Ord<EmployeeSummary> = contramap(
   (summary: EmployeeSummary) => summary.employee,

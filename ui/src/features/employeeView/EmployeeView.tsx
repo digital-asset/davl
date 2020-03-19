@@ -49,7 +49,9 @@ const EmployeeView: React.FC = () => {
     [party],
   );
   const loadingVacations = loadingVacationsV4 || loadingVacationsV5;
-  const contracts = (vacationContractsV4 as VacationCreateEvent[]).concat(vacationContractsV5 as VacationCreateEvent[]);
+  const contracts = (vacationContractsV4 as VacationCreateEvent[]).concat(
+    vacationContractsV5 as VacationCreateEvent[],
+  );
   const vacations = splitVacations(contracts);
 
   const handleCancelVacation = () =>
