@@ -40,6 +40,7 @@ const Requests: React.FC<Props> = (props: Props) => {
   );
   const requests = prettyRequests(requestContracts);
 
+  const [loadingRequestVacation, setLoadingRequestVacation] = useState(false);
   const exerciseRequestVacation = useExerciseByKey(
     v5.DAVL.V5.EmployeeRole.EmployeeRole_RequestVacation,
   );
@@ -70,7 +71,9 @@ const Requests: React.FC<Props> = (props: Props) => {
     }
     const fromDate = currentRequest.slice(0, 10);
     const toDate = currentRequest.slice(-10);
+    setLoadingRequestVacation(true);
     await exerciseRequestVacation(party, { fromDate, toDate });
+    setLoadingRequestVacation(false);
     setCurrentRequest("");
     toast({
       title: "Success",
@@ -125,6 +128,7 @@ const Requests: React.FC<Props> = (props: Props) => {
                 closable
                 icon={false}
                 allowSameEndDate
+                loading={loadingRequestVacation}
               />
             </Form>
           </List.Header>
