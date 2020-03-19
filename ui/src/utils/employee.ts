@@ -1,7 +1,8 @@
 import { Party } from "@daml/types";
 import { CreateEvent } from "@daml/ledger";
 import { ordString, Ord, contramap } from "fp-ts/lib/Ord";
-import * as v5 from "@daml2ts/davl/lib/davl-0.0.5/DAVL/V5";
+import v4 from "@daml.js/davl-0.0.4";
+import v5 from "@daml.js/davl-0.0.5";
 
 export type EmployeeSummary = {
   employee: Party;
@@ -9,12 +10,16 @@ export type EmployeeSummary = {
   remainingVacationDays: string;
 };
 
+export type EmployeeVacationAllocation =
+  | CreateEvent<v4.DAVL.EmployeeVacationAllocation>
+  | CreateEvent<v5.DAVL.V5.EmployeeVacationAllocation>;
+
 export const ordEmployeeSummaryOnName: Ord<EmployeeSummary> = contramap(
   (summary: EmployeeSummary) => summary.employee,
 )(ordString);
 
 export const prettyEmployeeSummaries = (
-  allocations: readonly CreateEvent<v5.EmployeeVacationAllocation>[],
+  allocations: readonly EmployeeVacationAllocation[],
 ): EmployeeSummary[] => {
   const staff = allocations.map(
     ({

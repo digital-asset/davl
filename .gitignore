@@ -1,8 +1,10 @@
 .daml
+daml2ts
 *.log
 node_modules
-/daml2ts/lib
-/daml2ts/src
 \#*\#
 .\#*\#
 *~
+daml-ledger
+daml-react
+daml-types

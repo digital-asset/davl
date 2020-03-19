@@ -58,11 +58,11 @@ jobs:
 
           yarn --version
           export PATH=$HOME/.daml/bin:$PATH
-          daml codegen ts -o daml2ts/src released/*.dar
+          daml codegen ts -o daml2ts released/*.dar
           yarn install --frozen-lockfile
           yarn workspaces run build
           yarn workspaces run lint
-          CI=yes yarn workspaces run test --ci --all
+          CI=yes yarn workspace davl-ui test --ci --all
         displayName: build-and-test-ts
 
       # Deploy

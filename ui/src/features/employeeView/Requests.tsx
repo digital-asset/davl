@@ -10,13 +10,14 @@ import ListActionItem from "../../components/ListActionItem";
 import { DatesRangeInput } from "semantic-ui-calendar-react";
 import { VacationListItem } from "../../components/VacationListItem";
 import { vacationLength, prettyRequests, Vacation } from "../../utils/vacation";
+import { ContractId } from "@daml/types";
 import {
   useStreamQuery,
   useExerciseByKey,
   useParty,
   useExercise,
 } from "@daml/react";
-import * as v5 from "@daml2ts/davl/lib/davl-0.0.5/DAVL/V5";
+import v5 from "@daml.js/davl-0.0.5";
 import { EmployeeSummary } from "../../utils/employee";
 import { toast } from "react-semantic-toasts";
 
@@ -33,21 +34,25 @@ const Requests: React.FC<Props> = (props: Props) => {
     loading: loadingRequests,
     contracts: requestContracts,
   } = useStreamQuery(
-    v5.VacationRequest,
+    v5.DAVL.V5.VacationRequest,
     () => ({ vacation: { employeeRole: { employee: party } } }),
     [party],
   );
   const requests = prettyRequests(requestContracts);
 
-  const [exerciseRequestVacation, loadingRequestVacation] = useExerciseByKey(
-    v5.EmployeeRole.EmployeeRole_RequestVacation,
+  const [loadingRequestVacation, setLoadingRequestVacation] = useState(false);
+  const exerciseRequestVacation = useExerciseByKey(
+    v5.DAVL.V5.EmployeeRole.EmployeeRole_RequestVacation,
   );
-  const [exerciseCancelVacationRequest] = useExercise(
-    v5.VacationRequest.VacationRequest_Cancel,
+  const exerciseCancelVacationRequest = useExercise(
+    v5.DAVL.V5.VacationRequest.VacationRequest_Cancel,
   );
 
   const handleCancelRequest = async (vacation: Vacation) => {
-    await exerciseCancelVacationRequest(vacation.contractId, {});
+    await exerciseCancelVacationRequest(
+      vacation.contractId as ContractId<v5.DAVL.V5.VacationRequest>,
+      {},
+    );
     toast({
       title: "Success",
       type: "success",
@@ -66,7 +71,9 @@ const Requests: React.FC<Props> = (props: Props) => {
     }
     const fromDate = currentRequest.slice(0, 10);
     const toDate = currentRequest.slice(-10);
+    setLoadingRequestVacation(true);
     await exerciseRequestVacation(party, { fromDate, toDate });
+    setLoadingRequestVacation(false);
     setCurrentRequest("");
     toast({
       title: "Success",

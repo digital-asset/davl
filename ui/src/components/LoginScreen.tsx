@@ -2,9 +2,9 @@ import React from "react";
 import { Button, Form, Grid, Header, Segment } from "semantic-ui-react";
 import Ledger from "@daml/ledger";
 import { Party } from "@daml/types";
-import * as v4 from "@daml2ts/davl/lib/davl-0.0.4/DAVL";
-import * as v5 from "@daml2ts/davl/lib/davl-0.0.5/DAVL/V5";
-import * as upgrade from "@daml2ts/davl/lib/davl-upgrade-v4-v5-0.0.5/Upgrade";
+import v4 from "@daml.js/davl-0.0.4";
+import v5 from "@daml.js/davl-0.0.5";
+import upgrade from "@daml.js/davl-upgrade-v4-v5-0.0.5";
 import { decode } from "jwt-simple";
 
 const LEDGER_ID = "DAVL";
@@ -68,7 +68,7 @@ const LoginScreen: React.FC<Props> = props => {
   const canLogin = async (credentials: Credentials): Promise<boolean> => {
     const ledger = new Ledger({ token: credentials.token });
     const employeeRoleV5 = await ledger.fetchByKey(
-      v5.EmployeeRole,
+      v5.DAVL.V5.EmployeeRole,
       credentials.party,
     );
     if (employeeRoleV5) {
@@ -76,7 +76,7 @@ const LoginScreen: React.FC<Props> = props => {
     }
 
     const employeeRoleV4 = await ledger.fetchByKey(
-      v4.EmployeeRole,
+      v4.DAVL.EmployeeRole,
       credentials.party,
     );
     if (!employeeRoleV4) {
@@ -89,7 +89,7 @@ const LoginScreen: React.FC<Props> = props => {
       _2: employeeRoleV4.payload.company,
     };
     const upgradeProposal = await ledger.fetchByKey(
-      upgrade.UpgradeProposal,
+      upgrade.Upgrade.UpgradeProposal,
       upkradeProposalKey,
     );
     if (!upgradeProposal) {
@@ -109,7 +109,7 @@ const LoginScreen: React.FC<Props> = props => {
     }
 
     await ledger.exercise(
-      upgrade.UpgradeProposal.UpgradeProposal_Accept,
+      upgrade.Upgrade.UpgradeProposal.UpgradeProposal_Accept,
       upgradeProposal.contractId,
       {},
     );
@@ -142,9 +142,12 @@ const LoginScreen: React.FC<Props> = props => {
       try {
         setStatus(Status.SigningUp);
         const ledger = new Ledger({ token: credentials.token });
-        const employeeProposals = await ledger.query(v5.EmployeeProposal, {
-          employeeRole: { employee: credentials.party },
-        });
+        const employeeProposals = await ledger.query(
+          v5.DAVL.V5.EmployeeProposal,
+          {
+            employeeRole: { employee: credentials.party },
+          },
+        );
         if (employeeProposals.length === 0) {
           alert("There is no invitation for you.");
         } else if (employeeProposals.length > 1) {
@@ -160,7 +163,7 @@ const LoginScreen: React.FC<Props> = props => {
           );
           if (accept) {
             await ledger.exercise(
-              v5.EmployeeProposal.EmployeeProposal_Accept,
+              v5.DAVL.V5.EmployeeProposal.EmployeeProposal_Accept,
               contractId,
               {},
             );

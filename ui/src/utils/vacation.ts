@@ -1,7 +1,7 @@
 import { Party, ContractId } from "@daml/types";
 import { CreateEvent } from "@daml/ledger";
-import * as v4 from "@daml2ts/davl/lib/davl-0.0.4/DAVL";
-import * as v5 from "@daml2ts/davl/lib/davl-0.0.5/DAVL/V5";
+import v4 from "@daml.js/davl-0.0.4";
+import v5 from "@daml.js/davl-0.0.5";
 import { contramap, Ord, ordString, getDualOrd } from "fp-ts/lib/Ord";
 import { partition } from "fp-ts/lib/Array";
 import moment from "moment";
@@ -19,23 +19,23 @@ export type Vacation = {
 // would set the third parameter of `CreateEvent` as well. Unfortunately,
 // @daml/react does not properly use this parameter yet. This will be fixed in
 // the next release.
-type VacationCreateEvent =
-  | CreateEvent<v4.Vacation, undefined>
-  | CreateEvent<v5.Vacation, undefined>;
+export type VacationCreateEvent =
+  | CreateEvent<v4.DAVL.Vacation, undefined>
+  | CreateEvent<v5.DAVL.V5.Vacation, undefined>;
 
 type VacationRequestCreateEvent =
-  | CreateEvent<v4.VacationRequest, undefined>
-  | CreateEvent<v5.VacationRequest, undefined>;
+  | CreateEvent<v4.DAVL.VacationRequest, undefined>
+  | CreateEvent<v5.DAVL.V5.VacationRequest, undefined>;
 
 export const makeVacation = <T extends object>(
   contract: VacationCreateEvent,
 ): Vacation => {
   let version: Vacation["version"];
   switch (contract.templateId) {
-    case v4.Vacation.templateId:
+    case v4.DAVL.Vacation.templateId:
       version = "v4";
       break;
-    case v5.Vacation.templateId:
+    case v5.DAVL.V5.Vacation.templateId:
       version = "v5";
       break;
     default:
@@ -59,10 +59,10 @@ export const makeVacationFromRequest = <T extends object>(
 ): Vacation => {
   let version: Vacation["version"];
   switch (contract.templateId) {
-    case v4.VacationRequest.templateId:
+    case v4.DAVL.VacationRequest.templateId:
       version = "v4";
       break;
-    case v5.VacationRequest.templateId:
+    case v5.DAVL.V5.VacationRequest.templateId:
       version = "v5";
       break;
     default:
