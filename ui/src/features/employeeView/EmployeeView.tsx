@@ -7,7 +7,7 @@ import { toast } from "react-semantic-toasts";
 import { useStreamQuery, useParty, useStreamFetchByKey } from "@daml/react";
 import v4 from "@daml.js/davl-0.0.4";
 import v5 from "@daml.js/davl-0.0.5";
-import { VacationCreateEvent, splitVacations } from "../../utils/vacation";
+import { splitVacations } from "../../utils/vacation";
 import { EmployeeSummary } from "../../utils/employee";
 
 const EmployeeView: React.FC = () => {
@@ -49,9 +49,7 @@ const EmployeeView: React.FC = () => {
     [party],
   );
   const loadingVacations = loadingVacationsV4 || loadingVacationsV5;
-  const contracts = (vacationContractsV4 as VacationCreateEvent[]).concat(
-    vacationContractsV5 as VacationCreateEvent[],
-  );
+  const contracts = [...vacationContractsV4, ...vacationContractsV5];
   const vacations = splitVacations(contracts);
 
   const handleCancelVacation = () =>
