@@ -2,10 +2,8 @@ import { promises as fs } from 'fs';
 import { encode } from 'jwt-simple';
 import Ledger from '@daml/ledger';
 import { CreateEvent } from '@daml/ledger';
-import davl3 from '@daml.js/edb5e54da44bc80782890de3fc58edb5cc227a6b7e8c467536f8674b0bf4deb7';
 import davl4 from '@daml.js/davl-0.0.4';
 import davl5 from '@daml.js/davl-0.0.5';
-import davlUpgradev3v4 from '@daml.js/davl-upgrade-v3-v4-0.0.4';
 import { Argv } from 'yargs'; // Nice docs : http://yargs.js.org/
 
 type Vacation = {
@@ -46,217 +44,6 @@ function days(fromDate: string, toDate: string): number {
   // Holiday date ranges are closed i.e. [from, to].
   return Math.floor(Date.parse(toDate).valueOf() - Date.parse(fromDate).valueOf())/86400000 + 1;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-namespace
-namespace v3 {
-
-  export const init = async (config: Config) => {
-    const companyLedger = connect(config, config.company);
-    // Create/accept employee proposals.
-    for (const employee in config.employees) {
-      const employeeInfo = config.employees[employee];
-      const employeeRole: davl3.DAVL.EmployeeRole = {
-        company: config.company,
-        employee,
-        boss: employeeInfo.boss,
-      };
-      const employeeProposal: davl3.DAVL.EmployeeProposal = {
-        employeeRole,
-        vacationDays: employeeInfo.vacationDays.toString(),
-      };
-      const employeeProposalContract =
-        await companyLedger.create(davl3.DAVL.EmployeeProposal, employeeProposal);
-      console.log(`Created EmployeeProposal for ${employee}.`);
-      if (employeeInfo.acceptProposal) {
-        const employeeLedger = connect(config, employee);
-        await employeeLedger.exercise(
-          davl3.DAVL.EmployeeProposal.EmployeeProposal_Accept,
-          employeeProposalContract.contractId,
-          {},
-        );
-        console.log(`Accepted EmployeeProposal for ${employee}.`);
-      }
-    }
-    // Create/approve vacation requests.
-    for (const employee in config.employees) {
-      const employeeInfo = config.employees[employee];
-      for (const vacationRequest of employeeInfo.vacationRequests ?? []) {
-        const { fromDate, toDate } = vacationRequest;
-        const employeeLedger = connect(config, employee);
-        const employeeRoleContract = await employeeLedger.lookupByKey(davl3.DAVL.EmployeeRole, employee);
-        if (employeeRoleContract) {
-          const numDays = days(fromDate, toDate);
-          console.log(`Request of ${numDays} days(s) found for ${employee}.`);
-          const [vacationRequestContractId] =
-            await employeeLedger.exercise(
-              davl3.DAVL.EmployeeRole.EmployeeRole_RequestVacation,
-              employeeRoleContract.contractId,
-              { fromDate, toDate },
-            );
-          console.log(`Created VacationRequest [${fromDate} , ${toDate}] for ${employee}.`);
-          if (vacationRequest.approved) {
-            const boss = employeeInfo.boss
-            const bossLedger = connect(config, boss);
-            await bossLedger.exercise(
-              davl3.DAVL.VacationRequest.VacationRequest_Accept,
-              vacationRequestContractId,
-              {},
-            );
-            console.log(`${boss} approved VacationRequest [${fromDate}, ${toDate}] for ${employee}.`);
-          }
-        }
-      }
-    }
-  }
-
-  export const dump = async (ledgerParams: LedgerParams, company: string, file: string) => {
-    const companyLedger = connect(ledgerParams, company);
-
-    const vacationOfVacationContract = (
-      vacationContract: CreateEvent<davl3.DAVL.Vacation>): Vacation => {
-      const { fromDate, toDate} = vacationContract.payload;
-      return ({fromDate, toDate, approved: true});
-    };
-
-    const daysOfVacationContract = (
-      vacationContract: CreateEvent<davl3.DAVL.Vacation>): number => {
-      const { fromDate, toDate } = vacationContract.payload;
-      return days(fromDate, toDate);
-    };
-
-    const vacationOfVacationRequestContract = (
-      vacationRequestContract: CreateEvent<davl3.DAVL.VacationRequest>): Vacation => {
-      const { fromDate, toDate } = vacationRequestContract.payload.vacation;
-      return ({fromDate, toDate, approved: false});
-    }
-
-    const employeeInfoOfEmployeeRoleContract = async (
-      employeeRoleContract: CreateEvent<davl3.DAVL.EmployeeRole>): Promise<[string, EmployeeInfo]> => {
-      const employeeRole = employeeRoleContract.payload;
-      const { employee, boss } = employeeRole;
-      const vacationContracts = await companyLedger.query(davl3.DAVL.Vacation, { employeeRole });
-      const vacationRequestContracts = await companyLedger.query(davl3.DAVL.VacationRequest, { vacation: { employeeRole } });
-      const signedVacations = vacationContracts.map(vacationOfVacationContract);
-      const unsignedVacations = vacationRequestContracts.map(vacationOfVacationRequestContract);
-      const allVacations = signedVacations.concat(unsignedVacations);
-      const employeeVacationAllocationContract = await companyLedger.lookupByKey(davl3.DAVL.EmployeeVacationAllocation, employee);
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const { remainingDays } = employeeVacationAllocationContract!.payload;
-      const bookedDays = vacationContracts.reduce((total, vacationContract) => total + daysOfVacationContract(vacationContract), 0);
-      const vacationDays = bookedDays + Number.parseInt(remainingDays);
-      return [employee,
-              { boss,
-                vacationDays,
-                acceptProposal: true,
-                vacationRequests: allVacations.length == 0 ? undefined : allVacations
-              }];
-    }
-
-    const employeeInfoOfEmployeeProposalContract = (
-      employeeProposalContract: CreateEvent<davl3.DAVL.EmployeeProposal>): [string, EmployeeInfo] => {
-      const employeeProposal = employeeProposalContract.payload;
-      const { employeeRole, vacationDays } = employeeProposal;
-      const { employee, boss } = employeeRole;
-      return [employee,
-              { boss: boss,
-                vacationDays: Number.parseInt(vacationDays),
-                acceptProposal: false,
-                vacationRequests: undefined
-              }];
-    }
-
-    const employeeRoleContracts = await companyLedger.query(davl3.DAVL.EmployeeRole, {});
-    const employeeProposalContracts = await companyLedger.query(davl3.DAVL.EmployeeProposal, {});
-    const signedEmployees = await Promise.all(employeeRoleContracts.map(employeeInfoOfEmployeeRoleContract));
-    const unsignedEmployees = employeeProposalContracts.map(employeeInfoOfEmployeeProposalContract);
-    const employees: { [party: string]: EmployeeInfo } = {}
-    signedEmployees
-      .concat(unsignedEmployees)
-      .forEach(([name, info]) => employees[name] = info);
-    const { ledgerUrl, ledgerId, applicationId, secret } = ledgerParams;
-    const config: Config = { ledgerUrl, ledgerId, applicationId, secret, company, employees };
-    await fs.writeFile(file, JSON.stringify(config, null, 2), { encoding: 'utf8' })
-    console.log(`Dump written to '${file}'.`);
-  }
-
-}//namespace v3
-
-// eslint-disable-next-line @typescript-eslint/no-namespace
-namespace v3v4 {
-
-  export const upgradeInit = async (ledgerParams: LedgerParams, company: string) => {
-    const companyLedger = connect(ledgerParams, company);
-    const employeeRoleContracts = await companyLedger.query(davl3.DAVL.EmployeeRole, {});
-    for (const employeeRole of employeeRoleContracts) {
-      const employee = employeeRole.key;
-      const employeeProposal: davlUpgradev3v4.Upgrade.UpgradeProposal = {
-        employee: employee,
-        company,
-      };
-      await companyLedger.create(davlUpgradev3v4.Upgrade.UpgradeProposal, employeeProposal);
-      console.log(`Created UpgradeProposal for ${employee}.`);
-    }
-  }
-
-  export const upgradeAccept = async (ledgerParams: LedgerParams, company: string) => {
-    const companyLedger = connect(ledgerParams, company);
-    const employeeRoleContracts = await companyLedger.query(davl3.DAVL.EmployeeRole, {});
-    // Create update agreements.
-    for (const employeeRoleContract of employeeRoleContracts) {
-      const employee = employeeRoleContract.key;
-      const employeeLedger = connect(ledgerParams, employee);
-      const [upgradeProposalContract] =
-        await employeeLedger.query(davlUpgradev3v4.Upgrade.UpgradeProposal, { employee });
-      await employeeLedger.exercise(
-        davlUpgradev3v4.Upgrade.UpgradeProposal.UpgradeProposal_Accept,
-        upgradeProposalContract.contractId,
-        {},
-      );
-      console.log(`Accepted UpgradeProposal for ${employee}.`);
-    }
-  }
-
-  export const upgradeFinish = async (ledgerParams: LedgerParams, company: string) => {
-    const companyLedger = connect(ledgerParams, company);
-    const employeeUpgradeAgreementContracts =
-      await companyLedger.query(davlUpgradev3v4.Upgrade.UpgradeAgreement, { company });
-    for (const employeeUpgradeAgreementContract of employeeUpgradeAgreementContracts) {
-      const employee = employeeUpgradeAgreementContract.payload.employee;
-      const employeeRoleContract = await companyLedger.lookupByKey(davl4.DAVL.EmployeeRole, employee);
-      if (employeeRoleContract) {
-        const employeeRole = employeeRoleContract.payload;
-        const vacationRequestContracts = await companyLedger.query(davl3.DAVL.VacationRequest, { vacation: { employeeRole } });
-        if (vacationRequestContracts.length > 0) {
-          for (const vacationRequestContract of vacationRequestContracts) {
-            const { fromDate, toDate } = vacationRequestContract.payload.vacation;
-            await companyLedger.exercise(
-              davlUpgradev3v4.Upgrade.UpgradeAgreement.UpgradeAgreement_UpgradeVacationRequest,
-              employeeUpgradeAgreementContract.contractId,
-              { requestId: vacationRequestContract.contractId });
-            console.log(`Upgraded VacationRequest [${fromDate}, ${toDate}] for ${employee}.`);
-          }
-        }
-        const boss = employeeRole.boss;
-        const [bossUpgradeAgreementContract] =
-          await companyLedger.query(davlUpgradev3v4.Upgrade.UpgradeAgreement, { employee: boss, company });
-        if (bossUpgradeAgreementContract) {
-          const vacationContracts = await companyLedger.query(davl3.DAVL.Vacation, { employeeRole });
-          if (vacationContracts.length > 0) {
-            for (const vacationContract of vacationContracts) {
-              const { fromDate, toDate } = vacationContract.payload;
-              await companyLedger.exercise(
-                davlUpgradev3v4.Upgrade.UpgradeAgreement.UpgradeAgreement_UpgradeVacation,
-                bossUpgradeAgreementContract.contractId,
-                { employeeAgreementId: employeeUpgradeAgreementContract.contractId, vacationId: vacationContract.contractId });
-              console.log(`Upgraded Vaction [${fromDate}, ${toDate}] for ${employee}.`);
-            }
-          }
-        }
-      }
-    }
-  }
-
-} //namespace v3v4
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace v4 {
@@ -531,15 +318,10 @@ namespace v5 {
 namespace cli {
 
   type Cli =
-    | { command: 'v3-init'; file: string }
     | { command: 'v4-init'; file: string }
     | { command: 'v5-init'; file: string }
-    | { command: 'v3-dump'; ledgerParams: LedgerParams; company: string; file: string }
     | { command: 'v4-dump'; ledgerParams: LedgerParams; company: string; file: string }
     | { command: 'v5-dump'; ledgerParams: LedgerParams; company: string; file: string }
-    | { command: 'v3-v4-upgrade-init'; ledgerParams: LedgerParams; company: string }
-    | { command: 'v3-v4-upgrade-accept'; ledgerParams: LedgerParams; company: string }
-    | { command: 'v3-v4-upgrade-finish'; ledgerParams: LedgerParams; company: string }
 
   // The shape of the object returned from yargs.
   type Arguments = {
@@ -561,14 +343,6 @@ namespace cli {
 
     const [cmd] = args["_"] as string[];
     switch (cmd) {
-      case 'v3-init': {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return { command: cmd, file: args.file! };
-      }
-      case 'v3-dump': {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return { command: cmd, ledgerParams: mkLedgerParams(args), company: args.company!, file: args.file! };
-      }
       case 'v4-init': {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return { command: cmd, file: args.file! };
@@ -584,18 +358,6 @@ namespace cli {
       case 'v5-dump': {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return { command: cmd, ledgerParams: mkLedgerParams(args), company: args.company!, file: args.file! };
-      }
-      case 'v3-v4-upgrade-init': {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return { command: cmd, ledgerParams: mkLedgerParams(args), company: args.company! };
-      }
-      case 'v3-v4-upgrade-accept': {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return { command: cmd, ledgerParams: mkLedgerParams(args), company: args.company! };
-      }
-      case 'v3-v4-upgrade-finish': {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return { command: cmd, ledgerParams: mkLedgerParams(args), company: args.company! };
       }
       default: {
         console.error('Unrecognized command "' + cmd + '"');
@@ -725,27 +487,6 @@ namespace cli {
 
   export const run = async (cli: Cli): Promise<void> => {
     switch (cli.command) {
-      case 'v3-init': {
-        const cfg = await config(cli.file);
-        await v3.init(cfg);
-        break;
-      }
-      case 'v3-dump': {
-        await v3.dump(cli.ledgerParams, cli.company, cli.file);
-        break;
-      }
-      case 'v3-v4-upgrade-init': {
-        await v3v4.upgradeInit(cli.ledgerParams, cli.company);
-        break;
-      }
-      case 'v3-v4-upgrade-accept': {
-        await v3v4.upgradeAccept(cli.ledgerParams, cli.company);
-        break;
-      }
-      case 'v3-v4-upgrade-finish': {
-        await v3v4.upgradeFinish(cli.ledgerParams, cli.company);
-        break;
-      }
       case 'v4-init': {
         const cfg = await config(cli.file);
         await v4.init(cfg);
