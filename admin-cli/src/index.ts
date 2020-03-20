@@ -381,16 +381,6 @@ namespace cli {
       .help('h')
       .alias('h', 'help')
       .command({
-        command: 'v3-init',
-        desc: 'Initialze a test ledger',
-        builder: (yargs: Argv) => {
-          yargs.option('f', {
-            alias: 'file', demandOption: true, describe: 'Configuration file', type: 'string'
-          }) },
-      })
-      .example('$0 v3-init -f test-setup.json',
-               'Ledger initialization from configuration file.')
-      .command({
         command: 'v4-init',
         desc: 'Initialze a test ledger',
         builder: (yargs: Argv) => {
@@ -410,18 +400,6 @@ namespace cli {
       })
       .example('$0 v5-init -f test-setup.json',
                'Ledger initialization from configuration file.')
-      .command({
-        command: 'v3-dump',
-        desc: 'Create a v3 ledger dump',
-        builder: (yargs: Argv) => {
-          ledgerParamsBuilder(yargs)
-          .option('company', { demandOption: true, describe: 'Company', type: 'string' })
-          .option('f', {
-            alias: 'file', demandOption: true, describe: 'Filename to dump to', type: 'string'
-          }) },
-      })
-      .example('$0 v3-dump --ledger-params ... -f dump.json',
-               'Dumping the v3 state of a ledger to a file.')
       .command({
         command: 'v4-dump',
         desc: 'Create a v4 ledger dump',
@@ -446,33 +424,6 @@ namespace cli {
       })
       .example('$0 v5-dump --ledger-params ... -f dump.json',
                'Dumping the v5 state of a ledger to a file.')
-      .command({
-        command: 'v3-v4-upgrade-init',
-        desc: 'Create v3/v4 upgrade proposals',
-        builder: (yargs: Argv) =>
-          ledgerParamsBuilder(yargs)
-          .option('company', { demandOption: true, describe: 'Company', type: 'string' })
-      })
-      .example('$0 v3-v4-upgrade-init --ledger-url ...',
-               'Creation of v3/v4 upgrade proposal contracts.')
-      .command({
-        command: 'v3-v4-upgrade-accept',
-        desc: 'Exercise accepts on v3/v4 upgrade proposals',
-        builder: (yargs: Argv) =>
-          ledgerParamsBuilder(yargs)
-          .option('company', { demandOption: true, describe: 'Company', type: 'string' })
-      })
-      .example('$0 v3-v4-upgrade-accept --ledger-url ...',
-               'Exercising accept choices on v3/v4 upgrade proposals.')
-      .command({
-        command: 'v3-v4-upgrade-finish',
-        desc: 'Use approved upgrade agreements to complete v3/v4 contract upgrades',
-        builder: (yargs: Argv) =>
-          ledgerParamsBuilder(yargs)
-          .option('company', { demandOption: true, describe: 'Company', type: 'string' })
-      })
-      .example('$0 v3-v4-upgrade-finish --ledger-url ...',
-               'Upgrade v3 vacation and request contracts to v4.')
       .demandCommand(1, 'Missing command')
       .epilogue('$0 is an administration tool - use with caution!')
       .argv;
