@@ -70,7 +70,7 @@ yarn start
 
 To create a few employees on the running DAVL ledger, run
 ```
-yarn run davl-admin-cli v4-init --file test-setup.json
+yarn run davl-admin-cli v5-init --file test-setup.json
 ```
 
 4. Use the app
