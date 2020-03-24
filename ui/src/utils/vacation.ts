@@ -15,17 +15,25 @@ export type Vacation = {
   version: "v4" | "v5";
 };
 
-// TODO(MH): Ideally, `VacationCreateEvent` and `VacationRequestCreateEvent`
-// would set the third parameter of `CreateEvent` as well. Unfortunately,
-// @daml/react does not properly use this parameter yet. This will be fixed in
-// the next release.
 export type VacationCreateEvent =
-  | CreateEvent<v4.DAVL.Vacation, undefined>
-  | CreateEvent<v5.DAVL.V5.Vacation, undefined>;
+  | CreateEvent<v4.DAVL.Vacation, undefined, typeof v4.DAVL.Vacation.templateId>
+  | CreateEvent<
+      v5.DAVL.V5.Vacation,
+      undefined,
+      typeof v5.DAVL.V5.Vacation.templateId
+    >;
 
 type VacationRequestCreateEvent =
-  | CreateEvent<v4.DAVL.VacationRequest, undefined>
-  | CreateEvent<v5.DAVL.V5.VacationRequest, undefined>;
+  | CreateEvent<
+      v4.DAVL.VacationRequest,
+      undefined,
+      typeof v4.DAVL.VacationRequest.templateId
+    >
+  | CreateEvent<
+      v5.DAVL.V5.VacationRequest,
+      undefined,
+      typeof v5.DAVL.V5.VacationRequest.templateId
+    >;
 
 export const makeVacation = <T extends object>(
   contract: VacationCreateEvent,
@@ -38,10 +46,6 @@ export const makeVacation = <T extends object>(
     case v5.DAVL.V5.Vacation.templateId:
       version = "v5";
       break;
-    default:
-      // NOTE(MH): This is the fallout of the above comment on the third
-      // paramter of `CreateEvent`.
-      throw Error(`Invalid template id for Vacation: ${contract.templateId}`);
   }
   const vacation = contract.payload;
   return {
@@ -65,12 +69,6 @@ export const makeVacationFromRequest = <T extends object>(
     case v5.DAVL.V5.VacationRequest.templateId:
       version = "v5";
       break;
-    default:
-      // NOTE(MH): This is the fallout of the above comment on the third
-      // paramter of `CreateEvent`.
-      throw Error(
-        `Invalid template id for VacationRequest: ${contract.templateId}`,
-      );
   }
   const vacation = contract.payload.vacation;
   return {
