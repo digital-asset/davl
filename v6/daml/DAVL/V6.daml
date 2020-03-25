@@ -22,6 +22,7 @@ template EmployeeRole with
               employeeRole = this
               fromDate
               toDate
+              pendingCancel = False
         create VacationRequest with vacation
 
 template EmployeeProposal with
@@ -96,9 +97,49 @@ template Vacation with
     employeeRole: EmployeeRole
     fromDate: Date
     toDate: Date
+    pendingCancel: Bool
   where
     let EmployeeRole{..} = employeeRole
     signatory [employee, company, boss]
+
+    nonconsuming choice Vacation_RequestCancel: ContractId Vacation
+      controller employee
+      do
+        -- We might want to check that the vacation hasn't already
+        -- started or passed, but you can imagine situations where
+        -- you want to cancel past vacation, e.g. you get called in
+        -- to work anyway for an urgent task. In any case the boss
+        -- needs to approve the cancel request for it to take effect.
+        assertMsg "Cancellation request already requested" $ not pendingCancel
+        archive self
+        create this with pendingCancel = True
+
+    nonconsuming choice Vacation_WithdrawCancel: ContractId Vacation
+      controller employee
+      do
+        assertMsg "No cancellation request to withdraw" pendingCancel
+        archive self
+        create this with pendingCancel = False
+
+    nonconsuming choice Vacation_RejectCancel: ContractId Vacation
+      controller boss
+      do
+        assertMsg "No cancellation request to reject" pendingCancel
+        archive self
+        create this with pendingCancel = False
+
+    nonconsuming choice Vacation_AcceptCancel: ContractId EmployeeVacationAllocation
+      controller boss
+      do
+        assertMsg "No cancellation request to accept" pendingCancel
+        archive self
+        -- Add vacation days back to employee allocation
+        (allocationId, allocation) <- fetchByKey @EmployeeVacationAllocation (key employeeRole)
+        assertMsg "mismatching employee in vacation" $ employeeRole == allocation.employeeRole
+        let days = Date.subDate toDate fromDate + 1
+        let remainingDays = allocation.remainingDays + days
+        archive allocationId
+        create allocation with remainingDays
 
 createEmployee: Party -> Text -> Party -> Int -> Scenario Party
 createEmployee company employee boss vacationDays = do
