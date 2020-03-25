@@ -180,6 +180,23 @@ test = scenario do
 
   assertRemainingDays shaul 20
 
+  -- Cancellation requests
+  submitMustFail yuval do
+    exercise vacationId Vacation_AcceptCancel
+  vacationId2 <- submit shaul do
+    exercise vacationId Vacation_RequestCancel
+  assertRemainingDays shaul 20
+  vacationId3 <- submit shaul do
+    exercise vacationId2 Vacation_WithdrawCancel
+  vacationId4 <- submit shaul do
+    exercise vacationId3 Vacation_RequestCancel
+  submit shaul do
+    vacay <- fetch vacationId4
+    assert vacay.pendingCancel
+  submit yuval do
+    exercise vacationId4 Vacation_AcceptCancel
+  assertRemainingDays shaul 25
+
   let dd2020 = Date.date 2020 Date.Apr 3
   requestId <- submit shaul do
     exerciseByKey @EmployeeRole shaul EmployeeRole_RequestVacation with
@@ -189,10 +206,10 @@ test = scenario do
     exercise requestId VacationRequest_Cancel
   submitMustFail yuval do
     exercise requestId VacationRequest_Accept
-  assertRemainingDays shaul 20
+  assertRemainingDays shaul 25
 
   submit da do
     exerciseByKey @EmployeeVacationAllocation shaul EmployeeVacationAllocation_AddDays with days = 2
-  assertRemainingDays shaul 22
+  assertRemainingDays shaul 27
 
   pure ()
