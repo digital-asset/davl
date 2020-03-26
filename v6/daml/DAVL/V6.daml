@@ -22,7 +22,6 @@ template EmployeeRole with
               employeeRole = this
               fromDate
               toDate
-              pendingCancel = False
         create VacationRequest with vacation
 
 template EmployeeProposal with
@@ -49,7 +48,7 @@ template EmployeeVacationAllocation with
   where
     let EmployeeRole{..} = employeeRole
     signatory [employee, company]
-    observer [boss]
+    observer boss
 
     key employee: Party
     maintainer key
@@ -97,12 +96,11 @@ template Vacation with
     employeeRole: EmployeeRole
     fromDate: Date
     toDate: Date
-    pendingCancel: Bool
   where
     let EmployeeRole{..} = employeeRole
     signatory [employee, company, boss]
 
-    nonconsuming choice Vacation_RequestCancel: ContractId Vacation
+    nonconsuming choice Vacation_RequestCancel: ContractId VacationCancelRequest
       controller employee
       do
         -- We might want to check that the vacation hasn't already
@@ -110,32 +108,50 @@ template Vacation with
         -- you want to cancel past vacation, e.g. you get called in
         -- to work anyway for an urgent task. In any case the boss
         -- needs to approve the cancel request for it to take effect.
-        assertMsg "Cancellation request already requested" $ not pendingCancel
-        archive self
-        create this with pendingCancel = True
+        create VacationCancelRequest with vacationId = self, vacation = this
 
-    nonconsuming choice Vacation_WithdrawCancel: ContractId Vacation
+template VacationCancelRequest with
+    vacationId: ContractId Vacation
+    vacation: Vacation
+  where
+    let Vacation{..} = vacation
+        EmployeeRole{..} = employeeRole
+
+        -- Ensure the cancel request corresponds to an active vacation.
+        validateVacation: Update ()
+        validateVacation = do
+          vacation' <- fetch vacationId
+          assertMsg "Vacation ID does not match provided vacation details" $ vacation' == vacation
+
+    signatory [employee, company]
+    observer boss
+
+    -- Ensure at most one cancel request per vacation.
+    key vacation: Vacation
+    maintainer key.employeeRole.employee
+
+    nonconsuming choice VacationCancelRequest_Withdraw: ()
       controller employee
       do
-        assertMsg "No cancellation request to withdraw" pendingCancel
+        validateVacation
         archive self
-        create this with pendingCancel = False
 
-    nonconsuming choice Vacation_RejectCancel: ContractId Vacation
+    nonconsuming choice VacationCancelRequest_Reject: ()
       controller boss
       do
-        assertMsg "No cancellation request to reject" pendingCancel
+        validateVacation
         archive self
-        create this with pendingCancel = False
 
-    nonconsuming choice Vacation_AcceptCancel: ContractId EmployeeVacationAllocation
+    nonconsuming choice VacationCancelRequest_Accept: ContractId EmployeeVacationAllocation
       controller boss
       do
-        assertMsg "No cancellation request to accept" pendingCancel
+        validateVacation
         archive self
-        -- Add vacation days back to employee allocation
+        archive vacationId
+        -- Restore vacation days to employee allocation.
         (allocationId, allocation) <- fetchByKey @EmployeeVacationAllocation (key employeeRole)
-        assertMsg "mismatching employee in vacation" $ employeeRole == allocation.employeeRole
+        assertMsg "Employee details in vacation allocation do not match those in vacation cancel request" $
+          allocation.employeeRole == employeeRole
         let days = Date.subDate toDate fromDate + 1
         let remainingDays = allocation.remainingDays + days
         archive allocationId
@@ -181,20 +197,34 @@ test = scenario do
   assertRemainingDays shaul 20
 
   -- Cancellation requests
-  submitMustFail yuval do
-    exercise vacationId Vacation_AcceptCancel
-  vacationId2 <- submit shaul do
+  cancelRequest <- submit shaul do
     exercise vacationId Vacation_RequestCancel
-  assertRemainingDays shaul 20
-  vacationId3 <- submit shaul do
-    exercise vacationId2 Vacation_WithdrawCancel
-  vacationId4 <- submit shaul do
-    exercise vacationId3 Vacation_RequestCancel
+  -- Cannot request to cancel same vacation twice
+  submitMustFail shaul do
+    exercise vacationId Vacation_RequestCancel
   submit shaul do
-    vacay <- fetch vacationId4
-    assert vacay.pendingCancel
+    exercise cancelRequest VacationCancelRequest_Withdraw
+  -- Vacation still active
+  submit shaul do fetch vacationId
+  submitMustFail shaul do fetch cancelRequest
+  assertRemainingDays shaul 20
+
+  cancelRequest2 <- submit shaul do
+    exercise vacationId Vacation_RequestCancel
   submit yuval do
-    exercise vacationId4 Vacation_AcceptCancel
+    exercise cancelRequest2 VacationCancelRequest_Reject
+  -- Vacation still active
+  submit shaul do fetch vacationId
+  submitMustFail shaul do fetch cancelRequest2
+  assertRemainingDays shaul 20
+
+  cancelRequest3 <- submit shaul do
+    exercise vacationId Vacation_RequestCancel
+  submit yuval do
+    exercise cancelRequest3 VacationCancelRequest_Accept
+  -- Vacation should be archived and allocation added
+  submitMustFail shaul do fetch vacationId
+  submitMustFail shaul do fetch cancelRequest3
   assertRemainingDays shaul 25
 
   let dd2020 = Date.date 2020 Date.Apr 3
