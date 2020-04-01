@@ -27,9 +27,10 @@ const MainScreen: React.FC<Props> = props => {
             size="mini"
           />
         </Menu.Item>
-        <Menu.Menu position="right">
+        <Menu.Menu position="right" className='test-select-main-menu'>
           <Menu.Item position="right">You are logged in as {party}.</Menu.Item>
           <Menu.Item
+            className='test-select-log-out'
             position="right"
             active={false}
             onClick={props.onLogout}

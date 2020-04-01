@@ -190,10 +190,11 @@ const LoginScreen: React.FC<Props> = props => {
         >
           <Header.Content>Digital Asset Vacation Ledger v5</Header.Content>
         </Header>
-        <Form size="large">
+        <Form size="large" className='test-select-login-screen'>
           <Segment>
             <Form.Input
               fluid
+              className='test-select-username-field'
               icon="user"
               iconPosition="left"
               placeholder="Username"
@@ -203,6 +204,7 @@ const LoginScreen: React.FC<Props> = props => {
             />
             <Form.Input
               fluid
+              className='test-select-password-field'
               icon="lock"
               iconPosition="left"
               placeholder="Password"
@@ -214,6 +216,7 @@ const LoginScreen: React.FC<Props> = props => {
             <Button.Group fluid size="large">
               <Button
                 primary
+                className='test-select-login-button'
                 loading={status === Status.LoggingIn}
                 onClick={handleLogin}
               >
@@ -221,6 +224,7 @@ const LoginScreen: React.FC<Props> = props => {
               </Button>
               <Button
                 secondary
+                className='test-select-signup-button'
                 loading={status === Status.SigningUp}
                 onClick={handleSignup}
               >
