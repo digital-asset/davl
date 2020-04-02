@@ -9,13 +9,8 @@
     "@daml/ledger": "0.13.56-snapshot.20200318.3529.0.6ea118d6",
     "@daml/react": "0.13.56-snapshot.20200318.3529.0.6ea118d6",
     "@daml/types": "0.13.56-snapshot.20200318.3529.0.6ea118d6",
-    "@types/puppeteer": "^2.0.1",
-    "@types/tmp": "0.1.0",
-    "@types/jwt-simple": "^0.5.33",
     "fp-ts": "^2.1.1",
     "jwt-simple": "^0.5.6",
-    "puppeteer": "^2.1.1",
-    "tmp": "0.1.0",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "react-scripts": "3.3.0",
@@ -24,13 +19,12 @@
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^0.88.1",
     "typescript": "~3.7.3",
-    "@types/wait-on": "^4.0.0",
     "wait-on": "^4.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "tsc&&react-scripts test --testURL='http://localhost:7575/'",
+    "test": "tsc --noEmit&&react-scripts test --testURL='http://localhost:7575/'",
     "eject": "react-scripts eject",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx --max-warnings 0 src/"
   },
@@ -48,12 +42,20 @@
   },
   "proxy": "http://localhost:7575",
   "devDependencies": {
+    "puppeteer": "^2.1.1",
     "@types/jest": "^24.0.18",
     "@types/node": "^13.5.0",
     "@types/react": "^16.9.16",
     "@types/react-dom": "^16.9.4",
+    "@types/puppeteer": "^2.0.1",
+    "@types/tmp": "0.1.0",
+    "@types/jwt-simple": "^0.5.33",
+    "@types/wait-on": "^4.0.0",
     "@typescript-eslint/parser": "^2.6.0",
     "eslint": "^6.6.0",
-    "eslint-config-react-app": "^5.2.0"
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-config-react-app": "^5.2.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "prettier": "^1.19.1"
   }
 }
