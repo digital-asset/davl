@@ -71,95 +71,12 @@ jobs:
 
           export PATH=$HOME/.daml/bin:$PATH
 
-          get_tag () {
-              TZ=UTC git log -n1 --date=format-local:%Y%m%d%H%M --format=format:%cd-%h --abbrev=6 -- $@
-          }
-          tag_exists () {
-              gcloud container images list-tags gcr.io/da-dev-pinacolada/$1 | grep -q $2
-          }
-          tell_slack () {
-              local MESSAGE=$(git log --pretty=format:%s -n1)
-              curl -XPOST \
-                   -i \
-                   -H 'Content-type: application/json' \
-                   --data "{\"text\":\"<https://dev.azure.com/digitalasset/davl/_build/results?buildId=$(Build.BuildId)|$MESSAGE>: uploaded $1\n\"}" \
-                   $(Slack.URL)
-          }
+          docker/build-images.sh
 
-          GCS_KEY=$(mktemp)
-          cleanup () {
-              rm -f $GCS_KEY
-          }
-          trap cleanup EXIT
-          echo "$GOOGLE_APPLICATION_CREDENTIALS_CONTENT" > $GCS_KEY
-          gcloud auth activate-service-account --key-file=$GCS_KEY
-          gcloud auth configure-docker --quiet
-          SDK_VERSION=$(cat SDK_VERSION)
-
-          SANDBOX_TAG=$(get_tag released SDK_VERSION docker/sandbox.docker)
-          if tag_exists sandbox $SANDBOX_TAG; then
-              echo "sandbox $SANDBOX_TAG already exists."
-          else
-              echo "Building sandbox image version $SANDBOX_TAG..."
-              SANDBOX_IMAGE=gcr.io/da-dev-pinacolada/sandbox:$SANDBOX_TAG
-              DOCKER_DIR=$(mktemp -d)
-              cp -r released $DOCKER_DIR/released
-              cp -r $HOME/.daml/sdk/$SDK_VERSION/daml-sdk $DOCKER_DIR/daml-sdk
-              docker build -t $SANDBOX_IMAGE -f docker/sandbox.docker --build-arg sdk_version=$(cat SDK_VERSION) $DOCKER_DIR
-              docker push $SANDBOX_IMAGE
-              echo "Done building $SANDBOX_IMAGE."
-              tell_slack sandbox:$SANDBOX_TAG
-          fi
-
-          JSON_API_TAG=$(get_tag SDK_VERSION docker/json-api.docker)
-          if tag_exists json-api $JSON_API_TAG; then
-              echo "json-api $JSON_API_TAG already exists."
-          else
-              echo "Building json-api image version $JSON_API_TAG..."
-              JSON_API_IMAGE=gcr.io/da-dev-pinacolada/json-api:$JSON_API_TAG
-              DOCKER_DIR=$(mktemp -d)
-              cp -r $HOME/.daml/sdk/$SDK_VERSION/daml-sdk $DOCKER_DIR/daml-sdk
-              docker build -t $JSON_API_IMAGE -f docker/json-api.docker $DOCKER_DIR
-              docker push $JSON_API_IMAGE
-              echo "Done building $JSON_API_IMAGE."
-              tell_slack json-api:$JSON_API_TAG
-          fi
-
-          UI_TAG=$(get_tag ui docker/nginx.docker docker/nginx.conf.sh)
-          if tag_exists ui $UI_TAG; then
-              echo "ui $UI_TAG already exists."
-          else
-              echo "Building ui image version $UI_TAG..."
-              UI_IMAGE=gcr.io/da-dev-pinacolada/ui:$UI_TAG
-              DOCKER_DIR=$(mktemp -d)
-              (cd ui && yarn build)
-              cp -r ui/build $DOCKER_DIR/ui
-              cp docker/nginx.conf.sh $DOCKER_DIR/nginx.conf.sh
-              docker build -t $UI_IMAGE -f docker/nginx.docker $DOCKER_DIR
-              docker push $UI_IMAGE
-              echo "Done building $UI_IMAGE."
-              tell_slack ui:$UI_TAG
-          fi
-
-          TRIGGER_TAG=$(get_tag upgrade-v4-v5-automation SDK_VERSION docker/trigger.docker)
-          if tag_exists trigger $TRIGGER_TAG; then
-              echo "trigger $TRIGGER_TAG already exists."
-          else
-              echo "Building trigger image version $TRIGGER_TAG..."
-              TRIGGER_IMAGE=gcr.io/da-dev-pinacolada/trigger:$TRIGGER_TAG
-              DOCKER_DIR=$(mktemp -d)
-              echo '{"company": "Digital Asset"}' > $DOCKER_DIR/init.json
-              cd upgrade-v4-v5-automation
-              daml build -o $DOCKER_DIR/automation.dar
-              cd -
-              cp -r $HOME/.daml/sdk/$SDK_VERSION/daml-sdk $DOCKER_DIR/daml-sdk
-              docker build -t $TRIGGER_IMAGE -f docker/trigger.docker $DOCKER_DIR
-              docker push $TRIGGER_IMAGE
-              echo "Done building $TRIGGER_IMAGE."
-              tell_slack trigger:$TRIGGER_TAG
-          fi
         env:
-          GOOGLE_APPLICATION_CREDENTIALS_CONTENT: $(GOOGLE_APPLICATION_CREDENTIALS_CONTENT)
+          GCS_CREDS: $(GOOGLE_APPLICATION_CREDENTIALS_CONTENT)
+          BUILD_NUMBER: $(Build.BuildId)
+          SLACK_URL: $(Slack.URL)
         displayName: create-docker-images
         condition: in(variables['Build.SourceBranch'], 'refs/heads/master', 'master')
 
