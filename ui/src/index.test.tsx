@@ -121,15 +121,41 @@ const logout = async (page: Page): Promise<void> => {
 ////////////////////////////////////////////////////////////////////////////////
 // Tests
 
-test("all resources acquired", () => {
+test("All resources acquired", () => {
   expect(damlPlatform).toBeDefined();
   expect(ui).toBeDefined();
   expect(browser).toBeDefined();
 });
 
-test("exisiting user can log in and log out", async () => {
+test("Martin can log in and log out", async () => {
   const page = await newPage();
   await login(page, "Martin");
+  await logout(page);
+  await page.close();
+}, 50_000);
+
+test("Martin can approve Shayne's pending vacation", async () => {
+  const page = await newPage();
+  await login(page, "Martin");
+  const approve = await page.waitForXPath(
+    "/html/body/div[1]/div[2]/div/div[2]/div/div[2]/div/div/div[1]/i",
+  );
+  await approve.click();
+  await logout(page);
+  await page.close();
+}, 50_000);
+
+test("Robin can log in, request vacation and log out", async () => {
+  const page = await newPage();
+  await login(page, "Robin");
+  await page.type("#date-range-picker", "2020-04-06 - 2020-04-06");
+  // Although we can set the value of the picker with the above, it
+  // does not result in a 'change' event.
+
+  // const request = await page.waitForXPath(
+  //   "/html/body/div[1]/div[2]/div/div[1]/div/div[2]/div/div/div[1]/i",
+  // );
+  // await request.click();
   await logout(page);
   await page.close();
 }, 50_000);
