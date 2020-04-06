@@ -8,3 +8,5 @@ node_modules
 daml-ledger
 daml-react
 daml-types
+.DS_Store
+*.png

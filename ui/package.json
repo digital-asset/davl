@@ -23,7 +23,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --testURL='http://localhost:7575'",
+    "test": "tsc --noEmit&&react-scripts test --testURL='http://localhost:7575/'",
     "eject": "react-scripts eject",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx --max-warnings 0 src/"
   },
@@ -41,11 +41,16 @@
   },
   "proxy": "http://localhost:7575",
   "devDependencies": {
+    "puppeteer": "^2.1.1",
+    "wait-on": "^4.0.1",
     "@types/jest": "^24.0.18",
     "@types/jwt-simple": "^0.5.33",
     "@types/node": "^13.5.0",
     "@types/react": "^16.9.16",
     "@types/react-dom": "^16.9.4",
+    "@types/puppeteer": "^2.0.1",
+    "@types/tmp": "0.1.0",
+    "@types/wait-on": "^4.0.0",
     "@typescript-eslint/parser": "^2.6.0",
     "eslint": "^6.6.0",
     "eslint-config-prettier": "^6.10.0",

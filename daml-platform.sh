@@ -13,6 +13,7 @@ export DAML_SDK_VERSION=$(cat $DIR/SDK_VERSION)
 
 daml sandbox --port $LEDGER_PORT --ledgerid $LEDGER_ID --wall-clock-time &
 SANDBOX_PID=$!
+
 kill_sandbox() {
   kill $SANDBOX_PID || true
 }
@@ -35,11 +36,12 @@ NAVIGATOR_PID=$!
 daml json-api --ledger-host $LEDGER_HOST --ledger-port $LEDGER_PORT --http-port $JSON_API_PORT 2>&1 1> $DIR/json-api.log &
 JSON_API_PID=$!
 
-kill_navigator_json_api() {
+kill_everything() {
   kill $NAVIGATOR_PID || true
   kill $JSON_API_PID || true
+  kill $SANDBOX_PID || true
 }
-trap kill_navigator_json_api EXIT
+trap kill_everything EXIT
 
 echo "Everything started. Press Ctrl-C to exit."
 fg %1
