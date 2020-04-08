@@ -92,6 +92,104 @@ STARTUP
   }
 }
 
+resource "google_storage_bucket" "db-backups" {
+  name = "davl-db-backups"
+
+  storage_class = "REGIONAL"
+
+  # keep 60 days of backups
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      age = "60" # days
+    }
+  }
+}
+
+resource "google_compute_instance" "backed-up-db" {
+  name         = "db"
+  machine_type = "n1-standard-2"
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-1804-lts"
+    }
+  }
+
+  network_interface {
+    network    = "${data.google_compute_network.network.self_link}"
+    subnetwork = "${data.google_compute_subnetwork.subnet.self_link}"
+    access_config {
+      // auto-generate ephemeral IP
+    }
+  }
+
+  metadata_startup_script = <<STARTUP
+set -euxo pipefail
+
+apt-get update
+apt-get install -y docker.io
+
+log() {
+  echo "$(date -Is -u) $1" >> /root/log 2>&1
+}
+
+log "boot"
+
+LATEST_BACKUP_GCS=$(gsutil ls ${google_storage_bucket.db-backups.url} | sort | tail -1)
+LATEST_BACKUP=/backup/$(basename $LATEST_BACKUP_GCS)
+mkdir /backup
+gsutil cp $LATEST_BACKUP_GCS $LATEST_BACKUP
+
+log "fetched $LATEST_BACKUP_GCS"
+
+docker run -d \
+           --name pg \
+           -e POSTGRES_USER=davl \
+           -e POSTGRES_PASSWORD=s3cr3t \
+           -e POSTGRES_DB=davl-db \
+           -e PGDATA=/var/lib/postgresql/data/pgdata \
+           -v /db:/var/lib/postgresql/data \
+           -v /backup:/backup \
+           -p 5432:5432 \
+           postgres:11.5-alpine
+
+log "started pg"
+
+# Note: because /backup is mounted on /backup, path will work inside the
+# container too.
+docker exec -ti pg bash -c "psql davl-db -U davl < $LATEST_BACKUP"
+
+log "restored $LATEST_BACKUP"
+
+cat <<CRON > /root/backup.sh
+#!/usr/bin/env bash
+set -euo pipefail
+echo "\$(date -Is -u) start backup"
+
+TMP=\$(mktemp)
+BACKUP=\$(date -u +%Y%d%m%H%M%SZ).gz
+docker exec -ti pg pg_dump -U davl -d davl-db | gzip -9 > \$TMP
+gsutil cp \$TMP ${google_storage_bucket.db-backups.url}/\$BACKUP
+rm \$TMP
+
+echo "\$(date -Is -u) end backup"
+CRON
+
+chmod +x /root/backup.sh
+
+cat <<CRONTAB >> /etc/crontab
+0 * * * * root /root/backup.sh >> /root/log 2>&1
+CRONTAB
+
+tail -f /root/log
+
+
+STARTUP
+}
+
 resource "google_compute_instance" "ledger" {
   name         = "ledger"
   machine_type = "n1-standard-2"
