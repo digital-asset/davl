@@ -15,7 +15,6 @@
     "outDir": "lib/",
     "module": "commonjs",
     "moduleResolution": "node",
-    "esModuleInterop": true,
     "sourceMap": true
   },
   "include": ["src/**/*.ts"],

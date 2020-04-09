@@ -4,8 +4,8 @@ import { Vacation, prettyRequests, splitVacations } from "../../utils/vacation";
 import { Segment } from "semantic-ui-react";
 import Staff from "./Staff";
 import { useStreamQuery, useParty, useLedger } from "@daml/react";
-import v4 from "@daml.js/davl-0.0.4";
-import v5 from "@daml.js/davl-0.0.5";
+import * as v4 from "@daml.js/davl-0.0.4";
+import * as v5 from "@daml.js/davl-0.0.5";
 import { ContractId } from "@daml/types";
 import { toast } from "react-semantic-toasts";
 

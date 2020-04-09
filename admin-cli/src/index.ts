@@ -2,8 +2,8 @@ import { promises as fs } from 'fs';
 import { encode } from 'jwt-simple';
 import Ledger from '@daml/ledger';
 import { CreateEvent } from '@daml/ledger';
-import davl4 from '@daml.js/davl-0.0.4';
-import davl5 from '@daml.js/davl-0.0.5';
+import * as davl4 from '@daml.js/davl-0.0.4';
+import * as davl5 from '@daml.js/davl-0.0.5';
 import { Argv } from 'yargs'; // Nice docs : http://yargs.js.org/
 
 type Vacation = {
@@ -81,7 +81,7 @@ namespace v4 {
       for (const vacationRequest of employeeInfo.vacationRequests ?? []) {
         const { fromDate, toDate } = vacationRequest;
         const employeeLedger = connect(config, employee);
-        const employeeRoleContract = await employeeLedger.lookupByKey(davl4.DAVL.EmployeeRole, employee);
+        const employeeRoleContract = await employeeLedger.fetchByKey(davl4.DAVL.EmployeeRole, employee);
         if (employeeRoleContract) {
           const numDays = days(fromDate, toDate);
           console.log(`Request of ${numDays} days(s) found for ${employee}.`);
@@ -137,7 +137,7 @@ namespace v4 {
       const signedVacations = vacationContracts.map(vacationOfVacationContract);
       const unsignedVacations = vacationRequestContracts.map(vacationOfVacationRequestContract);
       const allVacations = signedVacations.concat(unsignedVacations);
-      const employeeVacationAllocationContract = await companyLedger.lookupByKey(davl4.DAVL.EmployeeVacationAllocation, employee);
+      const employeeVacationAllocationContract = await companyLedger.fetchByKey(davl4.DAVL.EmployeeVacationAllocation, employee);
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const { remainingDays } = employeeVacationAllocationContract!.payload;
       const bookedDays = vacationContracts.reduce((total, vacationContract) => total + daysOfVacationContract(vacationContract), 0);
@@ -215,7 +215,7 @@ namespace v5 {
       for (const vacationRequest of employeeInfo.vacationRequests ?? []) {
         const { fromDate, toDate } = vacationRequest;
         const employeeLedger = connect(config, employee);
-        const employeeRoleContract = await employeeLedger.lookupByKey(davl5.DAVL.V5.EmployeeRole, employee);
+        const employeeRoleContract = await employeeLedger.fetchByKey(davl5.DAVL.V5.EmployeeRole, employee);
         if (employeeRoleContract) {
           const numDays = days(fromDate, toDate);
           console.log(`Request of ${numDays} days(s) found for ${employee}.`);
@@ -271,7 +271,7 @@ namespace v5 {
       const signedVacations = vacationContracts.map(vacationOfVacationContract);
       const unsignedVacations = vacationRequestContracts.map(vacationOfVacationRequestContract);
       const allVacations = signedVacations.concat(unsignedVacations);
-      const employeeVacationAllocationContract = await companyLedger.lookupByKey(davl5.DAVL.V5.EmployeeVacationAllocation, employee);
+      const employeeVacationAllocationContract = await companyLedger.fetchByKey(davl5.DAVL.V5.EmployeeVacationAllocation, employee);
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const { remainingDays } = employeeVacationAllocationContract!.payload;
       const bookedDays = vacationContracts.reduce((total, vacationContract) => total + daysOfVacationContract(vacationContract), 0);

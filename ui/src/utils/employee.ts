@@ -1,8 +1,8 @@
 import { Party } from "@daml/types";
 import { CreateEvent } from "@daml/ledger";
 import { ordString, Ord, contramap } from "fp-ts/lib/Ord";
-import v4 from "@daml.js/davl-0.0.4";
-import v5 from "@daml.js/davl-0.0.5";
+import * as v4 from "@daml.js/davl-0.0.4";
+import * as v5 from "@daml.js/davl-0.0.5";
 
 export type EmployeeSummary = {
   employee: Party;

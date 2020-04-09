@@ -12,7 +12,7 @@ import { VacationListItem } from "../../components/VacationListItem";
 import { vacationLength, prettyRequests, Vacation } from "../../utils/vacation";
 import { ContractId } from "@daml/types";
 import { useStreamQuery, useParty, useLedger } from "@daml/react";
-import v5 from "@daml.js/davl-0.0.5";
+import * as v5 from "@daml.js/davl-0.0.5";
 import { EmployeeSummary } from "../../utils/employee";
 import { toast } from "react-semantic-toasts";
 
