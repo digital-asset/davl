@@ -4,7 +4,10 @@ set -euo pipefail
 
 BUILD_NUMBER=${BUILD_NUMBER:-unset}
 SLACK_URL=${SLACK_URL:-unset}
-GCS_CREDS=${GOOGLE_APPLICATION_CREDENTIALS_CONTENT:-unset}
+GCS_CREDS=${GCS_CREDS:-unset}
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd $DIR/..
 
 SDK_VERSION=$(cat SDK_VERSION)
 
@@ -14,14 +17,11 @@ else
     curl https://get.daml.com | sh -s $SDK_VERSION
 fi
 
-if [ "$BUILD_NUMBER" != "unset" ] && [ "$SLACK_URL" != "unset" ] && ["$GCS_CREDS" != "unset" ]; then
+if [ "$BUILD_NUMBER" != "unset" ] && [ "$SLACK_URL" != "unset" ] && [ "$GCS_CREDS" != "unset" ]; then
     CI="yes"
 else
     CI="no"
 fi
-
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-cd $DIR/..
 
 get_tag () {
     TZ=UTC git log -n1 --date=format-local:%Y%m%d%H%M --format=format:%cd-%h --abbrev=6 -- $@
