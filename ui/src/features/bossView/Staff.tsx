@@ -1,8 +1,8 @@
 import React from "react";
 import { Segment, Header, List } from "semantic-ui-react";
 import { useStreamQuery, useParty } from "@daml/react";
-import v4 from "@daml.js/davl-0.0.4";
-import v5 from "@daml.js/davl-0.0.5";
+import * as v4 from "@daml.js/davl-0.0.4";
+import * as v5 from "@daml.js/davl-0.0.5";
 import { prettyEmployeeSummaries } from "../../utils/employee";
 
 const Staff: React.FC = () => {

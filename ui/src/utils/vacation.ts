@@ -1,7 +1,7 @@
 import { Party, ContractId } from "@daml/types";
 import { CreateEvent } from "@daml/ledger";
-import v4 from "@daml.js/davl-0.0.4";
-import v5 from "@daml.js/davl-0.0.5";
+import * as v4 from "@daml.js/davl-0.0.4";
+import * as v5 from "@daml.js/davl-0.0.5";
 import { contramap, Ord, ordString, getDualOrd } from "fp-ts/lib/Ord";
 import { partition } from "fp-ts/lib/Array";
 import moment from "moment";
