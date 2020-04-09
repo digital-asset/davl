@@ -11,7 +11,7 @@ JSON_API_PORT=7575
 
 export DAML_SDK_VERSION=$(cat $DIR/SDK_VERSION)
 
-daml sandbox --port $LEDGER_PORT --ledgerid $LEDGER_ID --wall-clock-time &
+daml sandbox-classic --port $LEDGER_PORT --ledgerid $LEDGER_ID --wall-clock-time &
 SANDBOX_PID=$!
 
 kill_sandbox() {
