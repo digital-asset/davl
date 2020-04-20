@@ -19,6 +19,8 @@ jobs:
     timeoutInMinutes: 120
     pool:
       vmImage: "Ubuntu-16.04"
+    variables:
+      is_master: $[ eq(variables['Build.SourceBranch'], 'refs/heads/master') ]
     steps:
       - checkout: self
 
@@ -145,6 +147,22 @@ jobs:
           cd infra
           $terraform init
 
+          echo "Sanity check for Terraform config."
+          # `terraform plan` checks the difference between the tf files and
+          # the current (real) state of the deployed system and emits a plan
+          # for what would need to be changed, but doesn't actually change
+          # anything. The goal here is to check that:
+          # 1. The Terraform files are (still) well-formed, and
+          # 2. The CI runner still has all the permissions it needs to at least
+          #    check if anything needs to be redeployed.
+          $terraform plan -var-file=deployed-versions.tfvars
+          # "False" is the string returned by Azure expressions for the boolean
+          # value false.
+          if [ "$IS_MASTER" = "False" ]; then
+            # We're on a PR so we stop here.
+            exit 0
+          fi
+
           if previous_commit_reflects_deployment; then
               if current_commit_changes_infra; then
                   tell_slack "<!here> *WARNING*: Latest commit changes infra. Please apply manually."
@@ -172,8 +190,8 @@ jobs:
           fi
         env:
           GOOGLE_APPLICATION_CREDENTIALS_CONTENT: $(GOOGLE_APPLICATION_CREDENTIALS_CONTENT)
+          IS_MASTER: $(is_master)
         displayName: deploy
-        condition: in(variables['Build.SourceBranch'], 'refs/heads/master', 'master')
 
       - bash: |
           set -euo pipefail
