@@ -95,7 +95,7 @@ STARTUP
 resource "google_storage_bucket" "db-backups" {
   name = "davl-db-backups"
 
-  storage_class = "REGIONAL"
+  storage_class = "STANDARD"
 
   # keep 60 days of backups
   lifecycle_rule {
@@ -109,6 +109,7 @@ resource "google_storage_bucket" "db-backups" {
 }
 
 resource "google_compute_instance" "backed-up-db" {
+  count        = 0
   name         = "db"
   machine_type = "n1-standard-2"
 
