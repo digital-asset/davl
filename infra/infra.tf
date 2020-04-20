@@ -197,7 +197,9 @@ tail -f /root/log
 STARTUP
 }
 
+/*
 resource "google_compute_instance" "ledger" {
+  count        = 0
   name         = "ledger"
   machine_type = "n1-standard-2"
 
@@ -284,6 +286,7 @@ STARTUP
 }
 
 resource "google_compute_instance" "proxy" {
+  count        = 0
   name         = "proxy-${var.ui}"
   machine_type = "n1-standard-2"
 
@@ -328,6 +331,7 @@ docker run -p 8081:8081 -p 8080:8080 -e NAVIGATOR_IP_PORT=${google_compute_insta
 
 STARTUP
 }
+*/
 
 resource "google_compute_address" "proxy" {
   name         = "proxy"
@@ -339,7 +343,7 @@ resource "google_compute_address" "proxy" {
 // machine.
 resource "google_compute_instance_group" "frontend" {
   name      = "frontend"
-  instances = ["${google_compute_instance.proxy.self_link}"]
+  instances = [/*"${google_compute_instance.proxy.self_link}"*/]
   named_port {
     name = "http"
     port = "8081"
