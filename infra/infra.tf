@@ -180,7 +180,7 @@ echo "\$(date -Is -u) start backup"
 TMP=\$(mktemp)
 BACKUP=\$(date -u +%Y%d%m%H%M%SZ).gz
 docker exec pg pg_dump -U davl -d davl-db | gzip -9 > \$TMP
-gsutil cp \$TMP ${google_storage_bucket.db-backups.url}/\$BACKUP
+$(which gsutil) cp \$TMP ${google_storage_bucket.db-backups.url}/\$BACKUP
 rm \$TMP
 
 echo "\$(date -Is -u) end backup"
