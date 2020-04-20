@@ -197,9 +197,7 @@ tail -f /root/log
 STARTUP
 }
 
-/*
 resource "google_compute_instance" "ledger" {
-  count        = 0
   name         = "ledger"
   machine_type = "n1-standard-2"
 
@@ -234,11 +232,11 @@ gcloud components install docker-credential-gcr
 gcloud auth configure-docker --quiet
 
 # Wait for postgres machine to be listening
-while ! nc -z ${google_compute_instance.db.network_interface.0.network_ip} 5432; do
+while ! nc -z ${google_compute_instance.backed-up-db.network_interface.0.network_ip} 5432; do
   sleep 1
 done
 
-docker run --name sandbox -d -p 127.0.0.1:6865:6865 gcr.io/da-dev-pinacolada/sandbox:${var.sandbox} --sql-backend-jdbcurl 'jdbc:postgresql://${google_compute_instance.db.network_interface.0.network_ip}/davl-db?user=davl&password=s3cr3t'
+docker run --name sandbox -d -p 127.0.0.1:6865:6865 gcr.io/da-dev-pinacolada/sandbox:${var.sandbox} --sql-backend-jdbcurl 'jdbc:postgresql://${google_compute_instance.backed-up-db.network_interface.0.network_ip}/davl-db?user=davl&password=s3cr3t'
 
 # Wait for ledger to be ready
 docker exec sandbox /bin/sh -c "while ! nc -z localhost:6865; do sleep 1; done"
@@ -286,7 +284,6 @@ STARTUP
 }
 
 resource "google_compute_instance" "proxy" {
-  count        = 0
   name         = "proxy-${var.ui}"
   machine_type = "n1-standard-2"
 
@@ -331,7 +328,6 @@ docker run -p 8081:8081 -p 8080:8080 -e NAVIGATOR_IP_PORT=${google_compute_insta
 
 STARTUP
 }
-*/
 
 resource "google_compute_address" "proxy" {
   name         = "proxy"
@@ -343,7 +339,7 @@ resource "google_compute_address" "proxy" {
 // machine.
 resource "google_compute_instance_group" "frontend" {
   name      = "frontend"
-  instances = [/*"${google_compute_instance.proxy.self_link}"*/]
+  instances = ["${google_compute_instance.proxy.self_link}"]
   named_port {
     name = "http"
     port = "8081"
