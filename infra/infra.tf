@@ -92,6 +92,111 @@ STARTUP
   }
 }
 
+resource "google_storage_bucket" "db-backups" {
+  name = "davl-db-backups"
+
+  storage_class = "STANDARD"
+
+  # keep 60 days of backups
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      age = "60" # days
+    }
+  }
+}
+
+resource "google_compute_instance" "backed-up-db" {
+  name         = "backed-up-db"
+  machine_type = "n1-standard-2"
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-1804-lts"
+    }
+  }
+
+  network_interface {
+    network    = "${data.google_compute_network.network.self_link}"
+    subnetwork = "${data.google_compute_subnetwork.subnet.self_link}"
+    access_config {
+      // auto-generate ephemeral IP
+    }
+  }
+
+  service_account {
+    scopes = ["https://www.googleapis.com/auth/devstorage.read_write"]
+  }
+
+  metadata_startup_script = <<STARTUP
+set -euxo pipefail
+
+apt-get update
+apt-get install -y docker.io
+
+log() {
+  echo "$(date -Is -u) $1" >> /root/log 2>&1
+}
+
+log "boot"
+
+LATEST_BACKUP_GCS=$(gsutil ls ${google_storage_bucket.db-backups.url} | sort | tail -1)
+LATEST_BACKUP=/backup/$(basename $LATEST_BACKUP_GCS)
+mkdir /backup
+gsutil cp $LATEST_BACKUP_GCS $LATEST_BACKUP
+
+log "fetched $LATEST_BACKUP_GCS"
+
+docker run -d \
+           --name pg \
+           -e POSTGRES_USER=davl \
+           -e POSTGRES_PASSWORD=s3cr3t \
+           -e POSTGRES_DB=davl-db \
+           -e PGDATA=/var/lib/postgresql/data/pgdata \
+           -v /db:/var/lib/postgresql/data \
+           -v /backup:/backup \
+           -p 5432:5432 \
+           postgres:11.5-alpine
+
+log "started pg"
+
+docker exec pg bash -c "while ! nc -z localhost:5432; do sleep 1; done"
+
+log "pg ready"
+
+# Note: because /backup is mounted on /backup, path will work inside the
+# container too.
+docker exec pg bash -c "cat $LATEST_BACKUP | gunzip | psql davl-db -U davl"
+
+log "restored $LATEST_BACKUP"
+
+cat <<CRON > /root/backup.sh
+#!/usr/bin/env bash
+set -euo pipefail
+echo "\$(date -Is -u) start backup"
+
+TMP=\$(mktemp)
+BACKUP=\$(date -u +%Y%d%m%H%M%SZ).gz
+docker exec pg pg_dump -U davl -d davl-db | gzip -9 > \$TMP
+$(which gsutil) cp \$TMP ${google_storage_bucket.db-backups.url}/\$BACKUP
+rm \$TMP
+
+echo "\$(date -Is -u) end backup"
+CRON
+
+chmod +x /root/backup.sh
+
+cat <<CRONTAB >> /etc/crontab
+0 * * * * root /root/backup.sh >> /root/log 2>&1
+CRONTAB
+
+tail -f /root/log
+
+STARTUP
+}
+
 resource "google_compute_instance" "ledger" {
   name         = "ledger"
   machine_type = "n1-standard-2"
@@ -127,11 +232,11 @@ gcloud components install docker-credential-gcr
 gcloud auth configure-docker --quiet
 
 # Wait for postgres machine to be listening
-while ! nc -z ${google_compute_instance.db.network_interface.0.network_ip} 5432; do
+while ! nc -z ${google_compute_instance.backed-up-db.network_interface.0.network_ip} 5432; do
   sleep 1
 done
 
-docker run --name sandbox -d -p 127.0.0.1:6865:6865 gcr.io/da-dev-pinacolada/sandbox:${var.sandbox} --sql-backend-jdbcurl 'jdbc:postgresql://${google_compute_instance.db.network_interface.0.network_ip}/davl-db?user=davl&password=s3cr3t'
+docker run --name sandbox -d -p 127.0.0.1:6865:6865 gcr.io/da-dev-pinacolada/sandbox:${var.sandbox} --sql-backend-jdbcurl 'jdbc:postgresql://${google_compute_instance.backed-up-db.network_interface.0.network_ip}/davl-db?user=davl&password=s3cr3t'
 
 # Wait for ledger to be ready
 docker exec sandbox /bin/sh -c "while ! nc -z localhost:6865; do sleep 1; done"
