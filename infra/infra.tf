@@ -109,8 +109,7 @@ resource "google_storage_bucket" "db-backups" {
 }
 
 resource "google_compute_instance" "backed-up-db" {
-  count        = 0
-  name         = "db"
+  name         = "backed-up-db"
   machine_type = "n1-standard-2"
 
   boot_disk {
@@ -127,6 +126,10 @@ resource "google_compute_instance" "backed-up-db" {
     }
   }
 
+  service_account {
+    scopes = ["https://www.googleapis.com/auth/devstorage.read_write"]
+  }
+
   metadata_startup_script = <<STARTUP
 set -euxo pipefail
 
@@ -139,7 +142,7 @@ log() {
 
 log "boot"
 
-LATEST_BACKUP_GCS=$(gsutil ls ${google_storage_bucket.db-backups.url} | sort | tail -1)
+LATEST_BACKUP_GCS=$(gsutil ls ${google_storage_bucket.db-backups.url} | sort | tail -1)
 LATEST_BACKUP=/backup/$(basename $LATEST_BACKUP_GCS)
 mkdir /backup
 gsutil cp $LATEST_BACKUP_GCS $LATEST_BACKUP
@@ -159,9 +162,13 @@ docker run -d \
 
 log "started pg"
 
+docker exec pg bash -c "while ! nc -z localhost:5432; do sleep 1; done"
+
+log "pg ready"
+
 # Note: because /backup is mounted on /backup, path will work inside the
 # container too.
-docker exec -ti pg bash -c "psql davl-db -U davl < $LATEST_BACKUP"
+docker exec pg bash -c "cat $LATEST_BACKUP | gunzip | psql davl-db -U davl"
 
 log "restored $LATEST_BACKUP"
 
@@ -186,7 +193,6 @@ cat <<CRONTAB >> /etc/crontab
 CRONTAB
 
 tail -f /root/log
-
 
 STARTUP
 }
