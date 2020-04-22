@@ -17,6 +17,13 @@ provider "google" {
   version = "2.17.0"
 }
 
+provider "google-beta" {
+  project = "da-dev-pinacolada"
+  region  = "us-east4"
+  zone    = "us-east4-a"
+  version = "2.17.0"
+}
+
 # Network created by the security team. Allows all traffic from offices and
 # VPN.
 data "google_compute_network" "network" {
@@ -454,6 +461,7 @@ resource "google_compute_url_map" "frontend" {
 }
 
 resource "google_compute_backend_service" "frontend" {
+  provider        = google-beta
   name            = "frontend"
   health_checks   = ["${google_compute_http_health_check.frontend.self_link}"]
   security_policy = "${google_compute_security_policy.only-offices-and-vpns.self_link}"
@@ -461,6 +469,7 @@ resource "google_compute_backend_service" "frontend" {
   backend {
     group = "${google_compute_instance_group.frontend.self_link}"
   }
+  log_config { enable = true }
 }
 
 // UI: serve application; redirect connections to port 443 of the external IP
@@ -485,6 +494,7 @@ resource "google_compute_url_map" "ui" {
 }
 
 resource "google_compute_backend_service" "ui" {
+  provider        = google-beta
   name            = "ui"
   health_checks   = ["${google_compute_http_health_check.frontend.self_link}"]
   security_policy = "${google_compute_security_policy.only-offices-and-vpns.self_link}"
@@ -492,6 +502,7 @@ resource "google_compute_backend_service" "ui" {
   backend {
     group = "${google_compute_instance_group.frontend.self_link}"
   }
+  log_config { enable = true }
   # Because GCP is... well, GCP, this timeout is not just for failed
   # connections, i.e. the maximum time the proxy would wait befire returning an
   # error to clients when the backend doesn't respond, it's also the maximum
@@ -521,6 +532,7 @@ resource "google_compute_url_map" "navigator" {
 }
 
 resource "google_compute_backend_service" "navigator" {
+  provider        = google-beta
   name            = "navigator"
   health_checks   = ["${google_compute_http_health_check.frontend.self_link}"]
   security_policy = "${google_compute_security_policy.only-offices-and-vpns.self_link}"
@@ -528,6 +540,7 @@ resource "google_compute_backend_service" "navigator" {
   backend {
     group = "${google_compute_instance_group.frontend.self_link}"
   }
+  log_config { enable = true }
 }
 
 output "proxy-ip" {
