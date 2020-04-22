@@ -32,6 +32,22 @@ resource "google_storage_bucket_iam_member" "ci-write-images" {
   member = "serviceAccount:${google_service_account.ci.email}"
 }
 
+// CI can check the existence of the backup bucket (but doesn't need to do
+// anything else with it).
+resource "google_project_iam_custom_role" "ci-db-backups" {
+  role_id = "checkBackupsBucketExistence"
+  title   = "Minimal rights for CI TF to check backup bucket exists"
+  permissions = [
+    "storage.buckets.get",
+  ]
+}
+resource "google_storage_bucket_iam_member" "ci-backup-bucket" {
+  bucket = "davl-db-backups"
+  role   = "projects/da-dev-pinacolada/roles/checkBackupsBucketExistence"
+  member = "serviceAccount:${google_service_account.ci.email}"
+}
+
+
 // The next 2 roles are incrementally built to have the minimal set of rights
 // to be able to deploy using Terraform.
 resource "google_project_iam_custom_role" "tf-write-state" {
