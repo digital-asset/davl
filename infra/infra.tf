@@ -430,7 +430,10 @@ resource "google_compute_backend_service" "frontend" {
   backend {
     group = "${google_compute_instance_group.frontend.self_link}"
   }
-  log_config { enable = true }
+  log_config {
+    enable      = true
+    sample_rate = 1
+  }
 }
 
 // UI: serve application; redirect connections to port 443 of the external IP
@@ -463,7 +466,10 @@ resource "google_compute_backend_service" "ui" {
   backend {
     group = "${google_compute_instance_group.frontend.self_link}"
   }
-  log_config { enable = true }
+  log_config {
+    enable      = true
+    sample_rate = 1
+  }
   # Because GCP is... well, GCP, this timeout is not just for failed
   # connections, i.e. the maximum time the proxy would wait befire returning an
   # error to clients when the backend doesn't respond, it's also the maximum
@@ -501,7 +507,10 @@ resource "google_compute_backend_service" "navigator" {
   backend {
     group = "${google_compute_instance_group.frontend.self_link}"
   }
-  log_config { enable = true }
+  log_config {
+    enable      = true
+    sample_rate = 1
+  }
 }
 
 output "proxy-ip" {
