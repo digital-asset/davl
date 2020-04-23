@@ -60,45 +60,6 @@ resource "google_compute_firewall" "allow-http-load-balancers" {
   target_tags   = ["http-enabled"]
 }
 
-resource "google_compute_instance" "db" {
-  name         = "db"
-  machine_type = "n1-standard-2"
-
-  boot_disk {
-    initialize_params {
-      image = "ubuntu-1804-lts"
-    }
-  }
-
-  network_interface {
-    network    = "${data.google_compute_network.network.self_link}"
-    subnetwork = "${data.google_compute_subnetwork.subnet.self_link}"
-    access_config {
-      // auto-generate ephemeral IP
-    }
-  }
-
-  metadata_startup_script = <<STARTUP
-set -euxo pipefail
-
-apt-get update
-apt-get install -y docker.io
-
-docker run -e POSTGRES_USER=davl \
-           -e POSTGRES_PASSWORD=s3cr3t \
-           -e POSTGRES_DB=davl-db \
-           -e PGDATA=/var/lib/postgresql/data/pgdata \
-           -v /db:/var/lib/postgresql/data \
-           -p 5432:5432 \
-           postgres:11.5-alpine
-
-STARTUP
-
-  lifecycle {
-    prevent_destroy = true
-  }
-}
-
 resource "google_storage_bucket" "db-backups" {
   name = "davl-db-backups"
 
@@ -185,7 +146,7 @@ set -euo pipefail
 echo "\$(date -Is -u) start backup"
 
 TMP=\$(mktemp)
-BACKUP=\$(date -u +%Y%d%m%H%M%SZ).gz
+BACKUP=\$(date -u +%Y%m%d%H%M%SZ).gz
 docker exec pg pg_dump -U davl -d davl-db | gzip -9 > \$TMP
 $(which gsutil) cp \$TMP ${google_storage_bucket.db-backups.url}/\$BACKUP
 rm \$TMP
