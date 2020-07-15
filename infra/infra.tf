@@ -14,14 +14,12 @@ provider "google" {
   project = "da-dev-pinacolada"
   region  = "us-east4"
   zone    = "us-east4-a"
-  version = "2.17.0"
 }
 
 provider "google-beta" {
   project = "da-dev-pinacolada"
   region  = "us-east4"
   zone    = "us-east4-a"
-  version = "2.17.0"
 }
 
 # Network created by the security team. Allows all traffic from offices and
@@ -36,7 +34,7 @@ data "google_compute_subnetwork" "subnet" {
 
 resource "google_compute_firewall" "allow-internal" {
   name    = "allow-internal"
-  network = "${data.google_compute_network.network.self_link}"
+  network = data.google_compute_network.network.self_link
   allow {
     protocol = "tcp"
   }
@@ -46,12 +44,12 @@ resource "google_compute_firewall" "allow-internal" {
   allow {
     protocol = "icmp"
   }
-  source_ranges = ["${data.google_compute_subnetwork.subnet.ip_cidr_range}"]
+  source_ranges = [data.google_compute_subnetwork.subnet.ip_cidr_range]
 }
 
 resource "google_compute_firewall" "allow-http-load-balancers" {
   name    = "allow-lb"
-  network = "${data.google_compute_network.network.self_link}"
+  network = data.google_compute_network.network.self_link
   allow {
     protocol = "tcp"
     ports    = ["80", "8080", "8081"]
@@ -87,8 +85,8 @@ resource "google_compute_instance" "backed-up-db" {
   }
 
   network_interface {
-    network    = "${data.google_compute_network.network.self_link}"
-    subnetwork = "${data.google_compute_subnetwork.subnet.self_link}"
+    network    = data.google_compute_network.network.self_link
+    subnetwork = data.google_compute_subnetwork.subnet.self_link
     access_config {
       // auto-generate ephemeral IP
     }
@@ -176,8 +174,8 @@ resource "google_compute_instance" "ledger" {
   }
 
   network_interface {
-    network    = "${data.google_compute_network.network.self_link}"
-    subnetwork = "${data.google_compute_subnetwork.subnet.self_link}"
+    network    = data.google_compute_network.network.self_link
+    subnetwork = data.google_compute_subnetwork.subnet.self_link
     access_config {
       // auto-generate ephemeral IP
     }
@@ -262,8 +260,8 @@ resource "google_compute_instance" "proxy" {
   }
 
   network_interface {
-    network    = "${data.google_compute_network.network.self_link}"
-    subnetwork = "${data.google_compute_subnetwork.subnet.self_link}"
+    network    = data.google_compute_network.network.self_link
+    subnetwork = data.google_compute_subnetwork.subnet.self_link
     access_config {
       // auto-generate ephemeral IP
     }
@@ -307,7 +305,7 @@ resource "google_compute_address" "proxy" {
 // machine.
 resource "google_compute_instance_group" "frontend" {
   name      = "frontend"
-  instances = ["${google_compute_instance.proxy.self_link}"]
+  instances = [google_compute_instance.proxy.self_link]
   named_port {
     name = "http"
     port = "8081"
@@ -405,30 +403,30 @@ resource "google_compute_http_health_check" "frontend" {
 // they get redirected by nginx to HTTPS on port 443.
 resource "google_compute_forwarding_rule" "frontend" {
   name         = "frontend"
-  target       = "${google_compute_target_http_proxy.frontend.self_link}"
-  ip_address   = "${google_compute_address.proxy.address}"
+  target       = google_compute_target_http_proxy.frontend.self_link
+  ip_address   = google_compute_address.proxy.address
   port_range   = "80"
   network_tier = "STANDARD"
 }
 
 resource "google_compute_target_http_proxy" "frontend" {
   name    = "frontend"
-  url_map = "${google_compute_url_map.frontend.self_link}"
+  url_map = google_compute_url_map.frontend.self_link
 }
 
 resource "google_compute_url_map" "frontend" {
   name            = "frontend"
-  default_service = "${google_compute_backend_service.frontend.self_link}"
+  default_service = google_compute_backend_service.frontend.self_link
 }
 
 resource "google_compute_backend_service" "frontend" {
   provider        = google-beta
   name            = "frontend"
-  health_checks   = ["${google_compute_http_health_check.frontend.self_link}"]
-  security_policy = "${google_compute_security_policy.only-offices-and-vpns.self_link}"
+  health_checks   = [google_compute_http_health_check.frontend.self_link]
+  security_policy = google_compute_security_policy.only-offices-and-vpns.self_link
   port_name       = "http"
   backend {
-    group = "${google_compute_instance_group.frontend.self_link}"
+    group = google_compute_instance_group.frontend.self_link
   }
   log_config {
     enable      = true
@@ -440,31 +438,31 @@ resource "google_compute_backend_service" "frontend" {
 // address to port 80 of the machine (after TLS termination)
 resource "google_compute_forwarding_rule" "ui" {
   name         = "ui"
-  target       = "${google_compute_target_https_proxy.ui.self_link}"
-  ip_address   = "${google_compute_address.proxy.address}"
+  target       = google_compute_target_https_proxy.ui.self_link
+  ip_address   = google_compute_address.proxy.address
   port_range   = "443"
   network_tier = "STANDARD"
 }
 
 resource "google_compute_target_https_proxy" "ui" {
   name             = "ui"
-  url_map          = "${google_compute_url_map.ui.self_link}"
+  url_map          = google_compute_url_map.ui.self_link
   ssl_certificates = ["https://www.googleapis.com/compute/v1/projects/da-dev-pinacolada/global/sslCertificates/da-ext-wildcard"]
 }
 
 resource "google_compute_url_map" "ui" {
   name            = "ui"
-  default_service = "${google_compute_backend_service.ui.self_link}"
+  default_service = google_compute_backend_service.ui.self_link
 }
 
 resource "google_compute_backend_service" "ui" {
   provider        = google-beta
   name            = "ui"
-  health_checks   = ["${google_compute_http_health_check.frontend.self_link}"]
-  security_policy = "${google_compute_security_policy.only-offices-and-vpns.self_link}"
+  health_checks   = [google_compute_http_health_check.frontend.self_link]
+  security_policy = google_compute_security_policy.only-offices-and-vpns.self_link
   port_name       = "https"
   backend {
-    group = "${google_compute_instance_group.frontend.self_link}"
+    group = google_compute_instance_group.frontend.self_link
   }
   log_config {
     enable      = true
@@ -482,30 +480,30 @@ resource "google_compute_backend_service" "ui" {
 // 443.
 resource "google_compute_forwarding_rule" "navigator" {
   name         = "navigator"
-  target       = "${google_compute_target_http_proxy.navigator.self_link}"
-  ip_address   = "${google_compute_address.proxy.address}"
+  target       = google_compute_target_http_proxy.navigator.self_link
+  ip_address   = google_compute_address.proxy.address
   port_range   = "8080"
   network_tier = "STANDARD"
 }
 
 resource "google_compute_target_http_proxy" "navigator" {
   name    = "navigator"
-  url_map = "${google_compute_url_map.navigator.self_link}"
+  url_map = google_compute_url_map.navigator.self_link
 }
 
 resource "google_compute_url_map" "navigator" {
   name            = "navigator"
-  default_service = "${google_compute_backend_service.navigator.self_link}"
+  default_service = google_compute_backend_service.navigator.self_link
 }
 
 resource "google_compute_backend_service" "navigator" {
   provider        = google-beta
   name            = "navigator"
-  health_checks   = ["${google_compute_http_health_check.frontend.self_link}"]
-  security_policy = "${google_compute_security_policy.only-offices-and-vpns.self_link}"
+  health_checks   = [google_compute_http_health_check.frontend.self_link]
+  security_policy = google_compute_security_policy.only-offices-and-vpns.self_link
   port_name       = "navigator"
   backend {
-    group = "${google_compute_instance_group.frontend.self_link}"
+    group = google_compute_instance_group.frontend.self_link
   }
   log_config {
     enable      = true
@@ -514,5 +512,5 @@ resource "google_compute_backend_service" "navigator" {
 }
 
 output "proxy-ip" {
-  value = "${google_compute_address.proxy.address}"
+  value = google_compute_address.proxy.address
 }
