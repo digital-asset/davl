@@ -14,14 +14,12 @@ provider "google" {
   project = "da-dev-pinacolada"
   region  = "us-east4"
   zone    = "us-east4-a"
-  version = "2.17.0"
 }
 
 provider "google-beta" {
   project = "da-dev-pinacolada"
   region  = "us-east4"
   zone    = "us-east4-a"
-  version = "2.17.0"
 }
 
 # Network created by the security team. Allows all traffic from offices and
