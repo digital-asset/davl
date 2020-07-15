@@ -98,7 +98,7 @@ jobs:
           # provides; fortunately terraform is a single, self-contained
           # executable.
           TF_DIR=$(mktemp -d)
-          TF_VER="0.12.24"
+          TF_VER="0.12.26"
           wget https://releases.hashicorp.com/terraform/${TF_VER}/terraform_${TF_VER}_linux_amd64.zip -O $TF_DIR/tf.zip
           ( cd $TF_DIR; unzip tf.zip )
           terraform=$TF_DIR/terraform
