@@ -15,7 +15,7 @@
     "@daml.js/davl-v4-0.0.4": "file:../daml2ts/davl-0.0.4",
     "@daml.js/davl-v5-0;0.5": "file:../daml2ts/davl-0.0.5",
     "@daml.js/davl-upgrade-v4-v5-0.0.5": "file:../daml2ts/davl-upgrade-v4-v5-0.0.5",
-    "@daml/ledger": "1.3.0-snapshot.20200714.4687.0.8e10c7a7",
+    "@daml/ledger": "1.4.0-snapshot.20200729.4851.0.224ab362",
     "@types/jwt-simple": "^0.5.33",
     "jwt-simple": "^0.5.6",
     "node": "^13.6.0"
