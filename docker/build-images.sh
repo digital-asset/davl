@@ -98,7 +98,7 @@ else
     tell_slack json-api:$JSON_API_TAG
 fi
 
-UI_TAG=$(get_tag ui docker/nginx.docker docker/nginx.conf.sh)
+UI_TAG=$(get_tag ui docker/nginx.docker docker/nginx.conf.sh yarn.lock)
 if tag_exists ui $UI_TAG; then
     echo "ui $UI_TAG already exists."
 else
