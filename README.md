@@ -84,7 +84,7 @@ username/password combinations in the table below.
 | Moritz   | eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsZWRnZXJJZCI6IkRBVkwiLCJhcHBsaWNhdGlvbklkIjoiREFWTCIsInBhcnR5IjoiTW9yaXR6In0.Bg7DvvQT8FOsAPQo7hejwyqAlb1lrxqq4cDm6rhIFLA |
 | Robin    | eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsZWRnZXJJZCI6IkRBVkwiLCJhcHBsaWNhdGlvbklkIjoiREFWTCIsInBhcnR5IjoiUm9iaW4ifQ.SvH81YSQIKw0cl4dEyTYBemu-UANkJbYB1huqrIOL28  |
 
-Once you're logged in, the app hopefully self-explanatory.
+Once you're logged in, the app is, hopefully, self-explanatory.
 
 ## Production setup
 

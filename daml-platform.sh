@@ -30,7 +30,7 @@ for DAR in $DIR/released/*.dar; do
   daml ledger upload-dar --host $LEDGER_HOST --port $LEDGER_PORT $DAR
 done
 
-daml navigator server --port $NAVIGATOR_PORT $LEDGER_HOST $LEDGER_PORT 2>&1 1> $DIR/navigtor.log &
+daml navigator server --port $NAVIGATOR_PORT $LEDGER_HOST $LEDGER_PORT 2>&1 1> $DIR/navigator.log &
 NAVIGATOR_PID=$!
 
 daml json-api --ledger-host $LEDGER_HOST --ledger-port $LEDGER_PORT --http-port $JSON_API_PORT 2>&1 1> $DIR/json-api.log &
