@@ -447,7 +447,7 @@ resource "google_compute_forwarding_rule" "ui" {
 resource "google_compute_target_https_proxy" "ui" {
   name             = "ui"
   url_map          = google_compute_url_map.ui.self_link
-  ssl_certificates = ["https://www.googleapis.com/compute/v1/projects/da-dev-pinacolada/global/sslCertificates/da-ext-wildcard"]
+  ssl_certificates = ["https://www.googleapis.com/compute/v1/projects/da-dev-pinacolada/global/sslCertificates/davl-cert"]
 }
 
 resource "google_compute_url_map" "ui" {
