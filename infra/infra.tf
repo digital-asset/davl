@@ -74,8 +74,11 @@ resource "google_storage_bucket" "db-backups" {
   }
 }
 
+locals {
+  db_backup_prefix = "r1"
+}
 resource "google_compute_instance" "backed-up-db" {
-  count        = 0
+  count        = 1
   name         = "backed-up-db"
   machine_type = "n1-standard-2"
 
@@ -109,7 +112,7 @@ log() {
 
 log "boot"
 
-LATEST_BACKUP_GCS=$(gsutil ls ${google_storage_bucket.db-backups.url} | sort | tail -1)
+LATEST_BACKUP_GCS=$(gsutil ls ${google_storage_bucket.db-backups.url}/${local.db_backup_prefix}/\*\* | sort | tail -1)
 LATEST_BACKUP=/backup/$(basename $LATEST_BACKUP_GCS)
 mkdir /backup
 gsutil cp $LATEST_BACKUP_GCS $LATEST_BACKUP
@@ -145,9 +148,9 @@ set -euo pipefail
 echo "\$(date -Is -u) start backup"
 
 TMP=\$(mktemp)
-BACKUP=\$(date -u +%Y%m%d%H%M%SZ).gz
+BACKUP=\$(date -u +%Y/%m/%d/%Y-%m-%d-%H-%M-%SZ).gz
 docker exec pg pg_dump -U davl -d davl-db | gzip -9 > \$TMP
-$(which gsutil) cp \$TMP ${google_storage_bucket.db-backups.url}/\$BACKUP
+$(which gsutil) cp \$TMP ${google_storage_bucket.db-backups.url}/${local.db_backup_prefix}/\$BACKUP
 rm \$TMP
 
 echo "\$(date -Is -u) end backup"
@@ -165,7 +168,7 @@ STARTUP
 }
 
 resource "google_compute_instance" "ledger" {
-  count        = 0
+  count        = 1
   name         = "ledger"
   machine_type = "n1-standard-2"
 
@@ -252,7 +255,7 @@ STARTUP
 }
 
 resource "google_compute_instance" "proxy" {
-  count        = 0
+  count        = 1
   name         = "proxy-${var.ui}"
   machine_type = "n1-standard-2"
 
