@@ -187,6 +187,7 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS_CONTENT: $(GOOGLE_APPLICATION_CREDENTIALS_CONTENT)
           IS_MASTER: $(is_master)
         displayName: deploy
+        condition: false
 
       - bash: |
           set -euo pipefail

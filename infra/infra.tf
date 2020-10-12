@@ -75,6 +75,7 @@ resource "google_storage_bucket" "db-backups" {
 }
 
 resource "google_compute_instance" "backed-up-db" {
+  count        = 0
   name         = "backed-up-db"
   machine_type = "n1-standard-2"
 
@@ -164,6 +165,7 @@ STARTUP
 }
 
 resource "google_compute_instance" "ledger" {
+  count        = 0
   name         = "ledger"
   machine_type = "n1-standard-2"
 
@@ -198,11 +200,11 @@ gcloud components install docker-credential-gcr
 gcloud auth configure-docker --quiet
 
 # Wait for postgres machine to be listening
-while ! nc -z ${google_compute_instance.backed-up-db.network_interface.0.network_ip} 5432; do
+while ! nc -z ${google_compute_instance.backed-up-db[count.index].network_interface.0.network_ip} 5432; do
   sleep 1
 done
 
-docker run --name sandbox -d -p 127.0.0.1:6865:6865 gcr.io/da-dev-pinacolada/sandbox:${var.sandbox} --sql-backend-jdbcurl 'jdbc:postgresql://${google_compute_instance.backed-up-db.network_interface.0.network_ip}/davl-db?user=davl&password=s3cr3t'
+docker run --name sandbox -d -p 127.0.0.1:6865:6865 gcr.io/da-dev-pinacolada/sandbox:${var.sandbox} --sql-backend-jdbcurl 'jdbc:postgresql://${google_compute_instance.backed-up-db[count.index].network_interface.0.network_ip}/davl-db?user=davl&password=s3cr3t'
 
 # Wait for ledger to be ready
 docker exec sandbox /bin/sh -c "while ! nc -z localhost:6865; do sleep 1; done"
@@ -250,6 +252,7 @@ STARTUP
 }
 
 resource "google_compute_instance" "proxy" {
+  count        = 0
   name         = "proxy-${var.ui}"
   machine_type = "n1-standard-2"
 
@@ -288,7 +291,7 @@ gcloud auth configure-docker --quiet
 # The UI currently does not support signing up, so we add a running Navigator
 # to our setup. It will be served on 8080, so we also need to expose that port.
 # Added -p 8080:8080 and -e NAVIGATOR_IP_PORT=...
-docker run -p 8081:8081 -p 8080:8080 -e NAVIGATOR_IP_PORT=${google_compute_instance.ledger.network_interface.0.network_ip}:8080 -p 80:80 -e LEDGER_IP_PORT=${google_compute_instance.ledger.network_interface.0.network_ip}:7575 gcr.io/da-dev-pinacolada/ui:${var.ui}
+docker run -p 8081:8081 -p 8080:8080 -e NAVIGATOR_IP_PORT=${google_compute_instance.ledger[count.index].network_interface.0.network_ip}:8080 -p 80:80 -e LEDGER_IP_PORT=${google_compute_instance.ledger[count.index].network_interface.0.network_ip}:7575 gcr.io/da-dev-pinacolada/ui:${var.ui}
 # </workaround>
 
 
@@ -305,7 +308,7 @@ resource "google_compute_address" "proxy" {
 // machine.
 resource "google_compute_instance_group" "frontend" {
   name      = "frontend"
-  instances = [google_compute_instance.proxy.self_link]
+  instances = google_compute_instance.proxy.*.self_link
   named_port {
     name = "http"
     port = "8081"
