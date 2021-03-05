@@ -1154,10 +1154,10 @@
     "@daml/types" "1.5.0-snapshot.20200907.5151.0.eb68e680"
     "@mojotech/json-type-validation" "^3.1.0"
 
-"@daml.js/davl-0.0.4@file:daml2ts/davl-0.0.4":
+"@daml.js/davl-0.0.4@file:daml2ts/davl-0.0.4", "@daml.js/davl-v4-0.0.4@file:daml2ts/davl-0.0.4":
   version "1.5.0-snapshot.20200907.5151.0.eb68e680"
   dependencies:
-    "@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-0-0-4-1.5.0-snapshot.20200907.5151.0.eb68e680-3c70512e-afe3-463b-a13a-dbc41058781b-1614786746261/node_modules/@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662"
+    "@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-0-0-4-1.5.0-snapshot.20200907.5151.0.eb68e680-2c865b29-000d-4033-9977-ac51707f74f4-1614957486582/node_modules/@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662"
     "@daml/ledger" "1.5.0-snapshot.20200907.5151.0.eb68e680"
     "@daml/types" "1.5.0-snapshot.20200907.5151.0.eb68e680"
     "@mojotech/json-type-validation" "^3.1.0"
@@ -1165,7 +1165,7 @@
 "@daml.js/davl-0.0.5@file:daml2ts/davl-0.0.5":
   version "1.5.0-snapshot.20200907.5151.0.eb68e680"
   dependencies:
-    "@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-0-0-5-1.5.0-snapshot.20200907.5151.0.eb68e680-e434a40d-3230-401d-85a5-786f836b6723-1614786746263/node_modules/@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662"
+    "@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-0-0-5-1.5.0-snapshot.20200907.5151.0.eb68e680-adbc6009-0dd9-4bb3-a414-c046718e3f9f-1614957486581/node_modules/@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662"
     "@daml/ledger" "1.5.0-snapshot.20200907.5151.0.eb68e680"
     "@daml/types" "1.5.0-snapshot.20200907.5151.0.eb68e680"
     "@mojotech/json-type-validation" "^3.1.0"
@@ -1173,18 +1173,10 @@
 "@daml.js/davl-upgrade-v4-v5-0.0.5@file:daml2ts/davl-upgrade-v4-v5-0.0.5":
   version "1.5.0-snapshot.20200907.5151.0.eb68e680"
   dependencies:
-    "@daml.js/40f452260bef3f29dede136108fc08a88d5a5250310281067087da6f0baddff7" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-upgrade-v4-v5-0-0-5-1.5.0-snapshot.20200907.5151.0.eb68e680-59d1d9d9-00fa-46e6-9b75-a17be965cb5b-1614786746253/node_modules/@daml.js/40f452260bef3f29dede136108fc08a88d5a5250310281067087da6f0baddff7"
-    "@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-upgrade-v4-v5-0-0-5-1.5.0-snapshot.20200907.5151.0.eb68e680-59d1d9d9-00fa-46e6-9b75-a17be965cb5b-1614786746253/node_modules/@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662"
-    "@daml.js/davl-0.0.4" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-upgrade-v4-v5-0-0-5-1.5.0-snapshot.20200907.5151.0.eb68e680-59d1d9d9-00fa-46e6-9b75-a17be965cb5b-1614786746253/node_modules/@daml.js/davl-0.0.4"
-    "@daml.js/davl-0.0.5" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-upgrade-v4-v5-0-0-5-1.5.0-snapshot.20200907.5151.0.eb68e680-59d1d9d9-00fa-46e6-9b75-a17be965cb5b-1614786746253/node_modules/@daml.js/davl-0.0.5"
-    "@daml/ledger" "1.5.0-snapshot.20200907.5151.0.eb68e680"
-    "@daml/types" "1.5.0-snapshot.20200907.5151.0.eb68e680"
-    "@mojotech/json-type-validation" "^3.1.0"
-
-"@daml.js/davl-v4-0.0.4@file:daml2ts/davl-0.0.4":
-  version "1.5.0-snapshot.20200907.5151.0.eb68e680"
-  dependencies:
-    "@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-v4-0-0-4-1.5.0-snapshot.20200907.5151.0.eb68e680-ac655393-bcbe-479d-a22d-df137608df87-1614786746255/node_modules/@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662"
+    "@daml.js/40f452260bef3f29dede136108fc08a88d5a5250310281067087da6f0baddff7" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-upgrade-v4-v5-0-0-5-1.5.0-snapshot.20200907.5151.0.eb68e680-c2c4eb69-9315-4164-9cd1-25cb7915b2dd-1614957486577/node_modules/@daml.js/40f452260bef3f29dede136108fc08a88d5a5250310281067087da6f0baddff7"
+    "@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-upgrade-v4-v5-0-0-5-1.5.0-snapshot.20200907.5151.0.eb68e680-c2c4eb69-9315-4164-9cd1-25cb7915b2dd-1614957486577/node_modules/@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662"
+    "@daml.js/davl-0.0.4" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-upgrade-v4-v5-0-0-5-1.5.0-snapshot.20200907.5151.0.eb68e680-c2c4eb69-9315-4164-9cd1-25cb7915b2dd-1614957486577/node_modules/@daml.js/davl-0.0.4"
+    "@daml.js/davl-0.0.5" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-upgrade-v4-v5-0-0-5-1.5.0-snapshot.20200907.5151.0.eb68e680-c2c4eb69-9315-4164-9cd1-25cb7915b2dd-1614957486577/node_modules/@daml.js/davl-0.0.5"
     "@daml/ledger" "1.5.0-snapshot.20200907.5151.0.eb68e680"
     "@daml/types" "1.5.0-snapshot.20200907.5151.0.eb68e680"
     "@mojotech/json-type-validation" "^3.1.0"
@@ -1192,17 +1184,17 @@
 "@daml.js/davl-v5-0;0.5@file:daml2ts/davl-0.0.5":
   version "1.5.0-snapshot.20200907.5151.0.eb68e680"
   dependencies:
-    "@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-v5-0-0-5-1.5.0-snapshot.20200907.5151.0.eb68e680-bdd578f6-07b5-4dfb-9ed7-13831bb713c4-1614786746259/node_modules/@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662"
+    "@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-v5-0-0-5-1.5.0-snapshot.20200907.5151.0.eb68e680-df487415-55cf-47a8-9f73-8ad0b08acb6a-1614957486579/node_modules/@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662"
     "@daml/ledger" "1.5.0-snapshot.20200907.5151.0.eb68e680"
     "@daml/types" "1.5.0-snapshot.20200907.5151.0.eb68e680"
     "@mojotech/json-type-validation" "^3.1.0"
 
-"@daml/ledger@1.11.0-snapshot.20210303.6421.0.145ddaa8":
-  version "1.11.0-snapshot.20210303.6421.0.145ddaa8"
-  resolved "https://registry.yarnpkg.com/@daml/ledger/-/ledger-1.11.0-snapshot.20210303.6421.0.145ddaa8.tgz#bc3732ad774c79945537ef198bb458cc80a866cb"
-  integrity sha512-tiLqMWHASeg4+nkLGnP8eYyFDkJq9kInBQItK466zROLoDWO9Dtu/7MxwNzxxPuhz2vCXKcAk04Gt+VpMYgl/g==
+"@daml/ledger@1.11.0-snapshot.20210304.6422.0.d3d5042a":
+  version "1.11.0-snapshot.20210304.6422.0.d3d5042a"
+  resolved "https://registry.yarnpkg.com/@daml/ledger/-/ledger-1.11.0-snapshot.20210304.6422.0.d3d5042a.tgz#9579404dd18874637fd4266141d1a7d2c15bd896"
+  integrity sha512-stZtfuk+Qe/iTVANcfgBA3PC3S4dtfqDPBuN38uY/topzUhWX9TeVrKTCwNyN97WzvMP8QayroiUXcenHwUnZA==
   dependencies:
-    "@daml/types" "1.11.0-snapshot.20210303.6421.0.145ddaa8"
+    "@daml/types" "1.11.0-snapshot.20210304.6422.0.d3d5042a"
     "@mojotech/json-type-validation" "^3.1.0"
     cross-fetch "^3.0.4"
     events "^3.1.0"
@@ -1221,19 +1213,19 @@
     isomorphic-ws "^4.0.1"
     ws "^7.2.1"
 
-"@daml/react@1.11.0-snapshot.20210303.6421.0.145ddaa8":
-  version "1.11.0-snapshot.20210303.6421.0.145ddaa8"
-  resolved "https://registry.yarnpkg.com/@daml/react/-/react-1.11.0-snapshot.20210303.6421.0.145ddaa8.tgz#ef07de173ffc68d445377057433b6f1f9fdd3661"
-  integrity sha512-Bz4I8D6o4JM88CuDmNPyBFK0cvGOOAOabnWcZ/g7ly9ZBRMa1FCWGcEP0Va9YwRP+olwNaIoiy4Qzud3cIlZ7w==
+"@daml/react@1.11.0-snapshot.20210304.6422.0.d3d5042a":
+  version "1.11.0-snapshot.20210304.6422.0.d3d5042a"
+  resolved "https://registry.yarnpkg.com/@daml/react/-/react-1.11.0-snapshot.20210304.6422.0.d3d5042a.tgz#b96babe9cf86324523fbef3c3aa73d121547a127"
+  integrity sha512-+ERcdLxDWbwazUL3reaIA11GzHBsK611bfTddmi7zbrGb4eythtqPNKytoxy+Wb03nJ4Dnned+fp47GZfukFzA==
   dependencies:
-    "@daml/ledger" "1.11.0-snapshot.20210303.6421.0.145ddaa8"
-    "@daml/types" "1.11.0-snapshot.20210303.6421.0.145ddaa8"
+    "@daml/ledger" "1.11.0-snapshot.20210304.6422.0.d3d5042a"
+    "@daml/types" "1.11.0-snapshot.20210304.6422.0.d3d5042a"
     react "^16.12.0"
 
-"@daml/types@1.11.0-snapshot.20210303.6421.0.145ddaa8":
-  version "1.11.0-snapshot.20210303.6421.0.145ddaa8"
-  resolved "https://registry.yarnpkg.com/@daml/types/-/types-1.11.0-snapshot.20210303.6421.0.145ddaa8.tgz#7938f0d7f6e5a90d527745aeaedce6d4e5fbe38f"
-  integrity sha512-ulTdLyL3Zmdfy4M5jZaibVEJg7kqADH1ijMEiUBiwFqSuVKG2nE8cLQVNlI462C7KXZfvv4Kz3z9aTz0QIw/Hw==
+"@daml/types@1.11.0-snapshot.20210304.6422.0.d3d5042a":
+  version "1.11.0-snapshot.20210304.6422.0.d3d5042a"
+  resolved "https://registry.yarnpkg.com/@daml/types/-/types-1.11.0-snapshot.20210304.6422.0.d3d5042a.tgz#8ac785585361aa0a13e89fc101c415905305e8e9"
+  integrity sha512-IPB8TdqfjT35P2x4MK/AFdFAt096rZPiUItpQA/7BuqptuM50dqIlKjCgl8n7SZGj95zSdij6weSOPdj3n1cOQ==
   dependencies:
     "@mojotech/json-type-validation" "^3.1.0"
 
@@ -2950,9 +2942,9 @@ caniuse-api@^3.0.0:
     lodash.uniq "^4.5.0"
 
 caniuse-lite@^1.0.0, caniuse-lite@^1.0.30000981, caniuse-lite@^1.0.30001035, caniuse-lite@^1.0.30001109, caniuse-lite@^1.0.30001181:
-  version "1.0.30001194"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001194.tgz#3d16ff3d734a5a7d9818402c28b1f636c5be5bed"
-  integrity sha512-iDUOH+oFeBYk5XawYsPtsx/8fFpndAPUQJC7gBTfxHM8xw5nOZv7ceAD4frS1MKCLUac7QL5wdAJiFQlDRjXlA==
+  version "1.0.30001196"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001196.tgz#00518a2044b1abf3e0df31fadbe5ed90b63f4e64"
+  integrity sha512-CPvObjD3ovWrNBaXlAIGWmg2gQQuJ5YhuciUOjPRox6hIQttu8O+b51dx6VIpIY9ESd2d0Vac1RKpICdG4rGUg==
 
 capture-exit@^2.0.0:
   version "2.0.0"
@@ -3748,7 +3740,7 @@ decode-uri-component@^0.2.0:
   resolved "https://registry.yarnpkg.com/decode-uri-component/-/decode-uri-component-0.2.0.tgz#eb3913333458775cb84cd1a1fae062106bb87545"
   integrity sha1-6zkTMzRYd1y4TNGh+uBiEGu4dUU=
 
-deep-equal@^1.0.1:
+deep-equal@^1.0.1, deep-equal@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/deep-equal/-/deep-equal-1.1.1.tgz#b5c98c942ceffaf7cb051e24e1434a25a2e6076a"
   integrity sha512-yd9c5AdiqVcR+JjcwUQb9DkhJc8ngNr0MahEBGvDiJw8puWab2yZlh+nkasOnZP+EGTAP6rRp2JzJhJZzvNF8g==
@@ -4026,9 +4018,9 @@ ee-first@1.1.1:
   integrity sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
 
 electron-to-chromium@^1.3.378, electron-to-chromium@^1.3.649:
-  version "1.3.678"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.678.tgz#c7c6960463167126b7ed076fade14cac6223bfff"
-  integrity sha512-E5ha1pE9+aWWrT2fUD5wdPBWUnYtKnEnloewbtVyrkAs79HvodOiNO4rMR94+hKbxgMFQG4fnPQACOc1cfMfBg==
+  version "1.3.681"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.681.tgz#facd915ae46a020e8be566a2ecdc0b9444439be9"
+  integrity sha512-W6uYvSUTHuyX2DZklIESAqx57jfmGjUkd7Z3RWqLdj9Mmt39ylhBuvFXlskQnvBHj0MYXIeQI+mjiwVddZLSvA==
 
 elliptic@^6.5.3:
   version "6.5.4"
@@ -4108,27 +4100,10 @@ error-ex@^1.2.0, error-ex@^1.3.1:
   dependencies:
     is-arrayish "^0.2.1"
 
-es-abstract@^1.17.2:
-  version "1.17.7"
-  resolved "https://registry.yarnpkg.com/es-abstract/-/es-abstract-1.17.7.tgz#a4de61b2f66989fc7421676c1cb9787573ace54c"
-  integrity sha512-VBl/gnfcJ7OercKA9MVaegWsBHFjV492syMudcnQZvt/Dw8ezpcOHYZXa/J96O8vx+g4x65YKhxOwDUh63aS5g==
-  dependencies:
-    es-to-primitive "^1.2.1"
-    function-bind "^1.1.1"
-    has "^1.0.3"
-    has-symbols "^1.0.1"
-    is-callable "^1.2.2"
-    is-regex "^1.1.1"
-    object-inspect "^1.8.0"
-    object-keys "^1.1.1"
-    object.assign "^4.1.1"
-    string.prototype.trimend "^1.0.1"
-    string.prototype.trimstart "^1.0.1"
-
-es-abstract@^1.18.0-next.1, es-abstract@^1.18.0-next.2:
-  version "1.18.0-next.3"
-  resolved "https://registry.yarnpkg.com/es-abstract/-/es-abstract-1.18.0-next.3.tgz#56bc8b5cc36b2cca25a13be07f3c02c2343db6b7"
-  integrity sha512-VMzHx/Bczjg59E6jZOQjHeN3DEoptdhejpARgflAViidlqSpjdq9zA6lKwlhRRs/lOw1gHJv2xkkSFRgvEwbQg==
+es-abstract@^1.17.2, es-abstract@^1.18.0-next.1, es-abstract@^1.18.0-next.2:
+  version "1.18.0"
+  resolved "https://registry.yarnpkg.com/es-abstract/-/es-abstract-1.18.0.tgz#ab80b359eecb7ede4c298000390bc5ac3ec7b5a4"
+  integrity sha512-LJzK7MrQa8TS0ja2w3YNLzUgJCGPdPOV1yVvezjNnS89D+VR08+Szt2mz3YB2Dck/+w5tfIq/RoUAFqJJGM2yw==
   dependencies:
     call-bind "^1.0.2"
     es-to-primitive "^1.2.1"
@@ -5737,7 +5712,7 @@ is-buffer@^1.0.2, is-buffer@^1.1.5:
   resolved "https://registry.yarnpkg.com/is-buffer/-/is-buffer-1.1.6.tgz#efaa2ea9daa0d7ab2ea13a97b2b8ad51fefbe8be"
   integrity sha512-NcdALwpXkTm5Zvvbk7owOUSvVvBKDgKP5/ewfXEznmQFfs4ZRmanOeKBTjRVjka3QFoN6XJ+9F3USqfHqTaU5w==
 
-is-callable@^1.1.3, is-callable@^1.1.4, is-callable@^1.2.2, is-callable@^1.2.3:
+is-callable@^1.1.3, is-callable@^1.1.4, is-callable@^1.2.3:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/is-callable/-/is-callable-1.2.3.tgz#8b1e0500b73a1d76c70487636f368e519de8db8e"
   integrity sha512-J1DcMe8UYTBSrKezuIUTUwjXsho29693unXM2YhJUTR2txK/eG47bvNa/wipPFmZFgr/N6f1GA66dv0mEyTIyQ==
@@ -5924,7 +5899,7 @@ is-plain-object@^2.0.1, is-plain-object@^2.0.3, is-plain-object@^2.0.4:
   dependencies:
     isobject "^3.0.1"
 
-is-regex@^1.0.4, is-regex@^1.1.1, is-regex@^1.1.2:
+is-regex@^1.0.4, is-regex@^1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/is-regex/-/is-regex-1.1.2.tgz#81c8ebde4db142f2cf1c53fc86d6a45788266251"
   integrity sha512-axvdhb5pdhEVThqJzYXwMlVuZwC+FF2DpcOhTS+y/8jVq4trxyPgfcwIxIKiyeuLlSQYKkmUaPQJ8ZE4yNKXDg==
@@ -7453,7 +7428,7 @@ object-hash@^2.0.1:
   resolved "https://registry.yarnpkg.com/object-hash/-/object-hash-2.1.1.tgz#9447d0279b4fcf80cff3259bf66a1dc73afabe09"
   integrity sha512-VOJmgmS+7wvXf8CjbQmimtCnEx3IAoLxI3fp2fbWehxrWBcAQFbk+vcwb6vzR0VZv/eNCJ/27j151ZTwqW/JeQ==
 
-object-inspect@^1.8.0, object-inspect@^1.9.0:
+object-inspect@^1.9.0:
   version "1.9.0"
   resolved "https://registry.yarnpkg.com/object-inspect/-/object-inspect-1.9.0.tgz#c90521d74e1127b67266ded3394ad6116986533a"
   integrity sha512-i3Bp9iTqwhaLZBxGkRfo5ZbE07BQRT7MGu8+nNgwW9ItGp1TzCTw2DLEoWwjClxBjOFI/hWljTAmYGCEwmtnOw==
@@ -7478,7 +7453,7 @@ object-visit@^1.0.0:
   dependencies:
     isobject "^3.0.0"
 
-object.assign@^4.1.0, object.assign@^4.1.1, object.assign@^4.1.2:
+object.assign@^4.1.0, object.assign@^4.1.2:
   version "4.1.2"
   resolved "https://registry.yarnpkg.com/object.assign/-/object.assign-4.1.2.tgz#0ed54a342eceb37b38ff76eb831a0e788cb63940"
   integrity sha512-ixT2L5THXsApyiUPYKmW+2EHpXXe5Ii3M+f4e+aJFAHao5amFRW6J0OO6c/LU8Be47utCx2GL89hxGB6XSmKuQ==
@@ -8973,12 +8948,13 @@ react-is@^16.6.3, react-is@^16.8.1, react-is@^16.8.4, react-is@^16.8.6:
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
 
 react-popper@^1.3.4:
-  version "1.3.10"
-  resolved "https://registry.yarnpkg.com/react-popper/-/react-popper-1.3.10.tgz#96fd88cc1bf45957e551c5053afea7adc0b1d4d8"
-  integrity sha512-sZfwHtHCMst0L0G/c83/Y/K1f9fNWMEKsk/cGAor68rQBHB75WuDQ7k95tkce8QNaUHhg9uFXIJbZO0eWRvJbw==
+  version "1.3.11"
+  resolved "https://registry.yarnpkg.com/react-popper/-/react-popper-1.3.11.tgz#a2cc3f0a67b75b66cfa62d2c409f9dd1fcc71ffd"
+  integrity sha512-VSA/bS+pSndSF2fiasHK/PTEEAyOpX60+H5EPAjoArr8JGm+oihu4UbrqcEBpQibJxBVCpYyjAX7abJ+7DoYVg==
   dependencies:
     "@babel/runtime" "^7.1.2"
     "@hypnosphi/create-react-context" "^0.3.1"
+    deep-equal "^1.1.1"
     popper.js "^1.14.4"
     prop-types "^15.6.1"
     typed-styles "^0.0.7"
@@ -10115,7 +10091,7 @@ string.prototype.matchall@^4.0.2:
     regexp.prototype.flags "^1.3.1"
     side-channel "^1.0.4"
 
-string.prototype.trimend@^1.0.1, string.prototype.trimend@^1.0.4:
+string.prototype.trimend@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/string.prototype.trimend/-/string.prototype.trimend-1.0.4.tgz#e75ae90c2942c63504686c18b287b4a0b1a45f80"
   integrity sha512-y9xCjw1P23Awk8EvTpcyL2NIr1j7wJ39f+k6lvRnSMz+mz9CGz9NYPelDk42kOz6+ql8xjfK8oYzy3jAP5QU5A==
@@ -10123,7 +10099,7 @@ string.prototype.trimend@^1.0.1, string.prototype.trimend@^1.0.4:
     call-bind "^1.0.2"
     define-properties "^1.1.3"
 
-string.prototype.trimstart@^1.0.1, string.prototype.trimstart@^1.0.4:
+string.prototype.trimstart@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/string.prototype.trimstart/-/string.prototype.trimstart-1.0.4.tgz#b36399af4ab2999b4c9c648bd7a3fb2bb26feeed"
   integrity sha512-jh6e984OBfvxS50tdY2nRZnoC5/mLFKOREQfw8t5yytkoUsJRNxvI/E39qu1sD0OtWI3OC0XgKSmcWwziwYuZw==
