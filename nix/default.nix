@@ -28,6 +28,7 @@ in rec {
       google
       google-beta
     ]);
+    yarn = pkgs.yarn;
   });
 
 }
