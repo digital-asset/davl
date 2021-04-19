@@ -68,7 +68,7 @@ http {
     add_header Last-Modified \$date_gmt;
     add_header Expires \$date_gmt;
     add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0";
-    add_header Pragme "no-cache";
+    add_header Pragma "no-cache";
   }
 
   # Load balancer redirects plain HTTP to this port.
