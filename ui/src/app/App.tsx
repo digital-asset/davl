@@ -13,7 +13,25 @@ const wsBaseUrl =
  * React component for the entry point into the application.
  */
 const App: React.FC = () => {
-  const [credentials, setCredentials] = useState<Credentials | undefined>();
+  const party0 = sessionStorage.getItem("party");
+  const token0 = sessionStorage.getItem("token");
+  const credentials0 =
+    party0 !== null && token0 !== null
+      ? { party: party0, token: token0 }
+      : undefined;
+  const [credentials, setCredentials] = useState(credentials0);
+
+  const handleLogin = (credentials: Credentials) => {
+    sessionStorage.setItem("party", credentials.party);
+    sessionStorage.setItem("token", credentials.token);
+    setCredentials(credentials);
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("party");
+    sessionStorage.removeItem("token");
+    setCredentials(undefined);
+  };
 
   return credentials ? (
     <DamlLedger
@@ -21,10 +39,10 @@ const App: React.FC = () => {
       wsBaseUrl={wsBaseUrl}
       party={credentials.party}
     >
-      <MainScreen onLogout={() => setCredentials(undefined)} />
+      <MainScreen onLogout={handleLogout} />
     </DamlLedger>
   ) : (
-    <LoginScreen onLogin={setCredentials} />
+    <LoginScreen onLogin={handleLogin} />
   );
 };
 
