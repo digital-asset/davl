@@ -94,7 +94,7 @@ jobs:
               curl -XPOST \
                    -i \
                    -H 'Content-type: application/json' \
-                   --data "{\"text\":\"<https://dev.azure.com/digitalasset/davl/_build/results?buildId=$(Build.BuildId)|$MESSAGE>:\n$1\n\"}" \
+                   --data "{\"text\":\"[davl] <https://dev.azure.com/digitalasset/davl/_build/results?buildId=$(Build.BuildId)|$MESSAGE>:\n$1\n\"}" \
                    $(Slack.URL)
           }
 
@@ -194,7 +194,7 @@ jobs:
           curl -XPOST \
                -i \
                -H 'Content-type: application/json' \
-               --data "{\"text\":\"<!here> *FAILED* $(Agent.JobName): <https://dev.azure.com/digitalasset/davl/_build/results?buildId=$(Build.BuildId)|$MESSAGE>\n\"}" \
+               --data "{\"text\":\"[davl] <!here> *FAILED* $(Agent.JobName): <https://dev.azure.com/digitalasset/davl/_build/results?buildId=$(Build.BuildId)|$MESSAGE>\n\"}" \
                $(Slack.URL)
         condition: and(failed(), in(variables['Build.SourceBranchName'], 'refs/heads/master', 'master'))
         displayName: tell-slack-if-failed
