@@ -80,7 +80,7 @@ locals {
 resource "google_compute_instance" "backed-up-db" {
   count        = 1
   name         = "backed-up-db"
-  machine_type = "n1-standard-2"
+  machine_type = "f1-micro"
 
   boot_disk {
     initialize_params {
@@ -170,7 +170,7 @@ STARTUP
 resource "google_compute_instance" "ledger" {
   count        = 1
   name         = "ledger"
-  machine_type = "n1-standard-2"
+  machine_type = "g1-small"
 
   boot_disk {
     initialize_params {
@@ -257,7 +257,7 @@ STARTUP
 resource "google_compute_instance" "proxy" {
   count        = 1
   name         = "proxy-${var.ui}"
-  machine_type = "n1-standard-2"
+  machine_type = "f1-micro"
 
   boot_disk {
     initialize_params {
