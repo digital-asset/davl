@@ -120,6 +120,7 @@ gsutil cp $LATEST_BACKUP_GCS $LATEST_BACKUP
 log "fetched $LATEST_BACKUP_GCS"
 
 docker run -d \
+           --restart=on-failure \
            --name pg \
            -e POSTGRES_USER=davl \
            -e POSTGRES_PASSWORD=s3cr3t \
@@ -207,7 +208,7 @@ while ! nc -z ${google_compute_instance.backed-up-db[count.index].network_interf
   sleep 1
 done
 
-docker run --name sandbox -d -p 127.0.0.1:6865:6865 gcr.io/da-dev-pinacolada/sandbox:${var.sandbox} --sql-backend-jdbcurl 'jdbc:postgresql://${google_compute_instance.backed-up-db[count.index].network_interface.0.network_ip}/davl-db?user=davl&password=s3cr3t'
+docker run --restart=on-failure --name sandbox -d -p 127.0.0.1:6865:6865 gcr.io/da-dev-pinacolada/sandbox:${var.sandbox} --sql-backend-jdbcurl 'jdbc:postgresql://${google_compute_instance.backed-up-db[count.index].network_interface.0.network_ip}/davl-db?user=davl&password=s3cr3t'
 
 # Wait for ledger to be ready
 docker exec sandbox /bin/sh -c "while ! nc -z localhost:6865; do sleep 1; done"
@@ -220,7 +221,7 @@ docker exec sandbox /bin/sh -c "while ! nc -z localhost:6865; do sleep 1; done"
 docker exec sandbox /bin/sh -c "for f in /app/released/*.dar; do /root/.daml/bin/daml ledger upload-dar --host=127.0.0.1 --port=6865 \$f; done"
 # </workaround>
 
-docker run --name json-api -d --link sandbox -p 7575:7575 gcr.io/da-dev-pinacolada/json-api:${var.json} --ledger-host sandbox --ledger-port 6865 --http-port 7575
+docker run --restart=on-failure --name json-api -d --link sandbox -p 7575:7575 gcr.io/da-dev-pinacolada/json-api:${var.json} --ledger-host sandbox --ledger-port 6865 --http-port 7575
 
 docker run --name script --link sandbox --entrypoint="java" gcr.io/da-dev-pinacolada/trigger:${var.trigger} \
      -Dlogback.configurationFile=/app/daml-sdk/script-logback.xml \
@@ -234,13 +235,13 @@ docker run --name script --link sandbox --entrypoint="java" gcr.io/da-dev-pinaco
      --wall-clock-time \
      --ledger-host sandbox\
      --ledger-port 6865
-docker run --name automation -d --link sandbox gcr.io/da-dev-pinacolada/trigger:${var.trigger} --ledger-host sandbox --ledger-port 6865
+docker run --restart=on-failure --name automation -d --link sandbox gcr.io/da-dev-pinacolada/trigger:${var.trigger} --ledger-host sandbox --ledger-port 6865
 
 # <workaround>
 # The UI currently does not support signing up, so we add a running Navigator
 # to our setup. It will be served on 8080, so we also need to expose that port.
 # Note: this relies on the Docker image containing the whole SDK.
-docker run --name navigator --link sandbox -p 8080:4000 --entrypoint /bin/sh -d gcr.io/da-dev-pinacolada/sandbox:${var.sandbox} -c "
+docker run --restart=on-failure --name navigator --link sandbox -p 8080:4000 --entrypoint /bin/sh -d gcr.io/da-dev-pinacolada/sandbox:${var.sandbox} -c "
 cat <<EOF > /app/navigator.conf
 users {
   DA {
@@ -294,7 +295,7 @@ gcloud auth configure-docker --quiet
 # The UI currently does not support signing up, so we add a running Navigator
 # to our setup. It will be served on 8080, so we also need to expose that port.
 # Added -p 8080:8080 and -e NAVIGATOR_IP_PORT=...
-docker run -p 8081:8081 -p 8080:8080 -e NAVIGATOR_IP_PORT=${google_compute_instance.ledger[count.index].network_interface.0.network_ip}:8080 -p 80:80 -e LEDGER_IP_PORT=${google_compute_instance.ledger[count.index].network_interface.0.network_ip}:7575 gcr.io/da-dev-pinacolada/ui:${var.ui}
+docker run --restart=on-failure -p 8081:8081 -p 8080:8080 -e NAVIGATOR_IP_PORT=${google_compute_instance.ledger[count.index].network_interface.0.network_ip}:8080 -p 80:80 -e LEDGER_IP_PORT=${google_compute_instance.ledger[count.index].network_interface.0.network_ip}:7575 gcr.io/da-dev-pinacolada/ui:${var.ui}
 # </workaround>
 
 
