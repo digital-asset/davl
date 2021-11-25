@@ -32,6 +32,23 @@ data "google_compute_subnetwork" "subnet" {
   name = "da-gcp-pinacolada-subnet-1"
 }
 
+resource "google_compute_firewall" "ssh" {
+  ## Disabled by default
+  count   = 0
+  name    = "ssh"
+  network = data.google_compute_network.network.name
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+  source_ranges = [      # VPNs
+    "35.194.81.56/32",   # North Virginia
+    "35.189.40.124/32",  # Sydney
+    "35.198.147.95/32",  # Frankfurt
+    "18.210.210.130/32", # consultant
+  ]
+}
+
 resource "google_compute_firewall" "allow-internal" {
   name    = "allow-internal"
   network = data.google_compute_network.network.self_link
@@ -77,10 +94,31 @@ resource "google_storage_bucket" "db-backups" {
 locals {
   db_backup_prefix = "r1"
 }
+
+resource "google_service_account" "backed-up-db" {
+  account_id = "backed-up-db"
+}
+
+resource "google_project_iam_custom_role" "backed-up-db" {
+  role_id = "backedUpDb"
+  title   = "Backed-up DB"
+  permissions = [
+    "storage.objects.create",
+    "storage.objects.get",
+    "storage.objects.list",
+  ]
+}
+
+resource "google_project_iam_member" "backed-up-db" {
+  role   = google_project_iam_custom_role.backed-up-db.id
+  member = "serviceAccount:${google_service_account.backed-up-db.email}"
+}
+
 resource "google_compute_instance" "backed-up-db" {
-  count        = 1
-  name         = "backed-up-db"
-  machine_type = "f1-micro"
+  count                     = 1
+  name                      = "backed-up-db"
+  machine_type              = "f1-micro"
+  allow_stopping_for_update = true
 
   boot_disk {
     initialize_params {
@@ -97,6 +135,7 @@ resource "google_compute_instance" "backed-up-db" {
   }
 
   service_account {
+    email  = google_service_account.backed-up-db.email
     scopes = ["https://www.googleapis.com/auth/devstorage.read_write"]
   }
 
@@ -168,10 +207,29 @@ tail -f /root/log
 STARTUP
 }
 
+resource "google_service_account" "read-docker" {
+  account_id = "read-docker"
+}
+
+resource "google_project_iam_custom_role" "read-docker" {
+  role_id = "readDocker"
+  title   = "Access Docker images in GCR"
+  permissions = [
+    "storage.objects.get",
+    "storage.objects.list",
+  ]
+}
+
+resource "google_project_iam_member" "read-docker" {
+  role   = google_project_iam_custom_role.read-docker.id
+  member = "serviceAccount:${google_service_account.read-docker.email}"
+}
+
 resource "google_compute_instance" "ledger" {
-  count        = 1
-  name         = "ledger"
-  machine_type = "g1-small"
+  count                     = 1
+  name                      = "ledger"
+  machine_type              = "g1-small"
+  allow_stopping_for_update = true
 
   boot_disk {
     initialize_params {
@@ -188,6 +246,7 @@ resource "google_compute_instance" "ledger" {
   }
 
   service_account {
+    email  = google_service_account.read-docker.email
     scopes = ["https://www.googleapis.com/auth/devstorage.read_only"]
   }
 
@@ -256,9 +315,10 @@ STARTUP
 }
 
 resource "google_compute_instance" "proxy" {
-  count        = 1
-  name         = "proxy-${var.ui}"
-  machine_type = "f1-micro"
+  count                     = 1
+  name                      = "proxy-${var.ui}"
+  machine_type              = "f1-micro"
+  allow_stopping_for_update = true
 
   boot_disk {
     initialize_params {
@@ -277,6 +337,7 @@ resource "google_compute_instance" "proxy" {
   tags = ["http-enabled"]
 
   service_account {
+    email  = google_service_account.read-docker.email
     scopes = ["https://www.googleapis.com/auth/devstorage.read_only"]
   }
   metadata_startup_script = <<STARTUP
