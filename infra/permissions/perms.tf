@@ -91,6 +91,9 @@ resource "google_project_iam_custom_role" "tf-deploy" {
     "compute.instances.setTags",
     "compute.instanceGroups.update",
     "compute.instances.use",
+    "iam.roles.get",
+    "iam.serviceAccounts.get",
+    "resourcemanager.projects.getIamPolicy",
   ]
 }
 
