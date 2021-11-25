@@ -1186,73 +1186,72 @@
   integrity sha512-ij4wRiunFfaJxjB0BdrYHIH8FxBJpOwNPhhAcunlmPdXudL1WQV1qoP9un6JsEBAgQH+7UXyyjh0g7jTxXK6tg==
 
 "@daml.js/40f452260bef3f29dede136108fc08a88d5a5250310281067087da6f0baddff7@file:daml2ts/40f452260bef3f29dede136108fc08a88d5a5250310281067087da6f0baddff7":
-  version "1.12.0-snapshot.20210309.6463.0.f7abca91"
+  version "1.15.0-snapshot.20210705.7286.0.62aabcc4"
   dependencies:
     "@mojotech/json-type-validation" "^3.1.0"
 
 "@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662@file:daml2ts/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662":
-  version "1.12.0-snapshot.20210309.6463.0.f7abca91"
+  version "1.15.0-snapshot.20210705.7286.0.62aabcc4"
   dependencies:
     "@mojotech/json-type-validation" "^3.1.0"
 
 "@daml.js/davl-0.0.4@file:daml2ts/davl-0.0.4":
-  version "1.12.0-snapshot.20210309.6463.0.f7abca91"
+  version "1.15.0-snapshot.20210705.7286.0.62aabcc4"
   dependencies:
-    "@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-0-0-4-1.12.0-snapshot.20210309.6463.0.f7abca91-e8061513-f1ce-4945-b891-32b736cdebf5-1633606486773/node_modules/@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662"
+    "@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662" "file:../../.cache/yarn/v6/npm-@daml-js-davl-0-0-4-1.15.0-snapshot.20210705.7286.0.62aabcc4-0989f0c9-a824-4720-8bd0-7378d3b70c7a-1637836230981/node_modules/@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662"
     "@mojotech/json-type-validation" "^3.1.0"
 
 "@daml.js/davl-0.0.5@file:daml2ts/davl-0.0.5":
-  version "1.12.0-snapshot.20210309.6463.0.f7abca91"
+  version "1.15.0-snapshot.20210705.7286.0.62aabcc4"
   dependencies:
-    "@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-0-0-5-1.12.0-snapshot.20210309.6463.0.f7abca91-c62b90e5-340a-4c03-a2c3-ddb159e244da-1633606486774/node_modules/@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662"
+    "@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662" "file:../../.cache/yarn/v6/npm-@daml-js-davl-0-0-5-1.15.0-snapshot.20210705.7286.0.62aabcc4-5c34bbc0-a3d5-498e-88e9-7a0fdf8e4626-1637836230982/node_modules/@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662"
     "@mojotech/json-type-validation" "^3.1.0"
 
 "@daml.js/davl-upgrade-v4-v5-0.0.5@file:daml2ts/davl-upgrade-v4-v5-0.0.5":
-  version "1.12.0-snapshot.20210309.6463.0.f7abca91"
+  version "1.15.0-snapshot.20210705.7286.0.62aabcc4"
   dependencies:
-    "@daml.js/40f452260bef3f29dede136108fc08a88d5a5250310281067087da6f0baddff7" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-upgrade-v4-v5-0-0-5-1.12.0-snapshot.20210309.6463.0.f7abca91-38fafb4c-51e3-4e62-abcc-9f84efa2cb8f-1633606486767/node_modules/@daml.js/40f452260bef3f29dede136108fc08a88d5a5250310281067087da6f0baddff7"
-    "@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-upgrade-v4-v5-0-0-5-1.12.0-snapshot.20210309.6463.0.f7abca91-38fafb4c-51e3-4e62-abcc-9f84efa2cb8f-1633606486767/node_modules/@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662"
-    "@daml.js/davl-0.0.4" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-upgrade-v4-v5-0-0-5-1.12.0-snapshot.20210309.6463.0.f7abca91-38fafb4c-51e3-4e62-abcc-9f84efa2cb8f-1633606486767/node_modules/@daml.js/davl-0.0.4"
-    "@daml.js/davl-0.0.5" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-upgrade-v4-v5-0-0-5-1.12.0-snapshot.20210309.6463.0.f7abca91-38fafb4c-51e3-4e62-abcc-9f84efa2cb8f-1633606486767/node_modules/@daml.js/davl-0.0.5"
+    "@daml.js/40f452260bef3f29dede136108fc08a88d5a5250310281067087da6f0baddff7" "file:../../.cache/yarn/v6/npm-@daml-js-davl-upgrade-v4-v5-0-0-5-1.15.0-snapshot.20210705.7286.0.62aabcc4-ac487404-c074-451a-b4bd-93d905840e01-1637836230980/node_modules/@daml.js/40f452260bef3f29dede136108fc08a88d5a5250310281067087da6f0baddff7"
+    "@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662" "file:../../.cache/yarn/v6/npm-@daml-js-davl-upgrade-v4-v5-0-0-5-1.15.0-snapshot.20210705.7286.0.62aabcc4-ac487404-c074-451a-b4bd-93d905840e01-1637836230980/node_modules/@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662"
+    "@daml.js/davl-0.0.4" "file:../../.cache/yarn/v6/npm-@daml-js-davl-upgrade-v4-v5-0-0-5-1.15.0-snapshot.20210705.7286.0.62aabcc4-ac487404-c074-451a-b4bd-93d905840e01-1637836230980/node_modules/@daml.js/davl-0.0.4"
+    "@daml.js/davl-0.0.5" "file:../../.cache/yarn/v6/npm-@daml-js-davl-upgrade-v4-v5-0-0-5-1.15.0-snapshot.20210705.7286.0.62aabcc4-ac487404-c074-451a-b4bd-93d905840e01-1637836230980/node_modules/@daml.js/davl-0.0.5"
     "@mojotech/json-type-validation" "^3.1.0"
 
 "@daml.js/davl-v4-0.0.4@file:daml2ts/davl-0.0.4":
-  version "1.12.0-snapshot.20210309.6463.0.f7abca91"
+  version "1.15.0-snapshot.20210705.7286.0.62aabcc4"
   dependencies:
-    "@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-v4-0-0-4-1.12.0-snapshot.20210309.6463.0.f7abca91-37dacce4-3043-4ce5-9748-1bb5aa5de27d-1633606486763/node_modules/@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662"
+    "@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662" "file:../../.cache/yarn/v6/npm-@daml-js-davl-v4-0-0-4-1.15.0-snapshot.20210705.7286.0.62aabcc4-90273488-6196-4a9b-b8de-a12a9944a731-1637836230979/node_modules/@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662"
     "@mojotech/json-type-validation" "^3.1.0"
 
 "@daml.js/davl-v5-0;0.5@file:daml2ts/davl-0.0.5":
-  version "1.12.0-snapshot.20210309.6463.0.f7abca91"
+  version "1.15.0-snapshot.20210705.7286.0.62aabcc4"
   dependencies:
-    "@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662" "file:../../../Library/Caches/Yarn/v6/npm-@daml-js-davl-v5-0-0-5-1.12.0-snapshot.20210309.6463.0.f7abca91-42712d21-4619-4aa9-b828-90dec5088618-1633606486762/node_modules/@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662"
+    "@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662" "file:../../.cache/yarn/v6/npm-@daml-js-davl-v5-0-0-5-1.15.0-snapshot.20210705.7286.0.62aabcc4-9743f190-93ed-42d9-9d06-83e63391b17e-1637836230977/node_modules/@daml.js/d14e08374fc7197d6a0de468c968ae8ba3aadbf9315476fd39071831f5923662"
     "@mojotech/json-type-validation" "^3.1.0"
 
-"@daml/ledger@1.17.1-snapshot.20211006.7853.0.e05be365":
-  version "1.17.1-snapshot.20211006.7853.0.e05be365"
-  resolved "https://registry.yarnpkg.com/@daml/ledger/-/ledger-1.17.1-snapshot.20211006.7853.0.e05be365.tgz#3614ba47e72d0bec2e187bac380907a8de98e1b3"
-  integrity sha512-Z5z/XxtjGJCu/myqn+MU08Qfg45jCE/JIlvB9sRVQIgLpIKruZx8BatJkCbeIPqlckxK+QtRhc9/evhTttgT5w==
+"@daml/ledger@1.18.0-snapshot.20211124.8419.0.39d9afcd", "@daml/ledger@1.18.0-snapshot.20211124.8419.0.39d9afcd ":
+  version "1.18.0-snapshot.20211124.8419.0.39d9afcd"
+  resolved "https://registry.yarnpkg.com/@daml/ledger/-/ledger-1.18.0-snapshot.20211124.8419.0.39d9afcd.tgz#782150329b461acde0202f2890dd86f24cd9f77c"
+  integrity sha512-3ZRSzcYjH19IuM/wY6qRQy5rXB2ymwwRmozzaqiX+lr3pY+DWKpdKfLF5q/reJKOvtxFIRduChZ06uEIx8A5MQ==
   dependencies:
-    "@daml/types" "1.17.1-snapshot.20211006.7853.0.e05be365"
+    "@daml/types" "1.18.0-snapshot.20211124.8419.0.39d9afcd"
     "@mojotech/json-type-validation" "^3.1.0"
     cross-fetch "^3.0.4"
     events "^3.1.0"
     isomorphic-ws "^4.0.1"
     ws "^7.2.1"
 
-"@daml/react@1.17.1-snapshot.20211006.7853.0.e05be365":
-  version "1.17.1-snapshot.20211006.7853.0.e05be365"
-  resolved "https://registry.yarnpkg.com/@daml/react/-/react-1.17.1-snapshot.20211006.7853.0.e05be365.tgz#86952ec465cd8818146ba0953ee63bc0393392fc"
-  integrity sha512-eql1MEJsa6cy7XZHsfRhy4bGJnE0wE9Ys0Cd7Tjt9e6TuacxVmAahSOPnYdGG/vbV+n1z+JXy217SjlLPbkwXw==
+"@daml/react@1.18.0-snapshot.20211124.8419.0.39d9afcd":
+  version "1.18.0-snapshot.20211124.8419.0.39d9afcd"
+  resolved "https://registry.yarnpkg.com/@daml/react/-/react-1.18.0-snapshot.20211124.8419.0.39d9afcd.tgz#9bec72e280cc8e842831974455ba78167dc9a1d6"
+  integrity sha512-eG+18KJ1WKvx3eBNJ/RVlCLtMuxQQfdEOViPspTGhwrV4xxBVP8NUSi5iQE/3JcQW0x3ZKAp3zjqZ/zY7XOGNg==
   dependencies:
-    "@daml/ledger" "1.17.1-snapshot.20211006.7853.0.e05be365"
-    "@daml/types" "1.17.1-snapshot.20211006.7853.0.e05be365"
-    react "^16.12.0"
+    "@daml/ledger" "1.18.0-snapshot.20211124.8419.0.39d9afcd"
+    "@daml/types" "1.18.0-snapshot.20211124.8419.0.39d9afcd"
 
-"@daml/types@1.17.1-snapshot.20211006.7853.0.e05be365":
-  version "1.17.1-snapshot.20211006.7853.0.e05be365"
-  resolved "https://registry.yarnpkg.com/@daml/types/-/types-1.17.1-snapshot.20211006.7853.0.e05be365.tgz#07ab561fa7183da27fe4c3e98255d136151a3aec"
-  integrity sha512-nKMbCbvf1PVo/HPsoU1vDIKIRD5i5BocuWXYITnHe0wT5DwahnxKUxddiIp31nYw46+rSXw4vOpxqJgv/SJqRQ==
+"@daml/types@1.18.0-snapshot.20211124.8419.0.39d9afcd":
+  version "1.18.0-snapshot.20211124.8419.0.39d9afcd"
+  resolved "https://registry.yarnpkg.com/@daml/types/-/types-1.18.0-snapshot.20211124.8419.0.39d9afcd.tgz#b12072680c5f97352df63b18d7f454278226eb40"
+  integrity sha512-9AFh9XwTuHg2a/Go3wK3+f32lYF0FQfT/846YXhs2SOzStz78WLrv4QIEGo/HdGEUlSqP9+ucfXTm3KDrcUztw==
   dependencies:
     "@mojotech/json-type-validation" "^3.1.0"
 
