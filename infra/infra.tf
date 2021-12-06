@@ -115,7 +115,7 @@ resource "google_project_iam_member" "backed-up-db" {
 }
 
 resource "google_compute_instance" "backed-up-db" {
-  count                     = 1
+  count                     = 0
   name                      = "backed-up-db"
   machine_type              = "f1-micro"
   allow_stopping_for_update = true
@@ -207,26 +207,12 @@ tail -f /root/log
 STARTUP
 }
 
-resource "google_service_account" "read-docker" {
+data "google_service_account" "read-docker" {
   account_id = "read-docker"
 }
 
-resource "google_project_iam_custom_role" "read-docker" {
-  role_id = "readDocker"
-  title   = "Access Docker images in GCR"
-  permissions = [
-    "storage.objects.get",
-    "storage.objects.list",
-  ]
-}
-
-resource "google_project_iam_member" "read-docker" {
-  role   = google_project_iam_custom_role.read-docker.id
-  member = "serviceAccount:${google_service_account.read-docker.email}"
-}
-
 resource "google_compute_instance" "ledger" {
-  count                     = 1
+  count                     = 0
   name                      = "ledger"
   machine_type              = "g1-small"
   allow_stopping_for_update = true
@@ -246,7 +232,7 @@ resource "google_compute_instance" "ledger" {
   }
 
   service_account {
-    email  = google_service_account.read-docker.email
+    email  = data.google_service_account.read-docker.email
     scopes = ["https://www.googleapis.com/auth/devstorage.read_only"]
   }
 
@@ -315,7 +301,7 @@ STARTUP
 }
 
 resource "google_compute_instance" "proxy" {
-  count                     = 1
+  count                     = 0
   name                      = "proxy-${var.ui}"
   machine_type              = "f1-micro"
   allow_stopping_for_update = true
@@ -337,7 +323,7 @@ resource "google_compute_instance" "proxy" {
   tags = ["http-enabled"]
 
   service_account {
-    email  = google_service_account.read-docker.email
+    email  = data.google_service_account.read-docker.email
     scopes = ["https://www.googleapis.com/auth/devstorage.read_only"]
   }
   metadata_startup_script = <<STARTUP

@@ -98,7 +98,7 @@ resource "google_project_iam_custom_role" "tf-deploy" {
 }
 
 resource "google_service_account_iam_member" "ci-deploy" {
-  service_account_id = "projects/da-dev-pinacolada/serviceAccounts/837776980187-compute@developer.gserviceaccount.com"
+  service_account_id = google_service_account.read-docker.name
   role               = "roles/iam.serviceAccountUser"
   member             = "serviceAccount:${google_service_account.ci.email}"
 }
@@ -113,4 +113,22 @@ resource "google_storage_bucket_iam_member" "ci-deploy" {
 resource "google_project_iam_member" "ci-deploy" {
   role   = "projects/da-dev-pinacolada/roles/deployTerraform"
   member = "serviceAccount:${google_service_account.ci.email}"
+}
+
+resource "google_service_account" "read-docker" {
+  account_id = "read-docker"
+}
+
+resource "google_project_iam_custom_role" "read-docker" {
+  role_id = "readDocker"
+  title   = "Access Docker images in GCR"
+  permissions = [
+    "storage.objects.get",
+    "storage.objects.list",
+  ]
+}
+
+resource "google_project_iam_member" "read-docker" {
+  role   = google_project_iam_custom_role.read-docker.id
+  member = "serviceAccount:${google_service_account.read-docker.email}"
 }
