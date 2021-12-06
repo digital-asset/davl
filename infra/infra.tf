@@ -115,7 +115,7 @@ resource "google_project_iam_member" "backed-up-db" {
 }
 
 resource "google_compute_instance" "backed-up-db" {
-  count                     = 0
+  count                     = 1
   name                      = "backed-up-db"
   machine_type              = "f1-micro"
   allow_stopping_for_update = true
@@ -212,7 +212,7 @@ data "google_service_account" "read-docker" {
 }
 
 resource "google_compute_instance" "ledger" {
-  count                     = 0
+  count                     = 1
   name                      = "ledger"
   machine_type              = "g1-small"
   allow_stopping_for_update = true
@@ -301,7 +301,7 @@ STARTUP
 }
 
 resource "google_compute_instance" "proxy" {
-  count                     = 0
+  count                     = 1
   name                      = "proxy-${var.ui}"
   machine_type              = "f1-micro"
   allow_stopping_for_update = true
