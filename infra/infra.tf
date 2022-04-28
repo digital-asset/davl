@@ -76,7 +76,8 @@ resource "google_compute_firewall" "allow-http-load-balancers" {
 }
 
 resource "google_storage_bucket" "db-backups" {
-  name = "davl-db-backups"
+  name          = "davl-db-backups"
+  force_destroy = true
 
   storage_class = "STANDARD"
 
